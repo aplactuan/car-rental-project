@@ -13,7 +13,7 @@ test('it can add a car thru api', function () {
         'price' => 1200000,
     ];
 
-    $response = $this->post('/cars', $payload);
+    $response = $this->post('/api/v1/cars', $payload);
 
 
     $response->assertStatus(201);
