@@ -6,10 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Car\AddCarRequest;
 use App\Models\Car;
 use App\Repositories\Contracts\CarRepositoryInterface;
+use App\Traits\ApiResponses;
 use Illuminate\Http\Request;
 
 class AddCarController extends Controller
 {
+    use ApiResponses;
+
     public function __construct(protected CarRepositoryInterface $car)
     {
 
@@ -21,8 +24,6 @@ class AddCarController extends Controller
     {
         $this->car->create($request->validated());
 
-        return response([
-            'message' => 'Car Created',
-        ], 201);
+        return $this->ok('Car is added', 201);
     }
 }
