@@ -1,46 +1,59 @@
 <?php
 
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+use Laravel\Sanctum\Sanctum;
 use function Pest\Laravel\assertDatabaseHas;
 
 uses(RefreshDatabase::class);
 
-test('it cannot add a car if user is not login', function () {
-    $this->withoutExceptionHandling();
-    $payload = [
-        'make' => 'Toyota',
-        'model' => 'Raize',
-        'year' => 2020,
-        'mileage' => 5000,
-        'type' => 'SUV',
-        'number_of_seats' => 5,
-        'plate_number' => 'IJC2912',
-    ];
+describe('guest user', function () {
+    test('it cannot add a car if user is not login', function () {
+        $this->withoutExceptionHandling();
+        $payload = [
+            'make' => 'Toyota',
+            'model' => 'Raize',
+            'year' => 2020,
+            'mileage' => 5000,
+            'type' => 'SUV',
+            'number_of_seats' => 5,
+            'plate_number' => 'IJC2912',
+        ];
 
-    $response = $this->post('/api/v1/cars', $payload);
+        $response = $this->post('/api/v1/cars', $payload);
 
-    $response->assertStatus('401');
+        $response->assertStatus('401');
+    });
 });
 
-test('it can add a car thru api', function () {
-    $this->withoutExceptionHandling();
-    $payload = [
-        'make' => 'Toyota',
-        'model' => 'Raize',
-        'year' => 2020,
-        'mileage' => 5000,
-        'type' => 'SUV',
-        'number_of_seats' => 5,
-        'plate_number' => 'IJC2912',
-    ];
+describe('authenticated user', function () {
+   beforeEach(function () {
+       $this->user = User::factory()->create();
 
-    $response = $this->post('/api/v1/cars', $payload);
+       Sanctum::actingAs($this->user);
+   });
 
-    $response->assertStatus(201);
+    test('it can add a car thru api', function () {
+        $this->withoutExceptionHandling();
+        $payload = [
+            'make' => 'Toyota',
+            'model' => 'Raize',
+            'year' => 2020,
+            'mileage' => 5000,
+            'type' => 'SUV',
+            'number_of_seats' => 5,
+            'plate_number' => 'IJC2912',
+        ];
 
-    assertDatabaseHas('cars', [
-        'make' => 'Toyota',
-        'model' => 'Raize',
-    ]);
+        $response = $this->post('/api/v1/cars', $payload);
+
+        $response->assertStatus(201);
+
+        assertDatabaseHas('cars', [
+            'make' => 'Toyota',
+            'model' => 'Raize',
+        ]);
+    });
 });
+

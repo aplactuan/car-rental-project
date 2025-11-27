@@ -3,6 +3,12 @@
 use App\Http\Controllers\V1\Cars\AddCarController;
 use Illuminate\Support\Facades\Route;
 
-Route::prefix('v1')->group(function () {
-    Route::post('/cars', AddCarController::class);
-});
+#Route::prefix('v1')->group(function () {
+#    Route::post('/cars', AddCarController::class);
+#})->middleware('auth:sanctum');
+
+Route::middleware('auth:sanctum')
+    ->prefix('v1')
+    ->group(function () {
+        Route::post('/cars', AddCarController::class);
+    });
