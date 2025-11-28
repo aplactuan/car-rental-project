@@ -5,12 +5,13 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 
 use Laravel\Sanctum\Sanctum;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\{postJson};
 
 uses(RefreshDatabase::class);
 
 describe('guest user', function () {
     test('it cannot add a car if user is not login', function () {
-        $this->withoutExceptionHandling();
+        //$this->withoutExceptionHandling();
         $payload = [
             'make' => 'Toyota',
             'model' => 'Raize',
@@ -21,9 +22,7 @@ describe('guest user', function () {
             'plate_number' => 'IJC2912',
         ];
 
-        $response = $this->post('/api/v1/cars', $payload);
-
-        $response->assertStatus('401');
+        postJson('/api/v1/cars', $payload)->assertStatus(401);
     });
 });
 
@@ -35,7 +34,6 @@ describe('authenticated user', function () {
    });
 
     test('it can add a car thru api', function () {
-        $this->withoutExceptionHandling();
         $payload = [
             'make' => 'Toyota',
             'model' => 'Raize',
@@ -46,7 +44,7 @@ describe('authenticated user', function () {
             'plate_number' => 'IJC2912',
         ];
 
-        $response = $this->post('/api/v1/cars', $payload);
+        $response = $this->withHeader('Accept', 'application/json')->post('/api/v1/cars', $payload);
 
         $response->assertStatus(201);
 

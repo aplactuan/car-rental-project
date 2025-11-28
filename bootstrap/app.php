@@ -21,11 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
-            if ($request->expectsJson()) {
-
+            if ($request->expectsJson() || $request->is('api/v1/*')) {
+                return response()->json([
+                    'message' => 'You are not authorized to access this endpoint. Please log in.',
+                ], 401);
             }
-            return response()->json([
-                'message' => 'You are not authorized to access this endpoint. Please log in.',
-            ], 401);
+
         });
     })->create();
