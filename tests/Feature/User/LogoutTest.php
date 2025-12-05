@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 use Laravel\Sanctum\Sanctum;
 use function Pest\Laravel\postJson;
 
@@ -13,11 +14,23 @@ test('guess user cannot logout', function () {
 
 test('authenticated user logout and cannot access protected route', function () {
     //create a user
-    $user = User::factory()->create();
+    $user = User::factory()->create([
+        'email' => 'tester@test.com',
+        'password' => Hash::make('password1234')
+    ]);
 
-    Sanctum::actingAs($user);
+    $response = postJson('/api/login', [
+        'email' => 'tester@test.com',
+        'password' => 'password1234'
+    ]);
 
-    postJson('/api/logout')->assertStatus(200);
+    $json_response = $response->json();
+
+    \Pest\Laravel\withHeaders([
+        'Authorization' => 'Bearer ' . $json_response['data']['token']
+    ])->postJson('/api/logout')->assertStatus(200);
+
+
 
     $payload = [
         'make' => 'Toyota',
