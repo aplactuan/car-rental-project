@@ -19,18 +19,18 @@ test('authenticated user logout and cannot access protected route', function () 
         'password' => Hash::make('password1234')
     ]);
 
-    $response = postJson('/api/login', [
-        'email' => 'tester@test.com',
-        'password' => 'password1234'
+    $token = $user->createToken('API token for ' . $user->email);
+    $plain = $token->plainTextToken;
+    $tokenId = $token->accessToken->id;
+
+
+    \Pest\Laravel\withHeader('Authorization', 'Bearer ' . $plain)
+        ->postJson('/api/logout')
+        ->assertStatus(200);
+
+    $this->assertDatabaseMissing('personal_access_tokens', [
+        'id' => $tokenId
     ]);
-
-    $json_response = $response->json();
-
-    \Pest\Laravel\withHeaders([
-        'Authorization' => 'Bearer ' . $json_response['data']['token']
-    ])->postJson('/api/logout')->assertStatus(200);
-
-
 
     $payload = [
         'make' => 'Toyota',
@@ -42,5 +42,9 @@ test('authenticated user logout and cannot access protected route', function () 
         'plate_number' => 'IJC2912',
     ];
 
-    postJson('/api/v1/cars', $payload)->assertStatus(401);
+
+
+    \Pest\Laravel\withHeader('Authorization', 'Bearer ' . $plain)
+        ->postJson('api/v1/cars', $payload)
+        ->assertStatus(401);
 });
