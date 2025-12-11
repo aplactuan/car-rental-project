@@ -4,6 +4,7 @@ namespace App\Http\Controllers\V1\Cars;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Car\AddCarRequest;
+use App\Http\Resources\V1\CarResource;
 use App\Models\Car;
 use App\Repositories\Contracts\CarRepositoryInterface;
 use App\Traits\ApiResponses;
@@ -22,8 +23,8 @@ class AddCarController extends Controller
      */
     public function __invoke(AddCarRequest $request)
     {
-        $this->car->create($request->validated());
+        $car = $this->car->create($request->validated());
 
-        return $this->ok('Car is added', 201);
+        return new CarResource($car);
     }
 }

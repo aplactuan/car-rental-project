@@ -46,12 +46,23 @@ describe('authenticated user', function () {
 
         $response = $this->withHeader('Accept', 'application/json')->post('/api/v1/cars', $payload);
 
-        $response->assertStatus(201);
-
         assertDatabaseHas('cars', [
             'make' => 'Toyota',
             'model' => 'Raize',
         ]);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure([
+                'data' => [
+                    'type',
+                    'id',
+                    'createdAt',
+                    'attributes' => [
+                        'make', 'model', 'year', 'mileage', 'type', 'numberOfSeats'
+                    ]
+                ]
+            ])
+            ->assertJsonPath('data.type', 'car');
     });
 });
 
