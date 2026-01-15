@@ -69,4 +69,59 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.0.attributes.make', $car1->make)
             ->assertJsonPath('data.0.attributes.model', $car1->model);
     });
+
+    test('it can filter available cars by make, model, type and number_of_seats', function () {
+        // Arrange: create cars with different attributes
+        $matchingCar = Car::create(availableCarPayload([
+            'make' => 'Toyota',
+            'model' => 'Corolla',
+            'type' => 'Sedan',
+            'number_of_seats' => 5,
+            'plate_number' => 'FILTER-1',
+        ]));
+
+        // Different make
+        Car::create(availableCarPayload([
+            'make' => 'Honda',
+            'model' => 'Civic',
+            'type' => 'Sedan',
+            'number_of_seats' => 5,
+            'plate_number' => 'FILTER-2',
+        ]));
+
+        // Different type
+        Car::create(availableCarPayload([
+            'make' => 'Toyota',
+            'model' => 'Corolla',
+            'type' => 'SUV',
+            'number_of_seats' => 5,
+            'plate_number' => 'FILTER-3',
+        ]));
+
+        // Different number_of_seats
+        Car::create(availableCarPayload([
+            'make' => 'Toyota',
+            'model' => 'Corolla',
+            'type' => 'Sedan',
+            'number_of_seats' => 7,
+            'plate_number' => 'FILTER-4',
+        ]));
+
+        // Act: call the endpoint with filters
+        $response = getJson('/api/v1/cars?' . http_build_query([
+            'make' => 'Toyota',
+            'model' => 'Corolla',
+            'type' => 'Sedan',
+            'number_of_seats' => 5,
+        ]));
+
+        // Assert: only the matching car is returned
+        $response
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.attributes.make', $matchingCar->make)
+            ->assertJsonPath('data.0.attributes.model', $matchingCar->model)
+            ->assertJsonPath('data.0.attributes.type', $matchingCar->type)
+            ->assertJsonPath('data.0.attributes.numberOfSeats', $matchingCar->number_of_seats);
+    });
 });

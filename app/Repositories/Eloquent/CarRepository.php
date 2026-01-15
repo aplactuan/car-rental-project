@@ -12,4 +12,27 @@ class CarRepository extends BaseRepository implements CarRepositoryInterface
     {
         $this->model = $model;
     }
+
+    public function filter(array $filters)
+    {
+        $query = $this->model->newQuery();
+
+        if (isset($filters['make'])) {
+            $query->where('make', $filters['make']);
+        }
+
+        if (isset($filters['model'])) {
+            $query->where('model', $filters['model']);
+        }
+
+        if (isset($filters['type'])) {
+            $query->where('type', $filters['type']);
+        }
+
+        if (isset($filters['number_of_seats'])) {
+            $query->where('number_of_seats', $filters['number_of_seats']);
+        }
+
+        return $query->get();
+    }
 }
