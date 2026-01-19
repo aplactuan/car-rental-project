@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Repositories\Contracts\CarRepositoryInterface;
+use App\Repositories\Contracts\DriverRepositoryInterface;
 use App\Repositories\Eloquent\CarRepository;
+use App\Repositories\Eloquent\DriverRepository;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -16,6 +18,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             CarRepositoryInterface::class,
             CarRepository::class
+        );
+
+        $this->app->bind(
+            DriverRepositoryInterface::class,
+            DriverRepository::class
         );
     }
 
