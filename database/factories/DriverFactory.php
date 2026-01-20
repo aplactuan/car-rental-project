@@ -16,8 +16,14 @@ class DriverFactory extends Factory
      */
     public function definition(): array
     {
+        //make a factory for Driver model
         return [
-            //
+            'first_name' => $this->faker->firstName(),
+            'last_name' => $this->faker->lastName(),
+            'license_number' => strtoupper($this->faker->bothify('??######')),
+            'license_expiry_date' => $this->faker->dateTimeBetween('now', '+5 years')->format('Y-m-d'),
+            'address' => $this->faker->address(),
+            'phone_number' => $this->faker->phoneNumber(),
         ];
     }
 }
