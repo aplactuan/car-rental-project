@@ -9,18 +9,6 @@ use function Pest\Laravel\postJson;
 
 uses(RefreshDatabase::class);
 
-function carPayload(array $overrides = []): array
-{
-    return array_merge([
-        'make' => 'Toyota',
-        'model' => 'Raize',
-        'year' => 2020,
-        'mileage' => 5000,
-        'type' => 'SUV',
-        'number_of_seats' => 5,
-        'plate_number' => 'IJC2912',
-    ], $overrides);
-}
 
 describe('guest user', function () {
     test('it cannot add a car if user is not login', function () {
