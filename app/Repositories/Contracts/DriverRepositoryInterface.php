@@ -6,6 +6,8 @@ interface DriverRepositoryInterface
 {
     public function all();
 
+    public function paginate(int $perPage = 15);
+
     public function find($id);
 
     public function create(array $data);

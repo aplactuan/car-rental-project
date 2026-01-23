@@ -12,5 +12,10 @@ class DriverRepository extends BaseRepository implements DriverRepositoryInterfa
     {
         $this->model = $model;
     }
+
+    public function paginate(int $perPage = 15)
+    {
+        return $this->model->paginate($perPage);
+    }
 }
 

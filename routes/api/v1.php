@@ -4,6 +4,7 @@ use App\Http\Controllers\V1\Cars\AddCarController;
 use App\Http\Controllers\V1\Cars\ListAvailableCarsController;
 use App\Http\Controllers\V1\Cars\UpdateCarController;
 use App\Http\Controllers\V1\Drivers\AddDriverController;
+use App\Http\Controllers\V1\Drivers\ListDriversController;
 use Illuminate\Support\Facades\Route;
 
 #Route::prefix('v1')->group(function () {
@@ -17,4 +18,5 @@ Route::prefix('v1')
         Route::put('/cars/{car}', UpdateCarController::class)->middleware('auth:sanctum');
 
         Route::post('/drivers', AddDriverController::class)->middleware('auth:sanctum');
+        Route::get('/drivers', ListDriversController::class)->middleware('auth:sanctum');
     });
