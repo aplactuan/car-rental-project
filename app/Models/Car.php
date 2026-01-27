@@ -14,4 +14,10 @@ class Car extends Model
     protected $fillable = [
         'make', 'model', 'year', 'type', 'number_of_seats', 'mileage', 'plate_number',
     ];
+
+    protected $casts = [
+        'id' => 'string',
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
 }

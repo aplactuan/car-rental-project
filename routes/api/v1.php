@@ -6,6 +6,8 @@ use App\Http\Controllers\V1\Cars\SingleCarController;
 use App\Http\Controllers\V1\Cars\UpdateCarController;
 use App\Http\Controllers\V1\Drivers\AddDriverController;
 use App\Http\Controllers\V1\Drivers\ListDriversController;
+use App\Http\Controllers\V1\Drivers\SingleDriverController;
+use App\Http\Controllers\V1\Drivers\UpdateDriverController;
 use Illuminate\Support\Facades\Route;
 
 #Route::prefix('v1')->group(function () {
@@ -21,4 +23,6 @@ Route::prefix('v1')
 
         Route::post('/drivers', AddDriverController::class)->middleware('auth:sanctum');
         Route::get('/drivers', ListDriversController::class)->middleware('auth:sanctum');
+        Route::get('/drivers/{driver}', SingleDriverController::class)->middleware('auth:sanctum');
+        Route::put('/drivers/{driver}', UpdateDriverController::class)->middleware('auth:sanctum');
     });

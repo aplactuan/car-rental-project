@@ -3,8 +3,13 @@
 namespace Tests\Feature;
 
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
+use App\Http\Resources\V1\CarResource;
+use App\Models\Car;
+use App\Models\User;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\getJson;
-
 
 uses(RefreshDatabase::class);
 
@@ -25,6 +30,23 @@ describe('authenticated user', function () {
         $car = Car::factory()->create();
         getJson("/api/v1/cars/{$car->id}")
         ->assertStatus(200)
-        ->assertJson(CarResource::make($car)->toArray(request()));
+        ->assertJsonStructure([
+            'data' => [
+                'type',
+                'id',
+                'createdAt',
+                'attributes' => [
+                    'make', 'model', 'year', 'mileage', 'type', 'numberOfSeats'
+                ]
+            ]
+        ])
+        ->assertJsonPath('data.type', 'car')
+        ->assertJsonPath('data.id', $car->id)
+        ->assertJsonPath('data.attributes.make', $car->make)
+        ->assertJsonPath('data.attributes.model', $car->model)
+        ->assertJsonPath('data.attributes.year', $car->year)
+        ->assertJsonPath('data.attributes.mileage', $car->mileage)
+        ->assertJsonPath('data.attributes.type', $car->type)
+        ->assertJsonPath('data.attributes.numberOfSeats', $car->number_of_seats);
     });
 });
