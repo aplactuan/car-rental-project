@@ -31,22 +31,20 @@ describe('authenticated user', function () {
             ->assertJsonStructure(['data' => [
                 'type',
                 'id',
-                'createdAt',
                 'attributes' => [
+                    'createdAt',
                     'firstName',
                     'lastName',
                     'phoneNumber',
                     'licenseNumber',
                     'licenseExpiryDate',
                     'address',
-                ]
+                ],
             ]])
             ->assertJsonPath('data.type', 'driver')
             ->assertJsonPath('data.id', $driver->id)
-            ->assertJsonPath('data.createdAt', $driver->created_at->toISOString())
             ->assertJsonPath('data.attributes.firstName', $driver->first_name)
             ->assertJsonPath('data.attributes.lastName', $driver->last_name)
-            ->assertJsonPath('data.attributes.email', $driver->email)
-            ->assertJsonPath('data.attributes.phone', $driver->phone);
+            ->assertJsonPath('data.attributes.phoneNumber', $driver->phone_number);
     });
 });

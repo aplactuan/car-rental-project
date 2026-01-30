@@ -46,7 +46,7 @@ describe('authenticated user', function () {
         ->assertJsonPath('data.attributes.model', $car->model)
         ->assertJsonPath('data.attributes.year', $car->year)
         ->assertJsonPath('data.attributes.mileage', $car->mileage)
-        ->assertJsonPath('data.attributes.type', $car->type)
+        ->assertJsonPath('data.attributes.vehicleType', $car->type)
         ->assertJsonPath('data.attributes.numberOfSeats', $car->number_of_seats);
     });
 });

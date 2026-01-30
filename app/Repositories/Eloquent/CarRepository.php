@@ -4,13 +4,16 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Car;
 use App\Repositories\BaseRepository;
+use App\Repositories\Contracts\BookingRepositoryInterface;
 use App\Repositories\Contracts\CarRepositoryInterface;
 
 class CarRepository extends BaseRepository implements CarRepositoryInterface
 {
-    public function __construct(Car $model)
-    {
-        $this->model = $model;
+    public function __construct(
+        Car $model,
+        protected BookingRepositoryInterface $bookingRepository
+    ) {
+        parent::__construct($model);
     }
 
     public function filter(array $filters)
@@ -34,5 +37,14 @@ class CarRepository extends BaseRepository implements CarRepositoryInterface
         }
 
         return $query->get();
+    }
+
+    public function availableInPeriod($startDate, $endDate)
+    {
+        $bookedCarIds = $this->bookingRepository->getCarIdsBookedInPeriod($startDate, $endDate);
+
+        return $this->model->newQuery()
+            ->whereNotIn('id', $bookedCarIds)
+            ->get();
     }
 }

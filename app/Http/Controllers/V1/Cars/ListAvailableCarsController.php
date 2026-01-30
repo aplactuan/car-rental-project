@@ -18,12 +18,23 @@ class ListAvailableCarsController extends Controller
      */
     public function __invoke(Request $request)
     {
-        // For now "available" = all cars in the system
+        $startDate = $request->query('start_date');
+        $endDate = $request->query('end_date');
+
+        if ($startDate !== null || $endDate !== null) {
+            $request->validate([
+                'start_date' => ['required_with:end_date', 'date'],
+                'end_date' => ['required_with:start_date', 'date', 'after_or_equal:start_date'],
+            ]);
+
+            $cars = $this->car->availableInPeriod($startDate, $endDate);
+
+            return CarResource::collection($cars);
+        }
+
         $filters = $request->only(['make', 'model', 'type', 'number_of_seats']);
-        
-        // Remove empty filters
-        $filters = array_filter($filters, fn($value) => $value !== null && $value !== '');
-        
+        $filters = array_filter($filters, fn ($value) => $value !== null && $value !== '');
+
         if (empty($filters)) {
             $cars = $this->car->all();
         } else {

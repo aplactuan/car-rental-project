@@ -48,8 +48,8 @@ describe('authenticated user', function () {
                 'data' => [
                     'type',
                     'id',
-                    'createdAt',
                     'attributes' => [
+                        'createdAt',
                         'firstName',
                         'lastName',
                         'licenseNumber',

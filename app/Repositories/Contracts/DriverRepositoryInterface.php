@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Contracts;
 
+use Carbon\CarbonInterface;
+
 interface DriverRepositoryInterface
 {
     public function all();
@@ -15,5 +17,14 @@ interface DriverRepositoryInterface
     public function update($id, array $data);
 
     public function delete($id);
+
+    /**
+     * Drivers available in the given period (no overlapping bookings).
+     *
+     * @param  CarbonInterface|string  $startDate
+     * @param  CarbonInterface|string  $endDate
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    public function availableInPeriod($startDate, $endDate, int $perPage = 15);
 }
 

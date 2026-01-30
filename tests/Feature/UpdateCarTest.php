@@ -80,7 +80,7 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.model', $updatePayload['model'])
             ->assertJsonPath('data.attributes.year', $updatePayload['year'])
             ->assertJsonPath('data.attributes.mileage', $updatePayload['mileage'])
-            ->assertJsonPath('data.attributes.type', $updatePayload['type'])
+            ->assertJsonPath('data.attributes.vehicleType', $updatePayload['type'])
             ->assertJsonPath('data.attributes.numberOfSeats', $updatePayload['number_of_seats']);
     });
 
@@ -116,7 +116,7 @@ describe('authenticated user', function () {
         $response->assertStatus(200)
             ->assertJsonPath('data.attributes.make', 'Honda')
             ->assertJsonPath('data.attributes.model', 'Accord')
-            ->assertJsonPath('data.attributes.type', 'Sedan')
+            ->assertJsonPath('data.attributes.vehicleType', 'Sedan')
             ->assertJsonPath('data.attributes.numberOfSeats', 5);
     });
 

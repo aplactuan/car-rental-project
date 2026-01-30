@@ -8,24 +8,25 @@ use Illuminate\Http\Resources\Json\JsonResource;
 class CarResource extends JsonResource
 {
     /**
-     * Transform the resource into an array.
+     * JSON:API resource: type, id, attributes only.
      *
      * @return array<string, mixed>
      */
     public function toArray(Request $request): array
     {
         return [
-            'type'=> 'car',
+            'type' => 'car',
             'id' => $this->id,
-            'createdAt' => $this->created_at,
             'attributes' => [
+                'createdAt' => $this->created_at?->toIso8601String(),
                 'make' => $this->make,
                 'model' => $this->model,
                 'year' => $this->year,
                 'mileage' => $this->mileage,
-                'type' => $this->type,
-                'numberOfSeats' => $this->number_of_seats
-            ]
+                'vehicleType' => $this->type,
+                'numberOfSeats' => $this->number_of_seats,
+                'plateNumber' => $this->plate_number,
+            ],
         ];
     }
 }
