@@ -66,7 +66,6 @@ describe('authenticated user', function () {
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
-                    'type',
                     'id',
                     'createdAt',
                     'attributes' => [

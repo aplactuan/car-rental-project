@@ -17,6 +17,7 @@ class CarResource extends JsonResource
         return [
             'type' => 'car',
             'id' => $this->id,
+            'createdAt' => $this->created_at?->toIso8601String(),
             'attributes' => [
                 'createdAt' => $this->created_at?->toIso8601String(),
                 'make' => $this->make,
