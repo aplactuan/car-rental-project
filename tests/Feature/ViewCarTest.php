@@ -36,7 +36,7 @@ describe('authenticated user', function () {
                 'id',
                 'createdAt',
                 'attributes' => [
-                    'make', 'model', 'year', 'mileage', 'type', 'numberOfSeats'
+                    'make', 'model', 'year', 'mileage', 'vehicleType', 'numberOfSeats'
                 ]
             ]
         ])

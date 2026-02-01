@@ -24,7 +24,7 @@ class SingleCarController extends Controller
     public function __invoke(Car $car)
     {
         $car = $this->car->find($car->id);
-        
+
         if (!$car) {
             return $this->error('Car not found', 404);
         }

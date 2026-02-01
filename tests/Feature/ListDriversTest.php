@@ -77,7 +77,7 @@ describe('authenticated user', function () {
 
         $response
             ->assertStatus(422)
-            ->assertJsonValidationErrors(['per_page']);
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/per_page');
     });
 });
 
