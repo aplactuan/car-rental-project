@@ -66,10 +66,11 @@ describe('authenticated user', function () {
         $response->assertStatus(200)
             ->assertJsonStructure([
                 'data' => [
+                    'type',
                     'id',
                     'createdAt',
                     'attributes' => [
-                        'make', 'model', 'year', 'mileage', 'type', 'numberOfSeats'
+                        'make', 'model', 'year', 'mileage', 'vehicleType', 'numberOfSeats'
                     ]
                 ]
             ])
@@ -129,9 +130,9 @@ describe('authenticated user', function () {
             'plate_number' => 'UNIQUE-1',
         ]);
 
-        // Assert: validation error
+        // Assert: validation error (JSON:API format uses source.pointer)
         $response->assertStatus(422)
-            ->assertJsonValidationErrors(['plate_number']);
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/plate_number');
     });
 
     test('it can update a car with the same plate_number (its own)', function () {
