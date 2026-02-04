@@ -1,60 +1,310 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Car Rental API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A RESTful API for managing car rentals, built with Laravel 12. The system handles cars, drivers, and rental transactions (bookings) with availability checking and JSON:API-style responses.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Authentication** — Login/logout via Laravel Sanctum (token-based)
+- **Car Management** — Add, list, view, and update cars with availability by date range
+- **Driver Management** — Add, list, view, and update drivers with availability by date range
+- **Transaction Management** — Create and list rental transactions with multiple bookings
+- **Availability Validation** — Ensures cars and drivers are available for the requested rental period
+- **JSON:API** — JSON:API-style error responses and resources
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Tech Stack
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **PHP** 8.2+
+- **Laravel** 12
+- **Laravel Sanctum** — API authentication
+- **MySQL** (default) / SQLite (testing)
+- **Pest** — Testing framework
 
-## Learning Laravel
+## Requirements
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP 8.2 or higher
+- Composer
+- MySQL 5.7+ / MariaDB or SQLite
+- Node.js & npm (for frontend assets, optional)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+## Installation
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+1. **Clone the repository**
 
-## Laravel Sponsors
+   ```bash
+   git clone <repository-url>
+   cd car-rental-project
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+2. **Install PHP dependencies**
 
-### Premium Partners
+   ```bash
+   composer install
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+3. **Configure environment**
 
-## Contributing
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+4. **Configure database** — Edit `.env` with your database credentials:
 
-## Code of Conduct
+   ```
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=car_rental_project
+   DB_USERNAME=root
+   DB_PASSWORD=your_password
+   ```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+5. **Run migrations**
 
-## Security Vulnerabilities
+   ```bash
+   php artisan migrate
+   ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+6. **Seed the database** (optional — creates a test user)
+
+   ```bash
+   php artisan db:seed
+   ```
+
+   Default test user:
+   - Email: `test@example.com`
+   - Password: `password`
+
+## Running the Application
+
+```bash
+php artisan serve
+```
+
+The API will be available at `http://localhost:8000`.
+
+## API Documentation
+
+### Base URL
+
+```
+http://localhost:8000/api
+```
+
+### Authentication
+
+All `/api/v1/*` endpoints require authentication. Use the Bearer token from the login response.
+
+#### Login
+
+```http
+POST /api/login
+Content-Type: application/json
+
+{
+  "email": "test@example.com",
+  "password": "password"
+}
+```
+
+**Response:**
+```json
+{
+  "message": "Authenticated",
+  "data": {
+    "token": "1|..."
+  }
+}
+```
+
+#### Logout
+
+```http
+POST /api/logout
+Authorization: Bearer {token}
+```
+
+#### Get Current User
+
+```http
+GET /api/user
+Authorization: Bearer {token}
+```
+
+---
+
+### Cars
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/cars` | Add a new car |
+| GET | `/api/v1/cars` | List available cars (supports date filters) |
+| GET | `/api/v1/cars/{id}` | View a single car |
+| PUT | `/api/v1/cars/{id}` | Update a car |
+
+#### Add Car
+
+```http
+POST /api/v1/cars
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "make": "Toyota",
+  "model": "Camry",
+  "year": 2023,
+  "plate_number": "ABC-1234",
+  "mileage": 15000,
+  "type": "sedan",
+  "number_of_seats": 5
+}
+```
+
+---
+
+### Drivers
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/drivers` | Add a new driver |
+| GET | `/api/v1/drivers` | List drivers (paginated, supports `per_page`) |
+| GET | `/api/v1/drivers/{id}` | View a single driver |
+| PUT | `/api/v1/drivers/{id}` | Update a driver |
+
+#### Add Driver
+
+```http
+POST /api/v1/drivers
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "first_name": "John",
+  "last_name": "Doe",
+  "license_number": "DL-12345",
+  "license_expiry_date": "2028-12-31",
+  "address": "123 Main St",
+  "phone_number": "+1234567890"
+}
+```
+
+---
+
+### Transactions
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/v1/transactions` | Create a transaction (rental) with bookings |
+| GET | `/api/v1/transactions` | List transactions (supports `per_page`) |
+| GET | `/api/v1/transactions/{id}` | View a single transaction |
+
+#### Create Transaction
+
+Each transaction can include multiple bookings. Cars and drivers must be available for the requested dates.
+
+```http
+POST /api/v1/transactions
+Authorization: Bearer {token}
+Content-Type: application/json
+
+{
+  "bookings": [
+    {
+      "car_id": "uuid",
+      "driver_id": "uuid",
+      "start_date": "2026-02-10",
+      "end_date": "2026-02-15",
+      "note": "Optional note"
+    }
+  ]
+}
+```
+
+**Validation:**
+- `end_date` must be on or after `start_date`
+- Car must be available for the date range
+- Driver must be available for the date range
+
+---
+
+## Project Structure
+
+```
+app/
+├── Http/
+│   ├── Controllers/
+│   │   ├── LoginController.php
+│   │   ├── LogoutController.php
+│   │   └── V1/
+│   │       ├── Cars/          # AddCar, ListAvailableCars, SingleCar, UpdateCar
+│   │       ├── Drivers/       # AddDriver, ListDrivers, SingleDriver, UpdateDriver
+│   │       └── Transactions/  # AddTransaction, ListTransactions, SingleTransaction
+│   ├── Middleware/
+│   │   └── AuthenticateApi.php
+│   ├── Requests/              # Form validation
+│   └── Resources/V1/          # API resources (JSON:API style)
+├── Models/
+│   ├── Booking.php
+│   ├── Car.php
+│   ├── Driver.php
+│   ├── Transaction.php
+│   └── User.php
+└── Repositories/              # Data access layer
+    ├── Contracts/
+    └── Eloquent/
+```
+
+## Data Models
+
+- **User** — Authenticated users
+- **Car** — Vehicles (make, model, year, type, seats, mileage, plate number)
+- **Driver** — Drivers (name, license, expiry, address, phone)
+- **Transaction** — Rental transactions (linked to user)
+- **Booking** — Individual rentals within a transaction (car, driver, dates, note)
+
+All entities use UUIDs as primary keys (via `HasUuid` trait).
+
+## Testing
+
+Tests use Pest and SQLite in-memory database.
+
+```bash
+composer test
+# or
+./vendor/bin/pest
+```
+
+### Test Coverage
+
+- **Feature:** Add/update car, driver, transaction; list drivers, transactions; view car, driver, transaction; login/logout; availability checks
+- **Unit:** Car model, BookingRepository, TransactionRepository
+
+## Docker
+
+A Dockerfile is provided for containerized development:
+
+```bash
+docker build -t car-rental .
+```
+
+PHP 8.2-FPM with extensions: pdo, pdo_mysql, pgsql, redis, xdebug, gd, bcmath, zip.
+
+## Error Responses
+
+API errors follow a JSON:API-inspired structure:
+
+```json
+{
+  "errors": [
+    {
+      "status": "422",
+      "title": "Validation Error",
+      "detail": "The selected car is not available for the given dates.",
+      "pointer": "/data/attributes/bookings/0/car_id"
+    }
+  ]
+}
+```
 
 ## License
 
