@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\Booking;
+use App\Observers\BookingObserver;
 use App\Repositories\Contracts\BookingRepositoryInterface;
 use App\Repositories\Contracts\CarRepositoryInterface;
 use App\Repositories\Contracts\DriverRepositoryInterface;
@@ -30,6 +32,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Booking::observe(BookingObserver::class);
     }
 }
