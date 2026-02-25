@@ -20,7 +20,6 @@ class BookingObserver
         $scheduleData = [
             'start_time' => $startTime,
             'end_time' => $endTime,
-            'booking_id' => $booking->id,
         ];
 
         if ($booking->driver_id) {
