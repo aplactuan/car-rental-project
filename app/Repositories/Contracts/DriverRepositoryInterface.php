@@ -19,7 +19,7 @@ interface DriverRepositoryInterface
     public function delete($id);
 
     /**
-     * Drivers available in the given period (no overlapping bookings).
+     * Drivers available in the given period (no overlapping schedules).
      *
      * @param  CarbonInterface|string  $startDate
      * @param  CarbonInterface|string  $endDate
@@ -27,4 +27,3 @@ interface DriverRepositoryInterface
      */
     public function availableInPeriod($startDate, $endDate, int $perPage = 15);
 }
-
