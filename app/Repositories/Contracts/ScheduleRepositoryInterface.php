@@ -15,4 +15,14 @@ interface ScheduleRepositoryInterface
      * @return array<string>
      */
     public function getCarIdsScheduledInPeriod($start, $end): array;
+
+    /**
+     * Get driver IDs that have overlapping schedules in the given period.
+     * Overlap: schedule.start_time < end AND schedule.end_time > start.
+     *
+     * @param  CarbonInterface|string  $start
+     * @param  CarbonInterface|string  $end
+     * @return array<string>
+     */
+    public function getDriverIdsScheduledInPeriod($start, $end): array;
 }
