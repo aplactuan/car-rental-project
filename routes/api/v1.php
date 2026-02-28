@@ -9,6 +9,7 @@ use App\Http\Controllers\V1\Drivers\ListDriversController;
 use App\Http\Controllers\V1\Drivers\SingleDriverController;
 use App\Http\Controllers\V1\Drivers\UpdateDriverController;
 use App\Http\Controllers\V1\Transactions\AddTransactionController;
+use App\Http\Controllers\V1\Availability\ListAvailabilityController;
 use App\Http\Controllers\V1\Transactions\ListTransactionsController;
 use App\Http\Controllers\V1\Transactions\SingleTransactionController;
 use Illuminate\Support\Facades\Route;
@@ -27,4 +28,6 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/transactions', AddTransactionController::class);
     Route::get('/transactions', ListTransactionsController::class);
     Route::get('/transactions/{transaction}', SingleTransactionController::class);
+
+    Route::get('/availability', ListAvailabilityController::class);
 });
