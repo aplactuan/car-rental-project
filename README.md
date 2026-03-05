@@ -8,6 +8,7 @@ A RESTful API for managing car rentals, built with Laravel 12. The system handle
 - **Car Management** — Add, list, view, and update cars with availability by date range
 - **Driver Management** — Add, list, view, and update drivers with availability by date range
 - **Transaction Management** — Create and list rental transactions with multiple bookings
+- **Availability Check** — Query available cars or drivers for a given date range
 - **Availability Validation** — Ensures cars and drivers are available for the requested rental period
 - **JSON:API** — JSON:API-style error responses and resources
 
@@ -198,6 +199,31 @@ Content-Type: application/json
 | GET | `/api/v1/transactions` | List transactions (supports `per_page`) |
 | GET | `/api/v1/transactions/{id}` | View a single transaction |
 
+---
+
+### Availability
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/availability` | List available cars or drivers for a date range |
+
+Query available cars or drivers that are **not** scheduled (booked) for the given period. Useful for finding resources before creating a transaction.
+
+**Query parameters:**
+- `type` (required) — `car` or `driver`
+- `start` (required) — Start date (YYYY-MM-DD)
+- `end` (required) — End date (YYYY-MM-DD, must be after `start`)
+
+**Example:**
+```http
+GET /api/v1/availability?type=car&start=2026-02-10&end=2026-02-15
+Authorization: Bearer {token}
+```
+
+Returns a collection of `CarResource` or `DriverResource` depending on `type`.
+
+---
+
 #### Create Transaction
 
 Each transaction can include multiple bookings. Cars and drivers must be available for the requested dates.
@@ -238,6 +264,7 @@ app/
 │   │   └── V1/
 │   │       ├── Cars/          # AddCar, ListAvailableCars, SingleCar, UpdateCar
 │   │       ├── Drivers/       # AddDriver, ListDrivers, SingleDriver, UpdateDriver
+│   │       ├── Availability/  # ListAvailability
 │   │       └── Transactions/  # AddTransaction, ListTransactions, SingleTransaction
 │   ├── Middleware/
 │   │   └── AuthenticateApi.php
@@ -276,7 +303,7 @@ composer test
 
 ### Test Coverage
 
-- **Feature:** Add/update car, driver, transaction; list drivers, transactions; view car, driver, transaction; login/logout; availability checks
+- **Feature:** Add/update car, driver, transaction; list drivers, transactions, availability; view car, driver, transaction; login/logout; availability validation
 - **Unit:** Car model, BookingRepository, TransactionRepository
 
 ## Docker
