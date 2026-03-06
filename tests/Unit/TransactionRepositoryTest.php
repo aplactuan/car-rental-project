@@ -13,6 +13,22 @@ beforeEach(function () {
     $this->repository = new TransactionRepository(new Transaction);
 });
 
+test('create persists transaction even without bookings', function () {
+    $user = User::factory()->create();
+
+    $data = [
+        'user_id' => $user->id,
+        'customer_name' => 'Jane Smith',
+    ];
+
+    $transaction = $this->repository->create($data);
+
+    expect($transaction)->toBeInstanceOf(Transaction::class);
+    expect($transaction->user_id)->toBe($user->id);
+    expect($transaction->customer_name)->toBe('Jane Smith');
+    expect($transaction->bookings)->toHaveCount(0);
+});
+
 test('create persists transaction and bookings in one go', function () {
     $user = User::factory()->create();
     $car = Car::factory()->create();
@@ -20,6 +36,7 @@ test('create persists transaction and bookings in one go', function () {
 
     $data = [
         'user_id' => $user->id,
+        'customer_name' => 'John Doe',
         'bookings' => [
             [
                 'car_id' => $car->id,
@@ -49,6 +66,7 @@ test('create with multiple bookings persists all', function () {
 
     $data = [
         'user_id' => $user->id,
+        'customer_name' => 'John Doe',
         'bookings' => [
             [
                 'car_id' => $car1->id,

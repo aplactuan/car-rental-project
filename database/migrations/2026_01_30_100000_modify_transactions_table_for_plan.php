@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('transactions', function (Blueprint $table) {
-            $table->dropColumn(['customer_name', 'amount']);
+            $table->dropColumn(['amount']);
             $table->foreignId('user_id')->after('id')->constrained('users')->cascadeOnDelete();
         });
     }
@@ -18,7 +18,6 @@ return new class extends Migration
     {
         Schema::table('transactions', function (Blueprint $table) {
             $table->dropConstrainedForeignId('user_id');
-            $table->string('customer_name');
             $table->bigInteger('amount');
         });
     }
