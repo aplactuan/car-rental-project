@@ -17,6 +17,7 @@ class TransactionFactory extends Factory
     {
         return [
             'user_id' => User::factory(),
+            'customer_name' => fake()->name(),
         ];
     }
 }
