@@ -26,7 +26,7 @@ trait ApiResponses
     /**
      * JSON:API compliant error: { "errors": [ { "status", "title", "detail" } ] }
      */
-    protected function error(string $detail, int $status, string $title = null): JsonResponse
+    protected function error(string $detail, int $status, ?string $title = null): JsonResponse
     {
         $titles = [
             400 => 'Bad Request',

@@ -2,16 +2,13 @@
 
 namespace App\Repositories\Eloquent;
 
-use App\Models\Booking;
 use App\Models\Transaction;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
 class TransactionRepository implements TransactionRepositoryInterface
 {
-    public function __construct(protected Transaction $model)
-    {
-    }
+    public function __construct(protected Transaction $model) {}
 
     public function all()
     {

@@ -9,9 +9,7 @@ use App\Repositories\Contracts\DriverRepositoryInterface;
 
 class ListDriversController extends Controller
 {
-    public function __construct(protected DriverRepositoryInterface $driver)
-    {
-    }
+    public function __construct(protected DriverRepositoryInterface $driver) {}
 
     public function __invoke(ListDriversRequest $request)
     {
@@ -35,4 +33,3 @@ class ListDriversController extends Controller
         return DriverResource::collection($drivers);
     }
 }
-

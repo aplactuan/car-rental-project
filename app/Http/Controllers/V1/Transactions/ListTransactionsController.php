@@ -9,9 +9,7 @@ use App\Repositories\Contracts\TransactionRepositoryInterface;
 
 class ListTransactionsController extends Controller
 {
-    public function __construct(protected TransactionRepositoryInterface $transactionRepository)
-    {
-    }
+    public function __construct(protected TransactionRepositoryInterface $transactionRepository) {}
 
     public function __invoke(ListTransactionsRequest $request)
     {

@@ -3,7 +3,7 @@
 uses(Tests\TestCase::class)->in('Feature');
 uses(Tests\TestCase::class)->in('Unit');
 
-if (!function_exists('carPayload')) {
+if (! function_exists('carPayload')) {
     function carPayload(array $overrides = []): array
     {
         return array_merge([
@@ -18,7 +18,7 @@ if (!function_exists('carPayload')) {
     }
 }
 
-if (!function_exists('bookingPayload')) {
+if (! function_exists('bookingPayload')) {
     function bookingPayload(array $overrides = []): array
     {
         return array_merge([
@@ -31,7 +31,7 @@ if (!function_exists('bookingPayload')) {
     }
 }
 
-if (!function_exists('transactionPayload')) {
+if (! function_exists('transactionPayload')) {
     function transactionPayload(array $bookingsOverrides = []): array
     {
         $bookings = $bookingsOverrides ?: [bookingPayload()];

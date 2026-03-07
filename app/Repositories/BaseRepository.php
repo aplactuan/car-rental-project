@@ -6,10 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 abstract class BaseRepository
 {
-    public function __construct(protected Model $model)
-    {
-
-    }
+    public function __construct(protected Model $model) {}
 
     public function all()
     {
@@ -37,6 +34,7 @@ abstract class BaseRepository
     public function delete($id)
     {
         $row = $this->find($id);
+
         return $row->delete();
     }
 }

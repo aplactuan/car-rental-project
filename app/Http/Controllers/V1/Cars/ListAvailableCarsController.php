@@ -9,9 +9,7 @@ use Illuminate\Http\Request;
 
 class ListAvailableCarsController extends Controller
 {
-    public function __construct(protected CarRepositoryInterface $car)
-    {
-    }
+    public function __construct(protected CarRepositoryInterface $car) {}
 
     /**
      * Handle the incoming request.

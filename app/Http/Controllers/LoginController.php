@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 class LoginController extends Controller
 {
     use ApiResponses;
+
     /**
      * Handle the incoming request.
      */
@@ -18,7 +19,7 @@ class LoginController extends Controller
     {
         $request->validated($request->all());
 
-        if (!Auth::attempt($request->only('email', 'password'))) {
+        if (! Auth::attempt($request->only('email', 'password'))) {
             return $this->error('Invalid username or password', 401);
         }
 
@@ -27,7 +28,7 @@ class LoginController extends Controller
         return $this->ok(
             'Authenticated',
             [
-                'token' => $user->createToken('API token for ' . $user->email)->plainTextToken
+                'token' => $user->createToken('API token for '.$user->email)->plainTextToken,
             ]
         );
     }

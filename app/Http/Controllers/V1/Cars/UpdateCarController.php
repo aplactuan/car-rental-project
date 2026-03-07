@@ -13,9 +13,7 @@ class UpdateCarController extends Controller
 {
     use ApiResponses;
 
-    public function __construct(protected CarRepositoryInterface $car)
-    {
-    }
+    public function __construct(protected CarRepositoryInterface $car) {}
 
     /**
      * Handle the incoming request.

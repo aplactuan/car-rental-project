@@ -4,6 +4,7 @@ use App\Models\Driver;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+
 use function Pest\Laravel\getJson;
 
 uses(RefreshDatabase::class);
@@ -13,7 +14,7 @@ function driverListPayload(array $overrides = []): array
     return array_merge([
         'first_name' => 'John',
         'last_name' => 'Doe',
-        'license_number' => 'LIC-' . uniqid(),
+        'license_number' => 'LIC-'.uniqid(),
         'license_expiry_date' => '2030-01-01',
         'address' => '123 Main St',
         'phone_number' => '+15555550123',
@@ -80,4 +81,3 @@ describe('authenticated user', function () {
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/per_page');
     });
 });
-

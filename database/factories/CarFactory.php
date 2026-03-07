@@ -23,7 +23,7 @@ class CarFactory extends Factory
             'type' => $this->faker->randomElement(['Sedan', 'SUV', 'Truck', 'Van']),
             'number_of_seats' => $this->faker->numberBetween(4, 8),
             'mileage' => $this->faker->numberBetween(10000, 100000),
-            'plate_number' => $this->faker->unique()->regexify('[A-Z]{3}-[0-9]{3}')
+            'plate_number' => $this->faker->unique()->regexify('[A-Z]{3}-[0-9]{3}'),
         ];
     }
 }

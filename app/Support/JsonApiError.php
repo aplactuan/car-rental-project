@@ -6,6 +6,7 @@ use Illuminate\Http\JsonResponse;
 
 /**
  * Build JSON:API 1.1 compliant error responses.
+ *
  * @see https://jsonapi.org/format/#error-objects
  */
 final class JsonApiError
@@ -19,7 +20,7 @@ final class JsonApiError
         string $detail,
         ?string $pointer = null,
         ?string $parameter = null,
-        int $httpStatus = null
+        ?int $httpStatus = null
     ): JsonResponse {
         $httpStatus = $httpStatus ?? (int) $status;
         $error = [
@@ -56,6 +57,7 @@ final class JsonApiError
             if (! empty($e['parameter'])) {
                 $obj['source'] = array_merge($obj['source'] ?? [], ['parameter' => $e['parameter']]);
             }
+
             return $obj;
         }, $errors);
 

@@ -3,14 +3,12 @@
 use App\Models\Car;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use Laravel\Sanctum\Sanctum;
+
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\putJson;
 
 uses(RefreshDatabase::class);
-
 
 describe('guest user', function () {
     test('it cannot update a car if user is not logged in', function () {
@@ -70,9 +68,9 @@ describe('authenticated user', function () {
                     'id',
                     'createdAt',
                     'attributes' => [
-                        'make', 'model', 'year', 'mileage', 'vehicleType', 'numberOfSeats'
-                    ]
-                ]
+                        'make', 'model', 'year', 'mileage', 'vehicleType', 'numberOfSeats',
+                    ],
+                ],
             ])
             ->assertJsonPath('data.type', 'car')
             ->assertJsonPath('data.id', $car->id)

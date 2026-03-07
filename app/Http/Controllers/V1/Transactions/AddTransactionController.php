@@ -12,8 +12,7 @@ class AddTransactionController extends Controller
 {
     public function __construct(
         protected TransactionRepositoryInterface $transactionRepository
-    ) {
-    }
+    ) {}
 
     public function __invoke(AddTransactionRequest $request): JsonResponse|TransactionResource
     {

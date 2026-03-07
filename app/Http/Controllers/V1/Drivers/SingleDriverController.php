@@ -13,10 +13,8 @@ class SingleDriverController extends Controller
 {
     use ApiResponses;
 
-    public function __construct(protected DriverRepositoryInterface $driver)
-    {
+    public function __construct(protected DriverRepositoryInterface $driver) {}
 
-    }
     /**
      * Handle the incoming request.
      */
@@ -24,7 +22,7 @@ class SingleDriverController extends Controller
     {
         $driver = $this->driver->find($driver->id);
 
-        if (!$driver) {
+        if (! $driver) {
             return $this->error('Driver not found', 404);
         }
 

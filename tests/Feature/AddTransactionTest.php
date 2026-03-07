@@ -3,6 +3,7 @@
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+
 use function Pest\Laravel\postJson;
 
 uses(RefreshDatabase::class);

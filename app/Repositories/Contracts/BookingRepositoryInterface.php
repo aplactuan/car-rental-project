@@ -2,7 +2,10 @@
 
 namespace App\Repositories\Contracts;
 
+use App\Models\Booking;
 use Carbon\CarbonInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 interface BookingRepositoryInterface
 {
@@ -24,4 +27,17 @@ interface BookingRepositoryInterface
      * @return array<string>
      */
     public function getDriverIdsBookedInPeriod($start, $end): array;
+
+    public function create(array $data): Booking;
+
+    public function find(string $id): Booking;
+
+    public function update(string $id, array $data): Booking;
+
+    public function delete(string $id): bool;
+
+    /**
+     * @return Collection<int, Booking>|LengthAwarePaginator
+     */
+    public function getByTransaction(string $transactionId, ?int $perPage = null): Collection|LengthAwarePaginator;
 }

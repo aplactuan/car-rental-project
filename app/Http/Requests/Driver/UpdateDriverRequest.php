@@ -24,7 +24,7 @@ class UpdateDriverRequest extends FormRequest
         return [
             'first_name' => 'sometimes|string',
             'last_name' => 'sometimes|string',
-            'license_number' => 'sometimes|string|unique:drivers,license_number,' . $this->route('driver')->id,
+            'license_number' => 'sometimes|string|unique:drivers,license_number,'.$this->route('driver')->id,
             'license_expiry_date' => 'sometimes|date',
             'address' => 'sometimes|string',
             'phone_number' => 'sometimes|string',
