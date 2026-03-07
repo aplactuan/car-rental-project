@@ -4,6 +4,7 @@ use App\Models\Car;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+
 use function Pest\Laravel\getJson;
 
 uses(RefreshDatabase::class);
@@ -20,7 +21,7 @@ function availableCarPayload(array $overrides = []): array
         'mileage' => 10000,
         'type' => 'Sedan',
         'number_of_seats' => 5,
-        'plate_number' => 'PLATE-' . uniqid(),
+        'plate_number' => 'PLATE-'.uniqid(),
     ], $overrides);
 }
 
@@ -109,7 +110,7 @@ describe('authenticated user', function () {
         ]));
 
         // Act: call the endpoint with filters
-        $response = getJson('/api/v1/cars?' . http_build_query([
+        $response = getJson('/api/v1/cars?'.http_build_query([
             'make' => 'Toyota',
             'model' => 'Corolla',
             'type' => 'Sedan',

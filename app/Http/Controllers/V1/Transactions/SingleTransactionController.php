@@ -10,9 +10,7 @@ use Illuminate\Http\Request;
 
 class SingleTransactionController extends Controller
 {
-    public function __construct(protected TransactionRepositoryInterface $transactionRepository)
-    {
-    }
+    public function __construct(protected TransactionRepositoryInterface $transactionRepository) {}
 
     public function __invoke(Request $request, Transaction $transaction)
     {

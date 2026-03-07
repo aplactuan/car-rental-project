@@ -2,13 +2,12 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use Laravel\Sanctum\Sanctum;
+
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\postJson;
 
 uses(RefreshDatabase::class);
-
 
 describe('guest user', function () {
     test('it cannot add a car if user is not login', function () {
@@ -17,11 +16,11 @@ describe('guest user', function () {
 });
 
 describe('authenticated user', function () {
-   beforeEach(function () {
-       $this->user = User::factory()->create();
+    beforeEach(function () {
+        $this->user = User::factory()->create();
 
-       Sanctum::actingAs($this->user);
-   });
+        Sanctum::actingAs($this->user);
+    });
 
     test('it can add a car thru api', function () {
         $payload = carPayload();
@@ -52,4 +51,3 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.numberOfSeats', $payload['number_of_seats']);
     });
 });
-

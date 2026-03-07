@@ -16,7 +16,7 @@ class DriverFactory extends Factory
      */
     public function definition(): array
     {
-        //make a factory for Driver model
+        // make a factory for Driver model
         return [
             'first_name' => $this->faker->firstName(),
             'last_name' => $this->faker->lastName(),

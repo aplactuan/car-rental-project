@@ -23,4 +23,3 @@ class AddDriverRequest extends FormRequest
         ];
     }
 }
-

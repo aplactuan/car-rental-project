@@ -10,10 +10,8 @@ use Illuminate\Http\Request;
 
 class UpdateDriverController extends Controller
 {
-    public function __construct(protected DriverRepositoryInterface $driver)
-    {
+    public function __construct(protected DriverRepositoryInterface $driver) {}
 
-    }
     /**
      * Handle the incoming request.
      */
@@ -21,7 +19,7 @@ class UpdateDriverController extends Controller
     {
         $driver = $this->driver->find($driver->id);
 
-        if (!$driver) {
+        if (! $driver) {
             return $this->error('Driver not found', 404);
         }
 

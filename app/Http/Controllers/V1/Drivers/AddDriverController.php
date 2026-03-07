@@ -12,9 +12,7 @@ class AddDriverController extends Controller
 {
     use ApiResponses;
 
-    public function __construct(protected DriverRepositoryInterface $driver)
-    {
-    }
+    public function __construct(protected DriverRepositoryInterface $driver) {}
 
     public function __invoke(AddDriverRequest $request)
     {
@@ -25,4 +23,3 @@ class AddDriverController extends Controller
             ->setStatusCode(201);
     }
 }
-

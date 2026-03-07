@@ -21,7 +21,7 @@ class TransactionResource extends JsonResource
             'attributes' => [
                 'createdAt' => $this->created_at?->toIso8601String(),
                 'userId' => $this->user_id,
-                'customerName' => $this->customer_name
+                'customerName' => $this->customer_name,
             ],
             'relationships' => [
                 'bookings' => [

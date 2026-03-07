@@ -6,7 +6,6 @@ use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Booking extends Model
 {
@@ -44,5 +43,4 @@ class Booking extends Model
     {
         return $this->belongsTo(Driver::class);
     }
-
 }

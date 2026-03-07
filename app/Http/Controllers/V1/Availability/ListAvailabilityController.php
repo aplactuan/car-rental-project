@@ -13,9 +13,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ListAvailabilityController extends Controller
 {
-    public function __construct(protected ScheduleRepositoryInterface $scheduleRepository)
-    {
-    }
+    public function __construct(protected ScheduleRepositoryInterface $scheduleRepository) {}
 
     public function __invoke(ListAvailabilityRequest $request): AnonymousResourceCollection
     {

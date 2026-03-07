@@ -1,12 +1,12 @@
 <?php
 
-
 use App\Models\Driver;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use function Pest\Laravel\putJson;
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
+
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\putJson;
 
 uses(RefreshDatabase::class);
 
@@ -15,13 +15,12 @@ function updateDriverPayload(array $overrides = []): array
     return array_merge([
         'first_name' => 'John',
         'last_name' => 'Doe',
-        'license_number' => 'LIC-' . uniqid(),
+        'license_number' => 'LIC-'.uniqid(),
         'license_expiry_date' => '2030-01-01',
         'address' => '123 Main St',
         'phone_number' => '+15555550123',
     ], $overrides);
 }
-
 
 describe('guest user', function () {
     test('it cannot update a driver if user is not logged in', function () {
@@ -44,7 +43,6 @@ describe('authenticated user', function () {
         $driver = Driver::factory()->create();
 
         $payload = updateDriverPayload();
-
 
         putJson("/api/v1/drivers/{$driver->id}", $payload)
             ->assertStatus(200)

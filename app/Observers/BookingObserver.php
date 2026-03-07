@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Models\Booking;
-use App\Models\Schedule;
 use Carbon\Carbon;
 
 class BookingObserver
