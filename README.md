@@ -1,338 +1,224 @@
 # Car Rental API
 
-A RESTful API for managing car rentals, built with Laravel 12. The system handles cars, drivers, and rental transactions (bookings) with availability checking and JSON:API-style responses.
+A production-style REST API for managing car rental operations, built with Laravel 12.
 
-## Features
+This project demonstrates practical backend engineering patterns: token auth, clean validation, service boundaries, availability conflict rules, JSON:API-style error handling, and a strong automated test suite.
 
-- **Authentication** — Login/logout via Laravel Sanctum (token-based)
-- **Car Management** — Add, list, view, and update cars with availability by date range
-- **Driver Management** — Add, list, view, and update drivers with availability by date range
-- **Transaction Management** — Create and list rental transactions with multiple bookings
-- **Availability Check** — Query available cars or drivers for a given date range
-- **Availability Validation** — Ensures cars and drivers are available for the requested rental period
-- **JSON:API** — JSON:API-style error responses and resources
+## Why this project stands out
 
-## Tech Stack
+- Business-focused API design for real rental workflows
+- Explicit ownership checks to protect tenant/user data
+- Booking conflict detection for both cars and drivers
+- Consistent API responses with JSON:API-style errors
+- Layered architecture (Controllers -> Requests -> Repositories -> Models)
+- Pest test suite covering happy paths and failure paths
 
-- **PHP** 8.2+
-- **Laravel** 12
-- **Laravel Sanctum** — API authentication
-- **MySQL** (default) / SQLite (testing)
-- **Pest** — Testing framework
+## Tech stack
 
-## Requirements
+- PHP 8.2
+- Laravel 12
+- Laravel Sanctum (token-based API auth)
+- Pest + PHPUnit
+- Laravel Pint
+- MySQL (default), SQLite (tests)
 
-- PHP 8.2 or higher
-- Composer
-- MySQL 5.7+ / MariaDB or SQLite
-- Node.js & npm (for frontend assets, optional)
+## Core domain
 
-## Installation
+- `User`: authenticated API consumer
+- `Car`: rentable vehicle
+- `Driver`: assignable driver
+- `Transaction`: parent rental record owned by a user
+- `Booking`: car + driver assignment with date range
+- `Schedule`: polymorphic schedule entries used for availability checks
 
-1. **Clone the repository**
-
-   ```bash
-   git clone <repository-url>
-   cd car-rental-project
-   ```
-
-2. **Install PHP dependencies**
-
-   ```bash
-   composer install
-   ```
-
-3. **Configure environment**
-
-   ```bash
-   cp .env.example .env
-   php artisan key:generate
-   ```
-
-4. **Configure database** — Edit `.env` with your database credentials:
-
-   ```
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=car_rental_project
-   DB_USERNAME=root
-   DB_PASSWORD=your_password
-   ```
-
-5. **Run migrations**
-
-   ```bash
-   php artisan migrate
-   ```
-
-6. **Seed the database** (optional — creates a test user)
-
-   ```bash
-   php artisan db:seed
-   ```
-
-   Default test user:
-   - Email: `test@example.com`
-   - Password: `password`
-
-## Running the Application
-
-```bash
-php artisan serve
-```
-
-The API will be available at `http://localhost:8000`.
-
-## API Documentation
-
-### Base URL
-
-```
-http://localhost:8000/api
-```
+## Key capabilities
 
 ### Authentication
 
-All `/api/v1/*` endpoints require authentication. Use the Bearer token from the login response.
+- Login (`/api/login`) to get a Sanctum token
+- Logout (`/api/logout`) to revoke current token
+- All `/api/v1/*` routes require `auth:sanctum`
 
-#### Login
+### Cars
 
-```http
-POST /api/login
-Content-Type: application/json
+- Create, list by availability window, view single, update
 
-{
-  "email": "test@example.com",
-  "password": "password"
-}
-```
+### Drivers
 
-**Response:**
+- Create, list, view single, update
+
+### Transactions
+
+- Create transaction
+- List user-owned transactions
+- View a single user-owned transaction
+
+### Bookings (within transactions)
+
+- Add booking to a transaction
+- List transaction bookings
+- View single booking
+- Update booking
+- Delete booking
+
+### Availability
+
+- Query available cars or drivers for a date range
+- Enforces overlap checks against existing schedules/bookings
+
+## API endpoint map
+
+### Public
+
+- `POST /api/login`
+
+### Authenticated
+
+- `POST /api/logout`
+- `GET /api/user`
+
+### V1 authenticated (`/api/v1`)
+
+- `POST /cars`
+- `GET /cars`
+- `GET /cars/{car}`
+- `PUT /cars/{car}`
+
+- `POST /drivers`
+- `GET /drivers`
+- `GET /drivers/{driver}`
+- `PUT /drivers/{driver}`
+
+- `POST /transactions`
+- `GET /transactions`
+- `GET /transactions/{transaction}`
+
+- `POST /transactions/{transaction}/book`
+- `GET /transactions/{transaction}/bookings`
+- `GET /transactions/{transaction}/bookings/{booking}`
+- `PUT /transactions/{transaction}/bookings/{booking}`
+- `DELETE /transactions/{transaction}/bookings/{booking}`
+
+- `GET /availability`
+
+## Request/response behavior
+
+### Success envelope
+
+Most custom controller responses follow:
+
 ```json
 {
-  "message": "Authenticated",
-  "data": {
-    "token": "1|..."
+  "data": {},
+  "meta": {
+    "message": "..."
   }
 }
 ```
 
-#### Logout
-
-```http
-POST /api/logout
-Authorization: Bearer {token}
-```
-
-#### Get Current User
-
-```http
-GET /api/user
-Authorization: Bearer {token}
-```
-
----
-
-### Cars
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/cars` | Add a new car |
-| GET | `/api/v1/cars` | List available cars (supports date filters) |
-| GET | `/api/v1/cars/{id}` | View a single car |
-| PUT | `/api/v1/cars/{id}` | Update a car |
-
-#### Add Car
-
-```http
-POST /api/v1/cars
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "make": "Toyota",
-  "model": "Camry",
-  "year": 2023,
-  "plate_number": "ABC-1234",
-  "mileage": 15000,
-  "type": "sedan",
-  "number_of_seats": 5
-}
-```
-
----
-
-### Drivers
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/drivers` | Add a new driver |
-| GET | `/api/v1/drivers` | List drivers (paginated, supports `per_page`) |
-| GET | `/api/v1/drivers/{id}` | View a single driver |
-| PUT | `/api/v1/drivers/{id}` | Update a driver |
-
-#### Add Driver
-
-```http
-POST /api/v1/drivers
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "first_name": "John",
-  "last_name": "Doe",
-  "license_number": "DL-12345",
-  "license_expiry_date": "2028-12-31",
-  "address": "123 Main St",
-  "phone_number": "+1234567890"
-}
-```
-
----
-
-### Transactions
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/transactions` | Create a transaction (rental) with bookings |
-| GET | `/api/v1/transactions` | List transactions (supports `per_page`) |
-| GET | `/api/v1/transactions/{id}` | View a single transaction |
-
----
-
-### Availability
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/v1/availability` | List available cars or drivers for a date range |
-
-Query available cars or drivers that are **not** scheduled (booked) for the given period. Useful for finding resources before creating a transaction.
-
-**Query parameters:**
-- `type` (required) — `car` or `driver`
-- `start` (required) — Start date (YYYY-MM-DD)
-- `end` (required) — End date (YYYY-MM-DD, must be after `start`)
-
-**Example:**
-```http
-GET /api/v1/availability?type=car&start=2026-02-10&end=2026-02-15
-Authorization: Bearer {token}
-```
-
-Returns a collection of `CarResource` or `DriverResource` depending on `type`.
-
----
-
-#### Create Transaction
-
-Each transaction can include multiple bookings. Cars and drivers must be available for the requested dates.
-
-```http
-POST /api/v1/transactions
-Authorization: Bearer {token}
-Content-Type: application/json
-
-{
-  "bookings": [
-    {
-      "car_id": "uuid",
-      "driver_id": "uuid",
-      "start_date": "2026-02-10",
-      "end_date": "2026-02-15",
-      "note": "Optional note"
-    }
-  ]
-}
-```
-
-**Validation:**
-- `end_date` must be on or after `start_date`
-- Car must be available for the date range
-- Driver must be available for the date range
-
----
-
-## Project Structure
-
-```
-app/
-├── Http/
-│   ├── Controllers/
-│   │   ├── LoginController.php
-│   │   ├── LogoutController.php
-│   │   └── V1/
-│   │       ├── Cars/          # AddCar, ListAvailableCars, SingleCar, UpdateCar
-│   │       ├── Drivers/       # AddDriver, ListDrivers, SingleDriver, UpdateDriver
-│   │       ├── Availability/  # ListAvailability
-│   │       └── Transactions/  # AddTransaction, ListTransactions, SingleTransaction
-│   ├── Middleware/
-│   │   └── AuthenticateApi.php
-│   ├── Requests/              # Form validation
-│   └── Resources/V1/          # API resources (JSON:API style)
-├── Models/
-│   ├── Booking.php
-│   ├── Car.php
-│   ├── Driver.php
-│   ├── Transaction.php
-│   └── User.php
-└── Repositories/              # Data access layer
-    ├── Contracts/
-    └── Eloquent/
-```
-
-## Data Models
-
-- **User** — Authenticated users
-- **Car** — Vehicles (make, model, year, type, seats, mileage, plate number)
-- **Driver** — Drivers (name, license, expiry, address, phone)
-- **Transaction** — Rental transactions (linked to user)
-- **Booking** — Individual rentals within a transaction (car, driver, dates, note)
-
-All entities use UUIDs as primary keys (via `HasUuid` trait).
-
-## Testing
-
-Tests use Pest and SQLite in-memory database.
-
-```bash
-composer test
-# or
-./vendor/bin/pest
-```
-
-### Test Coverage
-
-- **Feature:** Add/update car, driver, transaction; list drivers, transactions, availability; view car, driver, transaction; login/logout; availability validation
-- **Unit:** Car model, BookingRepository, TransactionRepository
-
-## Docker
-
-A Dockerfile is provided for containerized development:
-
-```bash
-docker build -t car-rental .
-```
-
-PHP 8.2-FPM with extensions: pdo, pdo_mysql, pgsql, redis, xdebug, gd, bcmath, zip.
-
-## Error Responses
-
-API errors follow a JSON:API-inspired structure:
+### Error envelope (JSON:API style)
 
 ```json
 {
   "errors": [
     {
       "status": "422",
-      "title": "Validation Error",
-      "detail": "The selected car is not available for the given dates.",
-      "pointer": "/data/attributes/bookings/0/car_id"
+      "title": "Unprocessable Entity",
+      "detail": "The selected car is not available for the given dates."
     }
   ]
 }
 ```
 
+## Local setup
+
+1. Install dependencies
+
+```bash
+composer install
+```
+
+2. Create environment file and app key
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+3. Configure database in `.env`
+
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=car_rental_project
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+4. Run migrations and (optional) seeders
+
+```bash
+php artisan migrate
+php artisan db:seed
+```
+
+5. Run the API
+
+```bash
+php artisan serve
+```
+
+API base URL: `http://127.0.0.1:8000/api`
+
+## Development commands
+
+```bash
+# Run tests
+php artisan test --compact
+
+# Run formatter
+php ./vendor/bin/pint --format agent
+
+# Run app + queue + vite concurrently
+composer run dev
+```
+
+## Testing
+
+- Framework: Pest (Feature + Unit)
+- Current suite contains 80+ tests (82 at the time this README was updated)
+- Focus areas include:
+  - authentication and token lifecycle
+  - ownership/authorization boundaries
+  - CRUD flows for cars, drivers, transactions, bookings
+  - availability and overlap conflict handling
+  - repository behavior
+
+## Example flow (quick smoke test)
+
+1. Login and get token:
+
+```bash
+curl -X POST http://127.0.0.1:8000/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"password"}'
+```
+
+2. Use token on a protected endpoint:
+
+```bash
+curl http://127.0.0.1:8000/api/v1/transactions \
+  -H "Authorization: Bearer YOUR_TOKEN"
+```
+
+## Architecture notes
+
+- Validation uses dedicated Form Request classes
+- Data access is abstracted via repository contracts
+- Business constraints (availability, ownership) are enforced at endpoint level
+- API resources are used for structured JSON output
+
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is open-sourced under the [MIT license](https://opensource.org/licenses/MIT).
