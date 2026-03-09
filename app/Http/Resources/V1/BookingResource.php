@@ -25,8 +25,29 @@ class BookingResource extends JsonResource
         ];
 
         $data['relationships'] = [
-            'car' => ['data' => ['type' => 'car', 'id' => $this->car_id]],
-            'driver' => ['data' => ['type' => 'driver', 'id' => $this->driver_id]],
+            'car' => [
+                'data' => array_merge(
+                    ['type' => 'car', 'id' => $this->car_id],
+                    $this->when($this->relationLoaded('car') && $this->car, [
+                        'attributes' => [
+                            'make' => $this->car->make,
+                            'model' => $this->car->model,
+                            'plateNumber' => $this->car->plate_number,
+                        ],
+                    ])
+                ),
+            ],
+            'driver' => [
+                'data' => array_merge(
+                    ['type' => 'driver', 'id' => $this->driver_id],
+                    $this->when($this->relationLoaded('driver') && $this->driver, [
+                        'attributes' => [
+                            'firstName' => $this->driver->first_name,
+                            'lastName' => $this->driver->last_name,
+                        ],
+                    ])
+                ),
+            ],
         ];
 
         return $data;
