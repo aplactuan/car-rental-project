@@ -23,8 +23,8 @@ class Booking extends Model
 
     protected $casts = [
         'id' => 'string',
-        'start_date' => 'date',
-        'end_date' => 'date',
+        'start_date' => 'datetime',
+        'end_date' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
