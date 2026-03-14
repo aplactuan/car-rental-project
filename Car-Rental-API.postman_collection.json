@@ -330,7 +330,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"customer_name\": \"Jane Smith\"\n}"
+							"raw": "{\n    \"customer_id\": \"<uuid of existing customer>\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/transactions",

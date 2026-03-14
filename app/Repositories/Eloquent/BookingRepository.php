@@ -60,7 +60,8 @@ class BookingRepository implements BookingRepositoryInterface
     {
         $query = $this->model->newQuery()
             ->with(['car', 'driver'])
-            ->where('transaction_id', $transactionId);
+            ->where('transaction_id', $transactionId)
+            ->orderByDesc('created_at');    
 
         return $perPage
             ? $query->paginate($perPage)

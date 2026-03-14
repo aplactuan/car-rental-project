@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Customer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -10,7 +11,8 @@ uses(RefreshDatabase::class);
 
 describe('guest user', function () {
     test('cannot create a transaction when not authenticated', function () {
-        postJson('/api/v1/transactions', ['customer_name' => 'John Doe'])->assertStatus(401);
+        $customer = Customer::factory()->create();
+        postJson('/api/v1/transactions', ['customer_id' => $customer->id])->assertStatus(401);
     });
 });
 
@@ -21,7 +23,8 @@ describe('authenticated user', function () {
     });
 
     test('can create a transaction', function () {
-        $payload = ['customer_name' => 'Jane Smith'];
+        $customer = Customer::factory()->create(['name' => 'Jane Smith']);
+        $payload = ['customer_id' => $customer->id];
 
         $response = postJson('/api/v1/transactions', $payload);
 
@@ -32,14 +35,14 @@ describe('authenticated user', function () {
         expect($data)->toHaveKeys(['type', 'id', 'attributes', 'relationships']);
         expect($data['type'])->toBe('transaction');
         expect($data['attributes']['userId'])->toBe($this->user->id);
-        expect($data['attributes']['customerName'])->toBe('Jane Smith');
+        expect($data['attributes']['customerId'])->toBe($customer->id);
 
         $this->assertDatabaseHas('transactions', [
-            'customer_name' => 'Jane Smith',
+            'customer_id' => $customer->id,
         ]);
     });
 
-    test('returns 422 when customer_name is missing', function () {
+    test('returns 422 when customer_id is missing', function () {
         postJson('/api/v1/transactions', [])->assertStatus(422);
     });
 });

@@ -1,24 +1,25 @@
 <?php
 
-namespace App\Http\Controllers\V1\Transactions;
+namespace App\Http\Controllers\V1\Customers;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Transaction\AddTransactionRequest;
 use App\Http\Resources\V1\TransactionResource;
+use App\Models\Customer;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
-class AddTransactionController extends Controller
+class AddCustomerTransactionController extends Controller
 {
     public function __construct(
         protected TransactionRepositoryInterface $transactionRepository
     ) {}
 
-    public function __invoke(AddTransactionRequest $request): JsonResponse|TransactionResource
+    public function __invoke(Request $request, Customer $customer): JsonResponse|TransactionResource
     {
         $transaction = $this->transactionRepository->create([
             'user_id' => $request->user()->id,
-            'customer_id' => $request->validated('customer_id'),
+            'customer_id' => $customer->id,
         ]);
 
         return (new TransactionResource($transaction))->response()->setStatusCode(201);

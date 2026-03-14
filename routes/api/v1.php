@@ -5,6 +5,16 @@ use App\Http\Controllers\V1\Cars\AddCarController;
 use App\Http\Controllers\V1\Cars\ListAvailableCarsController;
 use App\Http\Controllers\V1\Cars\SingleCarController;
 use App\Http\Controllers\V1\Cars\UpdateCarController;
+use App\Http\Controllers\V1\Customers\AddCustomerController;
+use App\Http\Controllers\V1\Customers\AddCustomerTransactionController;
+use App\Http\Controllers\V1\Customers\DeleteCustomerController;
+use App\Http\Controllers\V1\Customers\DeleteCustomerTransactionController;
+use App\Http\Controllers\V1\Customers\ListCustomersController;
+use App\Http\Controllers\V1\Customers\ListCustomerTransactionsController;
+use App\Http\Controllers\V1\Customers\SingleCustomerController;
+use App\Http\Controllers\V1\Customers\SingleCustomerTransactionController;
+use App\Http\Controllers\V1\Customers\UpdateCustomerController;
+use App\Http\Controllers\V1\Customers\UpdateCustomerTransactionController;
 use App\Http\Controllers\V1\Drivers\AddDriverController;
 use App\Http\Controllers\V1\Drivers\ListDriversController;
 use App\Http\Controllers\V1\Drivers\SingleDriverController;
@@ -29,6 +39,22 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/drivers', ListDriversController::class);
     Route::get('/drivers/{driver}', SingleDriverController::class);
     Route::put('/drivers/{driver}', UpdateDriverController::class);
+
+    Route::post('/customers', AddCustomerController::class);
+    Route::get('/customers', ListCustomersController::class);
+    Route::get('/customers/{customer}', SingleCustomerController::class);
+    Route::put('/customers/{customer}', UpdateCustomerController::class);
+    Route::delete('/customers/{customer}', DeleteCustomerController::class);
+
+    Route::post('/customers/{customer}/transactions', AddCustomerTransactionController::class);
+    Route::get('/customers/{customer}/transactions', ListCustomerTransactionsController::class);
+    Route::get('/customers/{customer}/transactions/{transaction}', SingleCustomerTransactionController::class);
+    Route::put('/customers/{customer}/transactions/{transaction}', UpdateCustomerTransactionController::class);
+    Route::delete('/customers/{customer}/transactions/{transaction}', DeleteCustomerTransactionController::class);
+
+    Route::post('/transactions', AddTransactionController::class);
+    Route::get('/transactions', ListTransactionsController::class);
+    Route::get('/transactions/{transaction}', SingleTransactionController::class);
 
     Route::post('/transactions', AddTransactionController::class);
     Route::get('/transactions', ListTransactionsController::class);

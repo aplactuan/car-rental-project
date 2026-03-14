@@ -34,15 +34,15 @@ describe('authenticated user', function () {
         $transaction->bookings()->create([
             'car_id' => $car->id,
             'driver_id' => $driver->id,
-            'start_date' => '2026-02-10',
-            'end_date' => '2026-02-15',
+            'start_date' => '2026-02-10 10:00:00',
+            'end_date' => '2026-02-15 10:00:00',
             'note' => 'First booking',
         ]);
         $transaction->bookings()->create([
             'car_id' => $car->id,
             'driver_id' => $driver->id,
-            'start_date' => '2026-02-20',
-            'end_date' => '2026-02-25',
+            'start_date' => '2026-02-20 10:00:00',
+            'end_date' => '2026-02-25 10:00:00',
             'note' => 'Second booking',
         ]);
 
@@ -52,8 +52,8 @@ describe('authenticated user', function () {
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('data.0.type', 'booking')
             ->assertJsonPath('data.0.attributes.note', 'First booking')
-            ->assertJsonPath('data.0.attributes.startDate', '2026-02-10')
-            ->assertJsonPath('data.0.attributes.endDate', '2026-02-15')
+            ->assertJsonPath('data.0.attributes.startDate', '2026-02-10 10:00:00')
+            ->assertJsonPath('data.0.attributes.endDate', '2026-02-15 10:00:00')
             ->assertJsonPath('data.0.relationships.car.data.id', $car->id)
             ->assertJsonPath('data.0.relationships.driver.data.id', $driver->id);
     });
