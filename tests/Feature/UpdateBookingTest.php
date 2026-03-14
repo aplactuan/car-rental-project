@@ -22,8 +22,8 @@ describe('guest user', function () {
             'transaction_id' => $transaction->id,
             'car_id' => $car->id,
             'driver_id' => $driver->id,
-            'start_date' => '2026-02-20',
-            'end_date' => '2026-02-25',
+            'start_date' => '2026-02-20 10:00:00',
+            'end_date' => '2026-02-25 10:00:00',
         ]);
 
         putJson("/api/v1/transactions/{$transaction->id}/bookings/{$booking->id}", [
@@ -46,22 +46,22 @@ describe('authenticated user', function () {
             'transaction_id' => $transaction->id,
             'car_id' => $car->id,
             'driver_id' => $driver->id,
-            'start_date' => '2026-02-20',
-            'end_date' => '2026-02-25',
+            'start_date' => '2026-02-20 10:00:00',
+            'end_date' => '2026-02-25 10:00:00',
             'note' => 'Original note',
         ]);
 
         $response = putJson("/api/v1/transactions/{$transaction->id}/bookings/{$booking->id}", [
             'note' => 'Updated note',
-            'start_date' => '2026-02-26',
-            'end_date' => '2026-02-28',
+            'start_date' => '2026-02-26 10:00:00',
+            'end_date' => '2026-02-28 10:00:00',
         ]);
 
         $response->assertStatus(200);
         $json = $response->json();
         expect($json['data']['attributes']['note'])->toBe('Updated note');
-        expect($json['data']['attributes']['startDate'])->toBe('2026-02-26');
-        expect($json['data']['attributes']['endDate'])->toBe('2026-02-28');
+        expect($json['data']['attributes']['startDate'])->toBe('2026-02-26 10:00:00');
+        expect($json['data']['attributes']['endDate'])->toBe('2026-02-28 10:00:00');
 
         $booking->refresh();
         expect($booking->note)->toBe('Updated note');
@@ -77,8 +77,8 @@ describe('authenticated user', function () {
             'transaction_id' => $transaction->id,
             'car_id' => $car->id,
             'driver_id' => $driver->id,
-            'start_date' => '2026-02-20',
-            'end_date' => '2026-02-25',
+            'start_date' => '2026-02-20 10:00:00',
+            'end_date' => '2026-02-25 10:00:00',
             'note' => 'Original note',
         ]);
 
@@ -88,8 +88,8 @@ describe('authenticated user', function () {
 
         $response->assertStatus(200);
         expect($response->json('data.attributes.note'))->toBe('New note only');
-        expect($response->json('data.attributes.startDate'))->toBe('2026-02-20');
-        expect($response->json('data.attributes.endDate'))->toBe('2026-02-25');
+        expect($response->json('data.attributes.startDate'))->toBe('2026-02-20 10:00:00');
+        expect($response->json('data.attributes.endDate'))->toBe('2026-02-25 10:00:00');
     });
 
     test('returns 422 when car is scheduled for the new dates', function () {

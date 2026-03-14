@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Car;
+use App\Models\Customer;
 use App\Models\Driver;
 use App\Models\Transaction;
 use App\Models\User;
@@ -15,28 +16,30 @@ beforeEach(function () {
 
 test('create persists transaction even without bookings', function () {
     $user = User::factory()->create();
+    $customer = Customer::factory()->create(['name' => 'Jane Smith']);
 
     $data = [
         'user_id' => $user->id,
-        'customer_name' => 'Jane Smith',
+        'customer_id' => $customer->id,
     ];
 
     $transaction = $this->repository->create($data);
 
     expect($transaction)->toBeInstanceOf(Transaction::class);
     expect($transaction->user_id)->toBe($user->id);
-    expect($transaction->customer_name)->toBe('Jane Smith');
+    expect($transaction->customer_id)->toBe($customer->id);
     expect($transaction->bookings)->toHaveCount(0);
 });
 
 test('create persists transaction and bookings in one go', function () {
     $user = User::factory()->create();
+    $customer = Customer::factory()->create();
     $car = Car::factory()->create();
     $driver = Driver::factory()->create();
 
     $data = [
         'user_id' => $user->id,
-        'customer_name' => 'John Doe',
+        'customer_id' => $customer->id,
         'bookings' => [
             [
                 'car_id' => $car->id,
@@ -59,6 +62,7 @@ test('create persists transaction and bookings in one go', function () {
 
 test('create with multiple bookings persists all', function () {
     $user = User::factory()->create();
+    $customer = Customer::factory()->create();
     $car1 = Car::factory()->create();
     $car2 = Car::factory()->create();
     $driver1 = Driver::factory()->create();
@@ -66,7 +70,7 @@ test('create with multiple bookings persists all', function () {
 
     $data = [
         'user_id' => $user->id,
-        'customer_name' => 'John Doe',
+        'customer_id' => $customer->id,
         'bookings' => [
             [
                 'car_id' => $car1->id,
