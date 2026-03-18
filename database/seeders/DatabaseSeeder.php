@@ -21,5 +21,9 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
             'password' => Hash::make('password'),
         ]);
+
+        \App\Models\Car::factory(10)->create();
+        \App\Models\Driver::factory(10)->create();
+        \App\Models\User::factory(10)->customer()->create();
     }
 }
