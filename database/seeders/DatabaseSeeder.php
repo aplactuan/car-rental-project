@@ -24,6 +24,6 @@ class DatabaseSeeder extends Seeder
 
         \App\Models\Car::factory(10)->create();
         \App\Models\Driver::factory(10)->create();
-        \App\Models\User::factory(10)->customer()->create();
+        \App\Models\Customer::factory(10)->create();
     }
 }
