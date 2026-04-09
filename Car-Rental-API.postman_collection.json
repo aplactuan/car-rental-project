@@ -2,7 +2,7 @@
 	"info": {
 		"_postman_id": "car-rental-api-collection",
 		"name": "Car Rental API",
-		"description": "API collection for the Car Rental project. Import this file in Postman to test all endpoints.\n\n**Setup:**\n1. Set the `base_url` variable (default: http://localhost)\n2. Run the Login request to authenticate\n3. The token is automatically saved - all authenticated requests will use it",
+		"description": "API collection for the Car Rental project. Import this file in Postman to test all endpoints.\n\n**Setup:**\n1. Set the `base_url` variable (default: http://localhost)\n2. Run the Login request to authenticate (test@example.com / password)\n3. The token is automatically saved - all authenticated requests will use it\n4. Set `car_id`, `driver_id`, `customer_id`, `transaction_id`, `booking_id` from list/get responses (all IDs are UUIDs)",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"variable": [
@@ -16,19 +16,23 @@
 		},
 		{
 			"key": "car_id",
-			"value": "1"
+			"value": ""
 		},
 		{
 			"key": "driver_id",
-			"value": "1"
+			"value": ""
+		},
+		{
+			"key": "customer_id",
+			"value": ""
 		},
 		{
 			"key": "transaction_id",
-			"value": "1"
+			"value": ""
 		},
 		{
 			"key": "booking_id",
-			"value": "1"
+			"value": ""
 		}
 	],
 	"auth": {
@@ -64,7 +68,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password\"\n}"
+							"raw": "{\n    \"email\": \"test@example.com\",\n    \"password\": \"password\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/login",
@@ -312,6 +316,221 @@
 			]
 		},
 		{
+			"name": "Customers",
+			"item": [
+				{
+					"name": "Add Customer",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Jane Smith\",\n    \"type\": \"personal\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/customers",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "customers"]
+						},
+						"description": "Create a customer. Type must be 'personal' or 'business'."
+					}
+				},
+				{
+					"name": "List Customers",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customers?per_page=15",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "customers"],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15",
+									"description": "Optional: 1-100"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Single Customer",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customers/{{customer_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "customers", "{{customer_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Customer",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Jane Smith Updated\",\n    \"type\": \"business\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/customers/{{customer_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "customers", "{{customer_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Customer",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customers/{{customer_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "customers", "{{customer_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Add Customer Transaction",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customers/{{customer_id}}/transactions",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "customers", "{{customer_id}}", "transactions"]
+						},
+						"description": "Create a transaction for the given customer. No body required."
+					}
+				},
+				{
+					"name": "List Customer Transactions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customers/{{customer_id}}/transactions?per_page=15",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "customers", "{{customer_id}}", "transactions"],
+							"query": [
+								{
+									"key": "per_page",
+									"value": "15",
+									"description": "Optional: 1-100"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "Get Single Customer Transaction",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customers/{{customer_id}}/transactions/{{transaction_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "customers", "{{customer_id}}", "transactions", "{{transaction_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Update Customer Transaction",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"customer_id\": \"{{customer_id}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/customers/{{customer_id}}/transactions/{{transaction_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "customers", "{{customer_id}}", "transactions", "{{transaction_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete Customer Transaction",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customers/{{customer_id}}/transactions/{{transaction_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "customers", "{{customer_id}}", "transactions", "{{transaction_id}}"]
+						}
+					}
+				}
+			]
+		},
+		{
 			"name": "Transactions",
 			"item": [
 				{
@@ -330,7 +549,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"customer_id\": \"<uuid of existing customer>\"\n}"
+							"raw": "{\n    \"customer_id\": \"{{customer_id}}\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/transactions",
@@ -401,7 +620,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"car_id\": 1,\n    \"driver_id\": 1,\n    \"start_date\": \"2025-03-10\",\n    \"end_date\": \"2025-03-15\",\n    \"note\": \"Customer requested specific car\"\n}"
+							"raw": "{\n    \"car_id\": \"{{car_id}}\",\n    \"driver_id\": \"{{driver_id}}\",\n    \"start_date\": \"2025-03-10\",\n    \"end_date\": \"2025-03-15\",\n    \"note\": \"Customer requested specific car\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/book",
@@ -467,7 +686,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n    \"car_id\": 1,\n    \"driver_id\": 1,\n    \"start_date\": \"2025-03-10\",\n    \"end_date\": \"2025-03-20\",\n    \"note\": \"Extended rental period\"\n}"
+							"raw": "{\n    \"car_id\": \"{{car_id}}\",\n    \"driver_id\": \"{{driver_id}}\",\n    \"start_date\": \"2025-03-10\",\n    \"end_date\": \"2025-03-20\",\n    \"note\": \"Extended rental period\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings/{{booking_id}}",
