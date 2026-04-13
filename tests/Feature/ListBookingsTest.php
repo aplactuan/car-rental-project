@@ -51,9 +51,9 @@ describe('authenticated user', function () {
         $response->assertStatus(200)
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('data.0.type', 'booking')
-            ->assertJsonPath('data.0.attributes.note', 'First booking')
-            ->assertJsonPath('data.0.attributes.startDate', '2026-02-10 10:00:00')
-            ->assertJsonPath('data.0.attributes.endDate', '2026-02-15 10:00:00')
+            ->assertJsonPath('data.0.attributes.note', 'Second booking')
+            ->assertJsonPath('data.0.attributes.startDate', '2026-02-20 10:00:00')
+            ->assertJsonPath('data.0.attributes.endDate', '2026-02-25 10:00:00')
             ->assertJsonPath('data.0.relationships.car.data.id', $car->id)
             ->assertJsonPath('data.0.relationships.driver.data.id', $driver->id);
     });

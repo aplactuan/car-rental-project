@@ -21,6 +21,7 @@ test('create persists transaction even without bookings', function () {
     $data = [
         'user_id' => $user->id,
         'customer_id' => $customer->id,
+        'name' => 'Unit test transaction',
     ];
 
     $transaction = $this->repository->create($data);
@@ -28,6 +29,7 @@ test('create persists transaction even without bookings', function () {
     expect($transaction)->toBeInstanceOf(Transaction::class);
     expect($transaction->user_id)->toBe($user->id);
     expect($transaction->customer_id)->toBe($customer->id);
+    expect($transaction->name)->toBe('Unit test transaction');
     expect($transaction->bookings)->toHaveCount(0);
 });
 
@@ -40,6 +42,7 @@ test('create persists transaction and bookings in one go', function () {
     $data = [
         'user_id' => $user->id,
         'customer_id' => $customer->id,
+        'name' => 'With bookings',
         'bookings' => [
             [
                 'car_id' => $car->id,
@@ -71,6 +74,7 @@ test('create with multiple bookings persists all', function () {
     $data = [
         'user_id' => $user->id,
         'customer_id' => $customer->id,
+        'name' => 'Multi booking',
         'bookings' => [
             [
                 'car_id' => $car1->id,

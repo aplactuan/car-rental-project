@@ -19,6 +19,7 @@ class AddTransactionController extends Controller
         $transaction = $this->transactionRepository->create([
             'user_id' => $request->user()->id,
             'customer_id' => $request->validated('customer_id'),
+            'name' => $request->validated('name'),
         ]);
 
         return (new TransactionResource($transaction))->response()->setStatusCode(201);
