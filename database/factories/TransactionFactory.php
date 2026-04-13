@@ -3,11 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Customer;
+use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Transaction>
+ * @extends Factory<Transaction>
  */
 class TransactionFactory extends Factory
 {
@@ -19,6 +20,7 @@ class TransactionFactory extends Factory
         return [
             'user_id' => User::factory(),
             'customer_id' => Customer::factory(),
+            'name' => fake()->words(3, true),
         ];
     }
 }

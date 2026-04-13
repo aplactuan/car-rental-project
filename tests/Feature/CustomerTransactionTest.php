@@ -23,6 +23,7 @@ describe('guest user', function () {
         getJson("/api/v1/customers/{$customer->id}/transactions/{$transaction->id}")->assertUnauthorized();
         putJson("/api/v1/customers/{$customer->id}/transactions/{$transaction->id}", [
             'customer_id' => $customer->id,
+            'name' => 'Lease agreement',
         ])->assertUnauthorized();
         deleteJson("/api/v1/customers/{$customer->id}/transactions/{$transaction->id}")->assertUnauthorized();
     });
@@ -38,12 +39,15 @@ describe('authenticated user', function () {
         $customer = Customer::factory()->create();
         $newCustomer = Customer::factory()->create();
 
-        $createResponse = postJson("/api/v1/customers/{$customer->id}/transactions");
+        $createResponse = postJson("/api/v1/customers/{$customer->id}/transactions", [
+            'name' => 'Summer rental',
+        ]);
 
         $createResponse->assertCreated()
             ->assertJsonPath('data.type', 'transaction')
             ->assertJsonPath('data.attributes.userId', $this->user->id)
-            ->assertJsonPath('data.attributes.customerId', $customer->id);
+            ->assertJsonPath('data.attributes.customerId', $customer->id)
+            ->assertJsonPath('data.attributes.name', 'Summer rental');
 
         $transactionId = $createResponse->json('data.id');
 
@@ -59,14 +63,17 @@ describe('authenticated user', function () {
 
         putJson("/api/v1/customers/{$customer->id}/transactions/{$transactionId}", [
             'customer_id' => $newCustomer->id,
+            'name' => 'Updated label',
         ])->assertOk()
             ->assertJsonPath('data.id', $transactionId)
-            ->assertJsonPath('data.attributes.customerId', $newCustomer->id);
+            ->assertJsonPath('data.attributes.customerId', $newCustomer->id)
+            ->assertJsonPath('data.attributes.name', 'Updated label');
 
         $this->assertDatabaseHas('transactions', [
             'id' => $transactionId,
             'user_id' => $this->user->id,
             'customer_id' => $newCustomer->id,
+            'name' => 'Updated label',
         ]);
 
         getJson("/api/v1/customers/{$customer->id}/transactions/{$transactionId}")

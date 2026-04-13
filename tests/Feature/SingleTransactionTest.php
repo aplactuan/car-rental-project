@@ -1,5 +1,7 @@
 <?php
 
+use App\Models\Car;
+use App\Models\Driver;
 use App\Models\Transaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -27,8 +29,8 @@ describe('authenticated user', function () {
     test('can view own transaction with nested bookings', function () {
         $transaction = Transaction::factory()->create(['user_id' => $this->user->id]);
         $transaction->bookings()->create([
-            'car_id' => \App\Models\Car::factory()->create()->id,
-            'driver_id' => \App\Models\Driver::factory()->create()->id,
+            'car_id' => Car::factory()->create()->id,
+            'driver_id' => Driver::factory()->create()->id,
             'start_date' => now()->addDay(),
             'end_date' => now()->addDays(3),
             'note' => 'Test note',
@@ -43,6 +45,7 @@ describe('authenticated user', function () {
         expect($data)->toHaveKeys(['type', 'id', 'attributes', 'relationships']);
         expect($data['id'])->toBe($transaction->id);
         expect($data['attributes']['userId'])->toBe($this->user->id);
+        expect($data['attributes']['name'])->toBe($transaction->name);
         expect($data['relationships']['bookings']['data'])->toBeArray();
         expect($json)->toHaveKey('included');
         expect($json['included'][0]['attributes'])->toHaveKeys(['note', 'startDate', 'endDate']);
