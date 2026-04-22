@@ -1,6 +1,10 @@
 <?php
 
 use App\Http\Controllers\V1\Availability\ListAvailabilityController;
+use App\Http\Controllers\V1\Bills\AddBillController;
+use App\Http\Controllers\V1\Bills\DeleteBillController;
+use App\Http\Controllers\V1\Bills\ShowBillController;
+use App\Http\Controllers\V1\Bills\UpdateBillController;
 use App\Http\Controllers\V1\Cars\AddCarController;
 use App\Http\Controllers\V1\Cars\ListAvailableCarsController;
 use App\Http\Controllers\V1\Cars\SingleCarController;
@@ -55,10 +59,10 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/transactions', AddTransactionController::class);
     Route::get('/transactions', ListTransactionsController::class);
     Route::get('/transactions/{transaction}', SingleTransactionController::class);
-
-    Route::post('/transactions', AddTransactionController::class);
-    Route::get('/transactions', ListTransactionsController::class);
-    Route::get('/transactions/{transaction}', SingleTransactionController::class);
+    Route::post('/transactions/{transaction}/bill', AddBillController::class);
+    Route::get('/transactions/{transaction}/bill', ShowBillController::class);
+    Route::patch('/transactions/{transaction}/bill', UpdateBillController::class);
+    Route::delete('/transactions/{transaction}/bill', DeleteBillController::class);
 
     Route::post('/transactions/{transaction}/book', AddBookingController::class);
     Route::get('/transactions/{transaction}/bookings', ListBookingsController::class);

@@ -609,6 +609,93 @@
 						},
 						"description": "Returns transaction attributes including `name`, `userId`, `customerId`, and nested `bookings` (newest first) plus `included` booking details when present."
 					}
+				},
+				{
+					"name": "Add Bill",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"amount\": 1500000,\n    \"notes\": \"Initial invoice\",\n    \"due_at\": \"2026-05-01\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bill",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bill"]
+						},
+						"description": "Create a bill for a transaction. Only one bill is allowed per transaction."
+					}
+				},
+				{
+					"name": "Get Bill",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bill",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bill"]
+						}
+					}
+				},
+				{
+					"name": "Update Bill",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"issued\",\n    \"notes\": \"Issued to customer\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bill",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bill"]
+						},
+						"description": "Allowed status transitions: draft->issued/cancelled, issued->paid/cancelled."
+					}
+				},
+				{
+					"name": "Delete Bill",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bill",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bill"]
+						},
+						"description": "Only draft bills can be deleted."
+					}
 				}
 			]
 		},
