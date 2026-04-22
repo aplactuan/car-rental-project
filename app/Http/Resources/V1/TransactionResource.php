@@ -30,6 +30,13 @@ class TransactionResource extends JsonResource
                         fn ($b) => ['type' => 'booking', 'id' => $b->id]
                     )->values()->all(), []),
                 ],
+                'bill' => [
+                    'data' => $this->when(
+                        $this->relationLoaded('bill') && $this->bill,
+                        fn () => ['type' => 'bill', 'id' => $this->bill->id],
+                        null
+                    ),
+                ],
             ],
         ];
 
