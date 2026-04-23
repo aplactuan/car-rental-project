@@ -1,7 +1,8 @@
 {
     "agents": [
-        "codex",
-        "cursor"
+        "claude_code",
+        "cursor",
+        "phpstorm"
     ],
     "editors": [
         "cursor",
