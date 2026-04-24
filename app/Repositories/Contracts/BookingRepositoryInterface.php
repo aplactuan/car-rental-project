@@ -39,5 +39,5 @@ interface BookingRepositoryInterface
     /**
      * @return Collection<int, Booking>|LengthAwarePaginator
      */
-    public function getByTransaction(string $transactionId, ?int $perPage = null): Collection|LengthAwarePaginator;
+    public function getByTransaction(string $transactionId, array $filters = [], ?int $perPage = null): Collection|LengthAwarePaginator;
 }

@@ -4,8 +4,10 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Booking;
 use App\Repositories\Contracts\BookingRepositoryInterface;
+use App\Support\BookingListFilters;
 use Carbon\Carbon;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
 class BookingRepository implements BookingRepositoryInterface
@@ -56,11 +58,36 @@ class BookingRepository implements BookingRepositoryInterface
     /**
      * {@inheritdoc}
      */
-    public function getByTransaction(string $transactionId, ?int $perPage = null): Collection|LengthAwarePaginator
+    public function getByTransaction(string $transactionId, array $filters = [], ?int $perPage = null): Collection|LengthAwarePaginator
     {
         $query = $this->model->newQuery()
             ->with(['car', 'driver'])
             ->where('transaction_id', $transactionId)
+            ->when(
+                isset($filters[BookingListFilters::PARAM_CAR_ID]),
+                fn (Builder $builder) => $builder->where('car_id', $filters[BookingListFilters::PARAM_CAR_ID])
+            )
+            ->when(
+                isset($filters[BookingListFilters::PARAM_DRIVER_ID]),
+                fn (Builder $builder) => $builder->where('driver_id', $filters[BookingListFilters::PARAM_DRIVER_ID])
+            )
+            ->when(
+                isset($filters[BookingListFilters::PARAM_STATUS]),
+                function (Builder $builder) use ($filters): void {
+                    $statusConstraint = BookingListFilters::statusConstraint($filters[BookingListFilters::PARAM_STATUS]);
+
+                    $builder->where($statusConstraint['column'], $statusConstraint['operator'], now());
+                }
+            )
+            ->when(
+                isset($filters[BookingListFilters::PARAM_PERIOD]),
+                function (Builder $builder) use ($filters): void {
+                    [$periodStart, $periodEnd] = BookingListFilters::periodBounds($filters[BookingListFilters::PARAM_PERIOD]);
+
+                    $builder->where('start_date', '<', $periodEnd)
+                        ->where('end_date', '>=', $periodStart);
+                }
+            )
             ->orderByDesc('created_at')
             ->orderByDesc('start_date');
 

@@ -738,7 +738,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?per_page=15",
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?per_page=15&status=upcoming&period=week&car_id={{car_id}}&driver_id={{driver_id}}",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
 							"query": [
@@ -746,10 +746,338 @@
 									"key": "per_page",
 									"value": "15",
 									"description": "Optional: 1-100"
+								},
+								{
+									"key": "status",
+									"value": "upcoming",
+									"description": "Optional: upcoming or previous"
+								},
+								{
+									"key": "period",
+									"value": "week",
+									"description": "Optional: week or month"
+								},
+								{
+									"key": "car_id",
+									"value": "{{car_id}}",
+									"description": "Optional: car UUID"
+								},
+								{
+									"key": "driver_id",
+									"value": "{{driver_id}}",
+									"description": "Optional: driver UUID"
 								}
 							]
 						},
-						"description": "Bookings are ordered newest first (`created_at` desc, then `start_date` desc)."
+						"description": "Bookings are ordered newest first (`created_at` desc, then `start_date` desc). Supported filters: `status` (`upcoming` or `previous`), `period` (`week` or `month`), `car_id`, `driver_id`."
+					}
+				},
+				{
+					"name": "List Upcoming Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?status=upcoming",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "status",
+									"value": "upcoming"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Previous Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?status=previous",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "status",
+									"value": "previous"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Weekly Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?period=week",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "period",
+									"value": "week"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Monthly Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?period=month",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "period",
+									"value": "month"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Upcoming Bookings Of Car",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?status=upcoming&car_id={{car_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "status",
+									"value": "upcoming"
+								},
+								{
+									"key": "car_id",
+									"value": "{{car_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Upcoming Bookings Of Driver",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?status=upcoming&driver_id={{driver_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "status",
+									"value": "upcoming"
+								},
+								{
+									"key": "driver_id",
+									"value": "{{driver_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Previous Bookings Of Car",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?status=previous&car_id={{car_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "status",
+									"value": "previous"
+								},
+								{
+									"key": "car_id",
+									"value": "{{car_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Previous Bookings Of Driver",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?status=previous&driver_id={{driver_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "status",
+									"value": "previous"
+								},
+								{
+									"key": "driver_id",
+									"value": "{{driver_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Driver Bookings This Week",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?period=week&driver_id={{driver_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "period",
+									"value": "week"
+								},
+								{
+									"key": "driver_id",
+									"value": "{{driver_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Driver Bookings This Month",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?period=month&driver_id={{driver_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "period",
+									"value": "month"
+								},
+								{
+									"key": "driver_id",
+									"value": "{{driver_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Car Bookings This Week",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?period=week&car_id={{car_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "period",
+									"value": "week"
+								},
+								{
+									"key": "car_id",
+									"value": "{{car_id}}"
+								}
+							]
+						}
+					}
+				},
+				{
+					"name": "List Car Bookings This Month",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/transactions/{{transaction_id}}/bookings?period=month&car_id={{car_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "transactions", "{{transaction_id}}", "bookings"],
+							"query": [
+								{
+									"key": "period",
+									"value": "month"
+								},
+								{
+									"key": "car_id",
+									"value": "{{car_id}}"
+								}
+							]
+						}
 					}
 				},
 				{

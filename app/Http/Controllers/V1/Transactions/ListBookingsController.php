@@ -21,8 +21,9 @@ class ListBookingsController extends Controller
             abort(404);
         }
 
+        $filters = $request->filters();
         $perPage = $request->input('per_page');
-        $bookings = $this->bookingRepository->getByTransaction($transaction->id, $perPage);
+        $bookings = $this->bookingRepository->getByTransaction($transaction->id, $filters, $perPage);
 
         return BookingResource::collection($bookings);
     }
