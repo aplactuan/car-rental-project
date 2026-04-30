@@ -14,7 +14,8 @@ class ListDriversRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'per_page' => 'sometimes|integer|min:1|max:100',
+            'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
+            'filter' => ['sometimes', 'string', 'max:100'],
         ];
     }
 }

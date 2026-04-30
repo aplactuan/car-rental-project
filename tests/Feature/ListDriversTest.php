@@ -80,4 +80,42 @@ describe('authenticated user', function () {
             ->assertStatus(422)
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/per_page');
     });
+
+    test('it can filter drivers by first name or last name case insensitively', function () {
+        Driver::factory()->create([
+            'first_name' => 'Smith',
+            'last_name' => 'Brown',
+        ]);
+
+        Driver::factory()->create([
+            'first_name' => 'John',
+            'last_name' => 'Smith',
+        ]);
+
+        Driver::factory()->create([
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+        ]);
+
+        $response = getJson('/api/v1/drivers?filter=sMiTh');
+
+        $response
+            ->assertOk()
+            ->assertJsonCount(2, 'data');
+
+        $fullNames = collect($response->json('data'))
+            ->map(fn (array $driver): string => $driver['attributes']['firstName'].' '.$driver['attributes']['lastName']);
+
+        expect($fullNames)->toContain('Smith Brown', 'John Smith');
+    });
+
+    test('it returns all drivers when filter is omitted', function () {
+        Driver::factory()->count(3)->create();
+
+        $response = getJson('/api/v1/drivers?per_page=10');
+
+        $response
+            ->assertOk()
+            ->assertJsonCount(3, 'data');
+    });
 });

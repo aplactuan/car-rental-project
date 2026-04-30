@@ -3,12 +3,16 @@
 namespace App\Repositories\Contracts;
 
 use Carbon\CarbonInterface;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 interface DriverRepositoryInterface
 {
     public function all();
 
-    public function paginate(int $perPage = 15);
+    /**
+     * @param  array{filter?: ?string}  $filters
+     */
+    public function paginate(int $perPage = 15, array $filters = []);
 
     public function find($id);
 
@@ -23,7 +27,10 @@ interface DriverRepositoryInterface
      *
      * @param  CarbonInterface|string  $startDate
      * @param  CarbonInterface|string  $endDate
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return LengthAwarePaginator
      */
-    public function availableInPeriod($startDate, $endDate, int $perPage = 15);
+    /**
+     * @param  array{filter?: ?string}  $filters
+     */
+    public function availableInPeriod($startDate, $endDate, int $perPage = 15, array $filters = []);
 }
