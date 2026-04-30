@@ -16,6 +16,7 @@ class ListDriversController extends Controller
         $startDate = $request->query('start_date');
         $endDate = $request->query('end_date');
         $perPage = $request->input('per_page', 15);
+        $filters = $request->only(['filter']);
 
         if ($startDate !== null || $endDate !== null) {
             $request->validate([
@@ -23,12 +24,12 @@ class ListDriversController extends Controller
                 'end_date' => ['required_with:start_date', 'date', 'after_or_equal:start_date'],
             ]);
 
-            $drivers = $this->driver->availableInPeriod($startDate, $endDate, $perPage);
+            $drivers = $this->driver->availableInPeriod($startDate, $endDate, $perPage, $filters);
 
             return DriverResource::collection($drivers);
         }
 
-        $drivers = $this->driver->paginate($perPage);
+        $drivers = $this->driver->paginate($perPage, $filters);
 
         return DriverResource::collection($drivers);
     }
