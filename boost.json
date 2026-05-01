@@ -5,6 +5,7 @@
         "phpstorm"
     ],
     "editors": [
+        "claude_code",
         "cursor",
         "phpstorm"
     ],

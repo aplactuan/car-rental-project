@@ -3,9 +3,10 @@
 namespace App\Http\Controllers\V1\Cars;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Car\ListAvailableCarsRequest;
 use App\Http\Resources\V1\CarResource;
 use App\Repositories\Contracts\CarRepositoryInterface;
-use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class ListAvailableCarsController extends Controller
 {
@@ -14,30 +15,11 @@ class ListAvailableCarsController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Request $request)
+    public function __invoke(ListAvailableCarsRequest $request): AnonymousResourceCollection
     {
-        $startDate = $request->query('start_date');
-        $endDate = $request->query('end_date');
-
-        if ($startDate !== null || $endDate !== null) {
-            $request->validate([
-                'start_date' => ['required_with:end_date', 'date'],
-                'end_date' => ['required_with:start_date', 'date', 'after_or_equal:start_date'],
-            ]);
-
-            $cars = $this->car->availableInPeriod($startDate, $endDate);
-
-            return CarResource::collection($cars);
-        }
-
         $filters = $request->only(['make', 'model', 'type', 'number_of_seats']);
         $filters = array_filter($filters, fn ($value) => $value !== null && $value !== '');
-
-        if (empty($filters)) {
-            $cars = $this->car->all();
-        } else {
-            $cars = $this->car->filter($filters);
-        }
+        $cars = $this->car->paginate($filters, $request->integer('per_page', 15));
 
         return CarResource::collection($cars);
     }

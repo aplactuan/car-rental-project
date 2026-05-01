@@ -64,6 +64,8 @@ describe('authenticated user', function () {
                         ],
                     ],
                 ],
+                'links',
+                'meta',
             ])
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('data.0.type', 'car')
@@ -125,47 +127,5 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.0.attributes.model', $matchingCar->model)
             ->assertJsonPath('data.0.attributes.vehicleType', $matchingCar->type)
             ->assertJsonPath('data.0.attributes.numberOfSeats', $matchingCar->number_of_seats);
-    });
-
-    test('with start_date and end_date returns only cars available in that period', function () {
-        $user = User::factory()->create();
-        $carAvailable = Car::factory()->create(['plate_number' => 'AVAIL-1']);
-        $carBooked = Car::factory()->create(['plate_number' => 'BOOKED-1']);
-        $driver = \App\Models\Driver::factory()->create();
-        $transaction = \App\Models\Transaction::factory()->create(['user_id' => $user->id]);
-        $transaction->bookings()->create([
-            'car_id' => $carBooked->id,
-            'driver_id' => $driver->id,
-            'start_date' => '2026-02-10',
-            'end_date' => '2026-02-15',
-            'note' => null,
-        ]);
-
-        $response = getJson('/api/v1/cars?start_date=2026-02-10&end_date=2026-02-15');
-
-        $response->assertStatus(200);
-        $ids = collect($response->json('data'))->pluck('id')->all();
-        expect($ids)->not->toContain($carBooked->id);
-        expect($ids)->toContain($carAvailable->id);
-    });
-
-    test('with start_date and end_date car booked in period is available outside period', function () {
-        $user = User::factory()->create();
-        $car = Car::factory()->create(['plate_number' => 'ONE-CAR']);
-        $driver = \App\Models\Driver::factory()->create();
-        $transaction = \App\Models\Transaction::factory()->create(['user_id' => $user->id]);
-        $transaction->bookings()->create([
-            'car_id' => $car->id,
-            'driver_id' => $driver->id,
-            'start_date' => '2026-02-10',
-            'end_date' => '2026-02-15',
-            'note' => null,
-        ]);
-
-        $response = getJson('/api/v1/cars?start_date=2026-02-20&end_date=2026-02-25');
-
-        $response->assertStatus(200);
-        $ids = collect($response->json('data'))->pluck('id')->all();
-        expect($ids)->toContain($car->id);
     });
 });
