@@ -6,7 +6,9 @@ use App\Http\Controllers\V1\Bills\DeleteBillController;
 use App\Http\Controllers\V1\Bills\ShowBillController;
 use App\Http\Controllers\V1\Bills\UpdateBillController;
 use App\Http\Controllers\V1\Cars\AddCarController;
+use App\Http\Controllers\V1\Cars\ImportCarsController;
 use App\Http\Controllers\V1\Cars\ListAvailableCarsController;
+use App\Http\Controllers\V1\Cars\ShowCarImportController;
 use App\Http\Controllers\V1\Cars\SingleCarController;
 use App\Http\Controllers\V1\Cars\UpdateCarController;
 use App\Http\Controllers\V1\Customers\AddCustomerController;
@@ -35,6 +37,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/cars', AddCarController::class);
+    Route::post('/cars/import', ImportCarsController::class);
+    Route::get('/cars/imports/{carImport}', ShowCarImportController::class);
     Route::get('/cars', ListAvailableCarsController::class);
     Route::get('/cars/{car}', SingleCarController::class);
     Route::put('/cars/{car}', UpdateCarController::class);
