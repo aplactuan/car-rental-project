@@ -33,6 +33,7 @@ use App\Http\Controllers\V1\Transactions\ListTransactionsController;
 use App\Http\Controllers\V1\Transactions\SingleBookingController;
 use App\Http\Controllers\V1\Transactions\SingleTransactionController;
 use App\Http\Controllers\V1\Transactions\UpdateBookingController;
+use App\Http\Controllers\V1\Users\AddUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
@@ -75,4 +76,6 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::delete('/transactions/{transaction}/bookings/{booking}', DeleteBookingController::class);
 
     Route::get('/availability', ListAvailabilityController::class);
+
+    Route::post('/users', AddUserController::class)->middleware('user-registration-enabled');
 });
