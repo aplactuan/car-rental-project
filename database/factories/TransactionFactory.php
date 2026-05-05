@@ -20,7 +20,7 @@ class TransactionFactory extends Factory
         return [
             'user_id' => User::factory(),
             'customer_id' => Customer::factory(),
-            'name' => fake()->words(3, true),
+            'name' => $this->faker->words(3, true),
         ];
     }
 }
