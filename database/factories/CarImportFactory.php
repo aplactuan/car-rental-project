@@ -20,7 +20,7 @@ class CarImportFactory extends Factory
     {
         return [
             'status' => CarImportStatus::Pending,
-            'file_path' => 'imports/cars/'.fake()->uuid().'.csv',
+            'file_path' => 'imports/cars/'.$this->faker->uuid().'.csv',
             'total_rows' => 0,
             'imported_count' => 0,
             'failed_count' => 0,

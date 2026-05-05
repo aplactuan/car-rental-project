@@ -6,7 +6,7 @@ use App\Models\Customer;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Customer>
+ * @extends Factory<Customer>
  */
 class CustomerFactory extends Factory
 {
@@ -18,8 +18,8 @@ class CustomerFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->name(),
-            'type' => fake()->randomElement([Customer::TYPE_PERSONAL, Customer::TYPE_BUSINESS]),
+            'name' => $this->faker->name(),
+            'type' => $this->faker->randomElement([Customer::TYPE_PERSONAL, Customer::TYPE_BUSINESS]),
         ];
     }
 

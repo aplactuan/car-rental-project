@@ -20,10 +20,10 @@ class BillFactory extends Factory
     {
         return [
             'transaction_id' => Transaction::factory(),
-            'bill_number' => 'INV-'.fake()->unique()->numerify('########'),
-            'amount' => fake()->numberBetween(100_000, 10_000_000),
+            'bill_number' => 'INV-'.$this->faker->unique()->numerify('########'),
+            'amount' => $this->faker->numberBetween(100_000, 10_000_000),
             'status' => 'draft',
-            'notes' => fake()->optional()->sentence(),
+            'notes' => $this->faker->optional()->sentence(),
             'issued_at' => null,
             'due_at' => null,
             'paid_at' => null,
