@@ -1,11 +1,14 @@
 <?php
 
+use App\Http\Middleware\UserRegistrationEnabled;
 use App\Support\JsonApiError;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -17,9 +20,13 @@ return Application::configure(basePath: dirname(__DIR__))
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
     )
-    ->withMiddleware(function (Middleware $middleware): void {})
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->alias([
+            'user-registration-enabled' => UserRegistrationEnabled::class,
+        ]);
+    })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, Request $request) {
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return JsonApiError::response(
                     '401',
@@ -50,7 +57,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
         });
 
-        $exceptions->render(function (\Symfony\Component\HttpKernel\Exception\NotFoundHttpException $e, Request $request) {
+        $exceptions->render(function (NotFoundHttpException $e, Request $request) {
             if ($request->expectsJson() || $request->is('api/*')) {
                 return JsonApiError::response('404', 'Not Found', 'The requested resource was not found.', null, null, 404);
             }
