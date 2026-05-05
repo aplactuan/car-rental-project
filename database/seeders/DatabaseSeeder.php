@@ -2,8 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Models\Car;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Customer;
+use App\Models\Driver;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
@@ -14,16 +17,16 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
             'password' => Hash::make('password'),
         ]);
 
-        \App\Models\Car::factory(10)->create();
-        \App\Models\Driver::factory(10)->create();
-        \App\Models\Customer::factory(10)->create();
+        if (config('app.env') !== 'production') {
+            Car::factory(10)->create();
+            Driver::factory(10)->create();
+            Customer::factory(10)->create();
+        }
     }
 }
