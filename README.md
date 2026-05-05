@@ -101,6 +101,8 @@ User ──< Transaction >── Customer
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/v1/cars` | Add a new car |
+| `POST` | `/api/v1/cars/import` | Queue a CSV import job for cars |
+| `GET` | `/api/v1/cars/imports/{carImport}` | Check the status/result of a car import job |
 | `GET` | `/api/v1/cars` | List cars (filterable by availability window) |
 | `GET` | `/api/v1/cars/{car}` | View a single car |
 | `PUT` | `/api/v1/cars/{car}` | Update a car |
@@ -289,7 +291,7 @@ curl -X POST http://127.0.0.1:8000/api/login \
 **Step 2 — Check availability**
 
 ```bash
-curl "http://127.0.0.1:8000/api/v1/availability?type=car&start_date=2025-06-01&end_date=2025-06-05" \
+curl "http://127.0.0.1:8000/api/v1/availability?type=car&start=2025-06-01&end=2025-06-05" \
   -H "Authorization: Bearer 1|abc123..."
 ```
 
@@ -300,13 +302,13 @@ curl "http://127.0.0.1:8000/api/v1/availability?type=car&start_date=2025-06-01&e
 curl -X POST http://127.0.0.1:8000/api/v1/transactions \
   -H "Authorization: Bearer 1|abc123..." \
   -H "Content-Type: application/json" \
-  -d '{"customer_id": 1}'
+  -d '{"customer_id":"6a9f858c-0f96-4af0-a7fa-5f2cfec5d899","name":"Corporate fleet deal"}'
 
 # Book a car + driver
-curl -X POST http://127.0.0.1:8000/api/v1/transactions/1/book \
+curl -X POST http://127.0.0.1:8000/api/v1/transactions/f4df123f-1294-43a1-b0b1-5ab6f27e3317/book \
   -H "Authorization: Bearer 1|abc123..." \
   -H "Content-Type: application/json" \
-  -d '{"car_id":1,"driver_id":1,"start_date":"2025-06-01","end_date":"2025-06-05"}'
+  -d '{"car_id":"e7a08d85-1ebf-45ef-a17d-2a0cde35b495","driver_id":"91e49868-a2b2-420a-95bc-9f5e86a95d4d","start_date":"2025-06-01","end_date":"2025-06-05"}'
 ```
 
 ---
