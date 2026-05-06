@@ -76,6 +76,6 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::delete('/transactions/{transaction}/bookings/{booking}', DeleteBookingController::class);
 
     Route::get('/availability', ListAvailabilityController::class);
-
-    Route::post('/users', AddUserController::class)->middleware('user-registration-enabled');
 });
+
+Route::post('/users', AddUserController::class)->middleware('user-registration-enabled');
