@@ -22,7 +22,9 @@ use App\Http\Controllers\V1\Customers\SingleCustomerTransactionController;
 use App\Http\Controllers\V1\Customers\UpdateCustomerController;
 use App\Http\Controllers\V1\Customers\UpdateCustomerTransactionController;
 use App\Http\Controllers\V1\Drivers\AddDriverController;
+use App\Http\Controllers\V1\Drivers\ImportDriversController;
 use App\Http\Controllers\V1\Drivers\ListDriversController;
+use App\Http\Controllers\V1\Drivers\ShowDriverImportController;
 use App\Http\Controllers\V1\Drivers\SingleDriverController;
 use App\Http\Controllers\V1\Drivers\UpdateDriverController;
 use App\Http\Controllers\V1\Transactions\AddBookingController;
@@ -45,6 +47,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::put('/cars/{car}', UpdateCarController::class);
 
     Route::post('/drivers', AddDriverController::class);
+    Route::post('/drivers/import', ImportDriversController::class);
+    Route::get('/drivers/imports/{driverImport}', ShowDriverImportController::class);
     Route::get('/drivers', ListDriversController::class);
     Route::get('/drivers/{driver}', SingleDriverController::class);
     Route::put('/drivers/{driver}', UpdateDriverController::class);
