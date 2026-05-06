@@ -78,4 +78,6 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/availability', ListAvailabilityController::class);
 });
 
-Route::post('/users', AddUserController::class)->middleware('user-registration-enabled');
+Route::prefix('v1')->group(function () {
+    Route::post('/users', AddUserController::class)->middleware('user-registration-enabled');
+});

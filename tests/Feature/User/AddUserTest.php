@@ -11,7 +11,7 @@ describe('add user', function () {
     test('is accessible without authentication', function () {
         config(['app.allow_user_registration' => true]);
 
-        postJson('/api/users', [
+        postJson('/api/v1/users', [
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'password' => 'password123',
@@ -23,7 +23,7 @@ describe('add user', function () {
     test('returns 403 when user registration is disabled', function () {
         config(['app.allow_user_registration' => false]);
 
-        postJson('/api/users', [
+        postJson('/api/v1/users', [
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'password' => 'password123',
@@ -35,7 +35,7 @@ describe('add user', function () {
     test('validates required fields', function () {
         config(['app.allow_user_registration' => true]);
 
-        postJson('/api/users', [])
+        postJson('/api/v1/users', [])
             ->assertUnprocessable();
     });
 
@@ -44,7 +44,7 @@ describe('add user', function () {
 
         User::factory()->create(['email' => 'existing@example.com']);
 
-        postJson('/api/users', [
+        postJson('/api/v1/users', [
             'name' => 'John Doe',
             'email' => 'existing@example.com',
             'password' => 'password123',
@@ -56,7 +56,7 @@ describe('add user', function () {
     test('validates password confirmation', function () {
         config(['app.allow_user_registration' => true]);
 
-        postJson('/api/users', [
+        postJson('/api/v1/users', [
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'password' => 'password123',
@@ -68,7 +68,7 @@ describe('add user', function () {
     test('creates a user successfully', function () {
         config(['app.allow_user_registration' => true]);
 
-        postJson('/api/users', [
+        postJson('/api/v1/users', [
             'name' => 'John Doe',
             'email' => 'john@example.com',
             'password' => 'password123',
