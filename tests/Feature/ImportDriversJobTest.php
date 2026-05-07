@@ -149,6 +149,25 @@ describe('ImportDriversJob', function () {
             ->and($driverImport->failures[0]['errors']['row'][0])->toBe('Row column count does not match headers.');
     });
 
+    test('it ignores trailing blank csv rows', function () {
+        Storage::fake('local');
+
+        $path = 'imports/drivers/trailing-blank-line.csv';
+        Storage::put($path, "first_name,last_name,license_number,license_expiry_date,address,phone_number\nJohn,Doe,LIC-001,2030-01-01,123 Main St,555-1234\n\n");
+
+        $driverImport = DriverImport::factory()->create(['file_path' => $path]);
+
+        (new ImportDriversJob($driverImport))->handle(app(DriverRepositoryInterface::class));
+
+        $driverImport->refresh();
+
+        expect($driverImport->status)->toBe(DriverImportStatus::Completed)
+            ->and($driverImport->total_rows)->toBe(1)
+            ->and($driverImport->imported_count)->toBe(1)
+            ->and($driverImport->failed_count)->toBe(0)
+            ->and($driverImport->failures)->toBeNull();
+    });
+
     test('it sets status to failed when an exception is thrown', function () {
         $driverImport = DriverImport::factory()->create(['file_path' => 'imports/drivers/nonexistent.csv']);
 

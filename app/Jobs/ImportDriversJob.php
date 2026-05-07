@@ -32,8 +32,21 @@ class ImportDriversJob implements ShouldQueue
         $seenLicenseNumbers = [];
 
         foreach ($file as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $row = array_map(
+                static fn (mixed $value): string => is_string($value) ? trim($value) : '',
+                $row
+            );
+
+            if ($row === [''] || count(array_filter($row, static fn (string $value): bool => $value !== '')) === 0) {
+                continue;
+            }
+
             if ($headers === null) {
-                $headers = array_map('trim', $row);
+                $headers = $row;
 
                 continue;
             }
@@ -49,7 +62,7 @@ class ImportDriversJob implements ShouldQueue
                 continue;
             }
 
-            $data = array_combine($headers, array_map('trim', $row));
+            $data = array_combine($headers, $row);
 
             $validator = Validator::make($data, [
                 'first_name' => ['required', 'string'],

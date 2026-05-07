@@ -133,6 +133,24 @@ describe('ImportCarsJob', function () {
         $this->assertDatabaseCount('cars', 2);
     });
 
+    test('it ignores trailing blank csv rows', function () {
+        Storage::fake('local');
+
+        $path = 'imports/cars/trailing-blank-line.csv';
+        Storage::put($path, "make,model,year,type,number_of_seats,mileage,plate_number\nToyota,Corolla,2020,Sedan,5,10000,AAA-001\n\n");
+
+        $carImport = CarImport::factory()->create(['file_path' => $path]);
+
+        (new ImportCarsJob($carImport))->handle(app(CarRepositoryInterface::class));
+
+        $carImport->refresh();
+
+        expect($carImport->status)->toBe(CarImportStatus::Completed)
+            ->and($carImport->total_rows)->toBe(1)
+            ->and($carImport->imported_count)->toBe(1)
+            ->and($carImport->failed_count)->toBe(0);
+    });
+
     test('it sets status to failed when an exception is thrown', function () {
         $carImport = CarImport::factory()->create(['file_path' => 'imports/cars/nonexistent.csv']);
 
