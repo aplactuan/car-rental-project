@@ -20,7 +20,7 @@ A production-grade REST API for managing car rental operations — bookings, ava
 | **Business logic** | Availability conflict detection, multi-tenant ownership enforcement, billing lifecycle |
 | **API design** | Versioned routes (`/api/v1`), nested resources, JSON:API-style error envelopes |
 | **Auth** | Laravel Sanctum token-based authentication with login/logout lifecycle |
-| **Testing** | 80+ Pest tests — happy paths, failure paths, authorization boundaries, conflict detection |
+| **Testing** | 200+ Pest tests — happy paths, failure paths, authorization boundaries, conflict detection |
 | **Code quality** | Laravel Pint formatting, PHPDoc typing, no raw `DB::` queries |
 
 ---
@@ -86,6 +86,7 @@ User ──< Transaction >── Customer
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/login` | Authenticate and receive a Sanctum token |
+| `POST` | `/api/v1/users` | Register a new user account (requires `allow_user_registration` feature flag) |
 
 ### Authenticated
 
@@ -112,6 +113,8 @@ User ──< Transaction >── Customer
 | Method | Endpoint | Description |
 |---|---|---|
 | `POST` | `/api/v1/drivers` | Add a new driver |
+| `POST` | `/api/v1/drivers/import` | Queue a CSV import job for drivers |
+| `GET` | `/api/v1/drivers/imports/{driverImport}` | Check the status/result of a driver import job |
 | `GET` | `/api/v1/drivers` | List drivers |
 | `GET` | `/api/v1/drivers/{driver}` | View a single driver |
 | `PUT` | `/api/v1/drivers/{driver}` | Update a driver |
@@ -213,7 +216,7 @@ User ──< Transaction >── Customer
 ## Testing
 
 ```
-Tests:    80+ passing
+Tests:    200+ passing
 Runner:   Pest 3 (Feature + Unit)
 Database: SQLite in-memory (isolated per test)
 ```
