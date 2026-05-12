@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Transaction;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class TransactionRepository implements TransactionRepositoryInterface
@@ -51,18 +52,30 @@ class TransactionRepository implements TransactionRepositoryInterface
         return $this->model->with(['bookings', 'bill'])->paginate($perPage);
     }
 
-    public function paginateByUser(int $userId, int $perPage = 15)
+    public function paginateByUser(int $userId, int $perPage = 15, array $filters = [])
     {
         return $this->model->with(['bookings', 'bill'])
             ->where('user_id', $userId)
+            ->when(
+                isset($filters['has_bill']),
+                fn (Builder $builder) => $filters['has_bill']
+                    ? $builder->whereHas('bill')
+                    : $builder->whereDoesntHave('bill')
+            )
             ->paginate($perPage);
     }
 
-    public function paginateByUserAndCustomer(int $userId, string $customerId, int $perPage = 15)
+    public function paginateByUserAndCustomer(int $userId, string $customerId, int $perPage = 15, array $filters = [])
     {
         return $this->model->with(['bookings', 'bill'])
             ->where('user_id', $userId)
             ->where('customer_id', $customerId)
+            ->when(
+                isset($filters['has_bill']),
+                fn (Builder $builder) => $filters['has_bill']
+                    ? $builder->whereHas('bill')
+                    : $builder->whereDoesntHave('bill')
+            )
             ->paginate($perPage);
     }
 

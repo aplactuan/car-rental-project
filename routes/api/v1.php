@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\V1\Availability\ListAvailabilityController;
+use App\Http\Controllers\V1\Billing\BillingSummaryController;
 use App\Http\Controllers\V1\Bills\AddBillController;
 use App\Http\Controllers\V1\Bills\DeleteBillController;
+use App\Http\Controllers\V1\Bills\ListBillsController;
 use App\Http\Controllers\V1\Bills\ShowBillController;
 use App\Http\Controllers\V1\Bills\UpdateBillController;
 use App\Http\Controllers\V1\Cars\AddCarController;
@@ -15,6 +17,7 @@ use App\Http\Controllers\V1\Customers\AddCustomerController;
 use App\Http\Controllers\V1\Customers\AddCustomerTransactionController;
 use App\Http\Controllers\V1\Customers\DeleteCustomerController;
 use App\Http\Controllers\V1\Customers\DeleteCustomerTransactionController;
+use App\Http\Controllers\V1\Customers\ListCustomerBillsController;
 use App\Http\Controllers\V1\Customers\ListCustomersController;
 use App\Http\Controllers\V1\Customers\ListCustomerTransactionsController;
 use App\Http\Controllers\V1\Customers\SingleCustomerController;
@@ -59,7 +62,11 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::put('/customers/{customer}', UpdateCustomerController::class);
     Route::delete('/customers/{customer}', DeleteCustomerController::class);
 
+    Route::get('/billing/summary', BillingSummaryController::class);
+    Route::get('/bills', ListBillsController::class);
+
     Route::post('/customers/{customer}/transactions', AddCustomerTransactionController::class);
+    Route::get('/customers/{customer}/bills', ListCustomerBillsController::class);
     Route::get('/customers/{customer}/transactions', ListCustomerTransactionsController::class);
     Route::get('/customers/{customer}/transactions/{transaction}', SingleCustomerTransactionController::class);
     Route::put('/customers/{customer}/transactions/{transaction}', UpdateCustomerTransactionController::class);

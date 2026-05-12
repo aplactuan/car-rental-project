@@ -4,6 +4,9 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Bill;
 use App\Repositories\Contracts\BillRepositoryInterface;
+use Carbon\Carbon;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 class BillRepository implements BillRepositoryInterface
@@ -38,6 +41,114 @@ class BillRepository implements BillRepositoryInterface
         $bill->update($data);
 
         return $bill->fresh();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function paginateForUserAndCustomer(int $userId, string $customerId, int $perPage = 15, array $filters = []): LengthAwarePaginator
+    {
+        $query = $this->baseQueryForUserTransactions($userId, $customerId);
+
+        $this->applyListFilters($query, $filters);
+        $this->applyListSort($query, $filters);
+
+        return $query->paginate($perPage);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function paginateForUser(int $userId, int $perPage = 15, array $filters = []): LengthAwarePaginator
+    {
+        $query = $this->baseQueryForUserTransactions($userId);
+
+        $this->applyListFilters($query, $filters);
+        $this->applyListSort($query, $filters);
+
+        return $query->paginate($perPage);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function summarizeForUser(int $userId, array $filters = []): array
+    {
+        $customerId = $filters['customer_id'] ?? null;
+
+        $cashQuery = $this->baseQueryForUserTransactions($userId, $customerId)
+            ->where('status', 'paid');
+
+        if (isset($filters['paid_at_from'])) {
+            $cashQuery->where('paid_at', '>=', Carbon::parse($filters['paid_at_from'])->startOfDay());
+        }
+
+        if (isset($filters['paid_at_to'])) {
+            $cashQuery->where('paid_at', '<=', Carbon::parse($filters['paid_at_to'])->endOfDay());
+        }
+
+        $arQuery = $this->baseQueryForUserTransactions($userId, $customerId)
+            ->where('status', 'issued');
+
+        if (isset($filters['as_of'])) {
+            $arQuery->where('issued_at', '<=', Carbon::parse($filters['as_of'])->endOfDay());
+        }
+
+        return [
+            'cash_received_total' => (int) $cashQuery->sum('amount'),
+            'accounts_receivable_total' => (int) $arQuery->sum('amount'),
+        ];
+    }
+
+    private function baseQueryForUserTransactions(int $userId, ?string $customerId = null): Builder
+    {
+        return $this->model->newQuery()
+            ->whereHas('transaction', function (Builder $builder) use ($userId, $customerId): void {
+                $builder->where('user_id', $userId);
+                if ($customerId !== null) {
+                    $builder->where('customer_id', $customerId);
+                }
+            });
+    }
+
+    /**
+     * @param  array{
+     *     status?: array<int, string>,
+     *     issued_at_from?: string,
+     *     issued_at_to?: string,
+     *     sort?: string
+     * }  $filters
+     */
+    private function applyListFilters(Builder $query, array $filters): void
+    {
+        if (! empty($filters['status'])) {
+            $query->whereIn('status', $filters['status']);
+        }
+
+        if (isset($filters['issued_at_from'])) {
+            $from = Carbon::parse($filters['issued_at_from'])->startOfDay();
+            $query->where('issued_at', '>=', $from);
+        }
+
+        if (isset($filters['issued_at_to'])) {
+            $to = Carbon::parse($filters['issued_at_to'])->endOfDay();
+            $query->where('issued_at', '<=', $to);
+        }
+    }
+
+    /**
+     * @param  array{sort?: string}  $filters
+     */
+    private function applyListSort(Builder $query, array $filters): void
+    {
+        $sort = $filters['sort'] ?? '-created_at';
+
+        match ($sort) {
+            'issued_at' => $query->orderByRaw('issued_at IS NULL')->orderBy('issued_at')->orderBy('created_at'),
+            '-issued_at' => $query->orderByRaw('issued_at IS NULL')->orderByDesc('issued_at')->orderByDesc('created_at'),
+            'created_at' => $query->orderBy('created_at'),
+            default => $query->orderByDesc('created_at'),
+        };
     }
 
     private function nextBillNumber(): string

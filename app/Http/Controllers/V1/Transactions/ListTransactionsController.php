@@ -13,8 +13,12 @@ class ListTransactionsController extends Controller
 
     public function __invoke(ListTransactionsRequest $request)
     {
-        $perPage = $request->input('per_page', 15);
-        $transactions = $this->transactionRepository->paginateByUser($request->user()->id, $perPage);
+        $perPage = $request->integer('per_page', 15);
+        $transactions = $this->transactionRepository->paginateByUser(
+            $request->user()->id,
+            $perPage,
+            $request->filters()
+        );
 
         return TransactionResource::collection($transactions);
     }
