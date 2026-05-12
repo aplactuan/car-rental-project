@@ -14,14 +14,16 @@ interface TransactionRepositoryInterface
     public function findForUserAndCustomer(string $id, int $userId, string $customerId);
 
     /**
+     * @param  array{has_bill?: bool}  $filters
      * @return LengthAwarePaginator
      */
-    public function paginateByUser(int $userId, int $perPage = 15);
+    public function paginateByUser(int $userId, int $perPage = 15, array $filters = []);
 
     /**
+     * @param  array{has_bill?: bool}  $filters
      * @return LengthAwarePaginator
      */
-    public function paginateByUserAndCustomer(int $userId, string $customerId, int $perPage = 15);
+    public function paginateByUserAndCustomer(int $userId, string $customerId, int $perPage = 15, array $filters = []);
 
     /**
      * Create transaction with nested bookings in a single DB transaction.

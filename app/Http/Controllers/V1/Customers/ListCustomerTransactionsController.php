@@ -20,7 +20,8 @@ class ListCustomerTransactionsController extends Controller
         $transactions = $this->transactionRepository->paginateByUserAndCustomer(
             $request->user()->id,
             $customer->id,
-            $perPage
+            $perPage,
+            $request->filters()
         );
 
         return TransactionResource::collection($transactions);
