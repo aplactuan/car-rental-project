@@ -68,6 +68,27 @@ describe('authenticated user', function () {
         ])->assertStatus(422);
     });
 
+    test('increments bill number for bills created on the same day', function () {
+        $firstTransaction = Transaction::factory()->create(['user_id' => $this->user->id]);
+        $secondTransaction = Transaction::factory()->create(['user_id' => $this->user->id]);
+
+        $firstResponse = postJson("/api/v1/transactions/{$firstTransaction->id}/bill", [
+            'amount' => 500000,
+        ]);
+
+        $secondResponse = postJson("/api/v1/transactions/{$secondTransaction->id}/bill", [
+            'amount' => 600000,
+        ]);
+
+        $todayPrefix = now()->format('Ymd');
+
+        $firstResponse->assertCreated()
+            ->assertJsonPath('data.attributes.billNumber', "INV-{$todayPrefix}-0001");
+
+        $secondResponse->assertCreated()
+            ->assertJsonPath('data.attributes.billNumber', "INV-{$todayPrefix}-0002");
+    });
+
     test('returns 404 when creating bill for another users transaction', function () {
         $otherUser = User::factory()->create();
         $transaction = Transaction::factory()->create(['user_id' => $otherUser->id]);
