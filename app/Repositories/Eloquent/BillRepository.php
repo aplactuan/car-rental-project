@@ -157,7 +157,9 @@ class BillRepository implements BillRepositoryInterface
 
         $latestTodayCount = $this->model->newQuery()
             ->whereDate('created_at', now()->toDateString())
+            ->select('id')
             ->lockForUpdate()
+            ->get()
             ->count();
 
         $sequence = str_pad((string) ($latestTodayCount + 1), 4, '0', STR_PAD_LEFT);
