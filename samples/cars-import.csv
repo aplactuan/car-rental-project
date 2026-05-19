@@ -1,0 +1,6 @@
+type,door,seats,year,color,make,model,plate_number
+Sedan,4,5,2020,Black,Toyota,Corolla,ABC-001
+Sedan,4,5,2021,White,Honda,Civic,ABC-002
+SUV,5,7,2022,Silver,Ford,Explorer,ABC-003
+Truck,2,3,2019,Red,Chevrolet,Silverado,ABC-004
+Van,4,8,2018,Blue,Toyota,Hiace,ABC-005
