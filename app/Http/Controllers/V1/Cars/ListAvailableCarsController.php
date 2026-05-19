@@ -17,7 +17,7 @@ class ListAvailableCarsController extends Controller
      */
     public function __invoke(ListAvailableCarsRequest $request): AnonymousResourceCollection
     {
-        $filters = $request->only(['make', 'model', 'type', 'number_of_seats']);
+        $filters = $request->only(['type', 'door', 'seats', 'year', 'color', 'make', 'model', 'plate_number']);
         $filters = array_filter($filters, fn ($value) => $value !== null && $value !== '');
         $cars = $this->car->paginate($filters, $request->integer('per_page', 15));
 

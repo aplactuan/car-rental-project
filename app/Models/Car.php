@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Models\Traits\HasUuid;
+use Database\Factories\CarFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -10,11 +11,11 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Car extends Model
 {
-    /** @use HasFactory<\Database\Factories\CarFactory> */
+    /** @use HasFactory<CarFactory> */
     use HasFactory, HasUuid;
 
     protected $fillable = [
-        'make', 'model', 'year', 'type', 'number_of_seats', 'mileage', 'plate_number',
+        'type', 'door', 'seats', 'year', 'color', 'make', 'model', 'plate_number',
     ];
 
     protected $casts = [

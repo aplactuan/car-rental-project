@@ -33,7 +33,9 @@ describe('authenticated user', function () {
             'make' => 'Toyota',
             'model' => 'Corolla',
             'type' => 'Sedan',
-            'number_of_seats' => 5,
+            'door' => 4,
+            'seats' => 5,
+            'color' => 'White',
             'plate_number' => 'UPDATE-1',
         ]));
 
@@ -42,9 +44,10 @@ describe('authenticated user', function () {
             'make' => 'Honda',
             'model' => 'Civic',
             'type' => 'Coupe',
-            'number_of_seats' => 4,
-            'mileage' => 15000,
+            'door' => 2,
+            'seats' => 4,
             'year' => 2021,
+            'color' => 'Black',
         ];
 
         $response = putJson("/api/v1/cars/{$car->id}", $updatePayload);
@@ -55,9 +58,10 @@ describe('authenticated user', function () {
             'make' => $updatePayload['make'],
             'model' => $updatePayload['model'],
             'type' => $updatePayload['type'],
-            'number_of_seats' => $updatePayload['number_of_seats'],
-            'mileage' => $updatePayload['mileage'],
+            'door' => $updatePayload['door'],
+            'seats' => $updatePayload['seats'],
             'year' => $updatePayload['year'],
+            'color' => $updatePayload['color'],
         ]);
 
         // Assert: response structure and content
@@ -68,18 +72,19 @@ describe('authenticated user', function () {
                     'id',
                     'createdAt',
                     'attributes' => [
-                        'make', 'model', 'year', 'mileage', 'vehicleType', 'numberOfSeats',
+                        'type', 'door', 'seats', 'year', 'color', 'make', 'model', 'plateNumber',
                     ],
                 ],
             ])
             ->assertJsonPath('data.type', 'car')
             ->assertJsonPath('data.id', $car->id)
+            ->assertJsonPath('data.attributes.type', $updatePayload['type'])
+            ->assertJsonPath('data.attributes.door', $updatePayload['door'])
+            ->assertJsonPath('data.attributes.seats', $updatePayload['seats'])
             ->assertJsonPath('data.attributes.make', $updatePayload['make'])
             ->assertJsonPath('data.attributes.model', $updatePayload['model'])
             ->assertJsonPath('data.attributes.year', $updatePayload['year'])
-            ->assertJsonPath('data.attributes.mileage', $updatePayload['mileage'])
-            ->assertJsonPath('data.attributes.vehicleType', $updatePayload['type'])
-            ->assertJsonPath('data.attributes.numberOfSeats', $updatePayload['number_of_seats']);
+            ->assertJsonPath('data.attributes.color', $updatePayload['color']);
     });
 
     test('it can partially update a car (only some fields)', function () {
@@ -88,8 +93,9 @@ describe('authenticated user', function () {
             'make' => 'Toyota',
             'model' => 'Corolla',
             'type' => 'Sedan',
-            'number_of_seats' => 5,
-            'mileage' => 10000,
+            'door' => 4,
+            'seats' => 5,
+            'color' => 'Blue',
             'plate_number' => 'PARTIAL-1',
         ]));
 
@@ -107,15 +113,16 @@ describe('authenticated user', function () {
             'make' => 'Honda',
             'model' => 'Accord',
             'type' => 'Sedan', // unchanged
-            'number_of_seats' => 5, // unchanged
-            'mileage' => 10000, // unchanged
+            'door' => 4, // unchanged
+            'seats' => 5, // unchanged
+            'color' => 'Blue', // unchanged
         ]);
 
         $response->assertStatus(200)
             ->assertJsonPath('data.attributes.make', 'Honda')
             ->assertJsonPath('data.attributes.model', 'Accord')
-            ->assertJsonPath('data.attributes.vehicleType', 'Sedan')
-            ->assertJsonPath('data.attributes.numberOfSeats', 5);
+            ->assertJsonPath('data.attributes.type', 'Sedan')
+            ->assertJsonPath('data.attributes.seats', 5);
     });
 
     test('it cannot update a car with duplicate plate_number', function () {

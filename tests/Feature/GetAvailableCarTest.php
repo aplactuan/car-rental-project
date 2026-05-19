@@ -15,12 +15,13 @@ uses(RefreshDatabase::class);
 function availableCarPayload(array $overrides = []): array
 {
     return array_merge([
+        'type' => 'Sedan',
+        'door' => 4,
+        'seats' => 5,
+        'year' => 2020,
+        'color' => 'Silver',
         'make' => 'Toyota',
         'model' => 'Corolla',
-        'year' => 2020,
-        'mileage' => 10000,
-        'type' => 'Sedan',
-        'number_of_seats' => 5,
         'plate_number' => 'PLATE-'.uniqid(),
     ], $overrides);
 }
@@ -55,12 +56,13 @@ describe('authenticated user', function () {
                         'id',
                         'createdAt',
                         'attributes' => [
+                            'type',
+                            'door',
+                            'seats',
+                            'year',
+                            'color',
                             'make',
                             'model',
-                            'year',
-                            'mileage',
-                            'vehicleType',
-                            'numberOfSeats',
                         ],
                     ],
                 ],
@@ -69,18 +71,19 @@ describe('authenticated user', function () {
             ])
             ->assertJsonCount(2, 'data')
             ->assertJsonPath('data.0.type', 'car')
+            ->assertJsonPath('data.0.attributes.type', $car1->type)
             ->assertJsonPath('data.0.attributes.make', $car1->make)
             ->assertJsonPath('data.0.attributes.model', $car1->model)
-            ->assertJsonPath('data.0.attributes.vehicleType', $car1->type);
+            ->assertJsonPath('data.0.attributes.seats', $car1->seats);
     });
 
-    test('it can filter available cars by make, model, type and number_of_seats', function () {
+    test('it can filter available cars by make, model, type and seats', function () {
         // Arrange: create cars with different attributes
         $matchingCar = Car::create(availableCarPayload([
             'make' => 'Toyota',
             'model' => 'Corolla',
             'type' => 'Sedan',
-            'number_of_seats' => 5,
+            'seats' => 5,
             'plate_number' => 'FILTER-1',
         ]));
 
@@ -89,7 +92,7 @@ describe('authenticated user', function () {
             'make' => 'Honda',
             'model' => 'Civic',
             'type' => 'Sedan',
-            'number_of_seats' => 5,
+            'seats' => 5,
             'plate_number' => 'FILTER-2',
         ]));
 
@@ -98,16 +101,16 @@ describe('authenticated user', function () {
             'make' => 'Toyota',
             'model' => 'Corolla',
             'type' => 'SUV',
-            'number_of_seats' => 5,
+            'seats' => 5,
             'plate_number' => 'FILTER-3',
         ]));
 
-        // Different number_of_seats
+        // Different seats
         Car::create(availableCarPayload([
             'make' => 'Toyota',
             'model' => 'Corolla',
             'type' => 'Sedan',
-            'number_of_seats' => 7,
+            'seats' => 7,
             'plate_number' => 'FILTER-4',
         ]));
 
@@ -116,7 +119,7 @@ describe('authenticated user', function () {
             'make' => 'Toyota',
             'model' => 'Corolla',
             'type' => 'Sedan',
-            'number_of_seats' => 5,
+            'seats' => 5,
         ]));
 
         // Assert: only the matching car is returned
@@ -125,7 +128,7 @@ describe('authenticated user', function () {
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.attributes.make', $matchingCar->make)
             ->assertJsonPath('data.0.attributes.model', $matchingCar->model)
-            ->assertJsonPath('data.0.attributes.vehicleType', $matchingCar->type)
-            ->assertJsonPath('data.0.attributes.numberOfSeats', $matchingCar->number_of_seats);
+            ->assertJsonPath('data.0.attributes.type', $matchingCar->type)
+            ->assertJsonPath('data.0.attributes.seats', $matchingCar->seats);
     });
 });

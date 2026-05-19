@@ -61,12 +61,13 @@ test('deleted token cannot access protected route', function () {
     ]);
 
     $payload = [
+        'type' => 'SUV',
+        'door' => 5,
+        'seats' => 5,
+        'year' => 2020,
+        'color' => 'Black',
         'make' => 'Toyota',
         'model' => 'Raize',
-        'year' => 2020,
-        'mileage' => 5000,
-        'type' => 'SUV',
-        'number_of_seats' => 5,
         'plate_number' => 'IJC2912',
     ];
 

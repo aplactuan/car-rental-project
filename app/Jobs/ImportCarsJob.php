@@ -65,13 +65,14 @@ class ImportCarsJob implements ShouldQueue
             $data = array_combine($headers, $row);
 
             $validator = Validator::make($data, [
+                'type' => ['required', 'string'],
+                'door' => ['required', 'integer'],
+                'seats' => ['required', 'integer'],
+                'year' => ['required', 'integer'],
+                'color' => ['required', 'string'],
                 'make' => ['required', 'string'],
                 'model' => ['required', 'string'],
                 'plate_number' => ['required', 'string', 'unique:cars,plate_number'],
-                'mileage' => ['required', 'integer'],
-                'type' => ['required', 'string'],
-                'number_of_seats' => ['required', 'integer'],
-                'year' => ['nullable', 'integer'],
             ]);
 
             $plateNumber = $data['plate_number'] ?? null;

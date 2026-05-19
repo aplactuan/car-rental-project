@@ -38,16 +38,17 @@ describe('authenticated user', function () {
                     'type',
                     'id',
                     'attributes' => [
-                        'createdAt', 'make', 'model', 'year', 'mileage', 'vehicleType', 'numberOfSeats', 'plateNumber',
+                        'createdAt', 'type', 'door', 'seats', 'year', 'color', 'make', 'model', 'plateNumber',
                     ],
                 ],
             ])
             ->assertJsonPath('data.type', 'car')
+            ->assertJsonPath('data.attributes.type', $payload['type'])
+            ->assertJsonPath('data.attributes.door', $payload['door'])
+            ->assertJsonPath('data.attributes.seats', $payload['seats'])
             ->assertJsonPath('data.attributes.make', $payload['make'])
             ->assertJsonPath('data.attributes.model', $payload['model'])
             ->assertJsonPath('data.attributes.year', $payload['year'])
-            ->assertJsonPath('data.attributes.mileage', $payload['mileage'])
-            ->assertJsonPath('data.attributes.vehicleType', $payload['type'])
-            ->assertJsonPath('data.attributes.numberOfSeats', $payload['number_of_seats']);
+            ->assertJsonPath('data.attributes.color', $payload['color']);
     });
 });

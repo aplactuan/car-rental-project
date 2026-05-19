@@ -44,6 +44,26 @@ class CarRepository extends BaseRepository implements CarRepositoryInterface
 
     protected function applyFilters(Builder $query, array $filters): void
     {
+        if (isset($filters['type'])) {
+            $query->where('type', $filters['type']);
+        }
+
+        if (isset($filters['door'])) {
+            $query->where('door', $filters['door']);
+        }
+
+        if (isset($filters['seats'])) {
+            $query->where('seats', $filters['seats']);
+        }
+
+        if (isset($filters['year'])) {
+            $query->where('year', $filters['year']);
+        }
+
+        if (isset($filters['color'])) {
+            $query->where('color', $filters['color']);
+        }
+
         if (isset($filters['make'])) {
             $query->where('make', $filters['make']);
         }
@@ -52,12 +72,8 @@ class CarRepository extends BaseRepository implements CarRepositoryInterface
             $query->where('model', $filters['model']);
         }
 
-        if (isset($filters['type'])) {
-            $query->where('type', $filters['type']);
-        }
-
-        if (isset($filters['number_of_seats'])) {
-            $query->where('number_of_seats', $filters['number_of_seats']);
+        if (isset($filters['plate_number'])) {
+            $query->where('plate_number', $filters['plate_number']);
         }
     }
 }

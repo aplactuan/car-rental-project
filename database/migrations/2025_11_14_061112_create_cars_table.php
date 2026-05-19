@@ -16,10 +16,11 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('make');
             $table->string('model');
-            $table->string('year');
+            $table->integer('year');
             $table->string('type');
-            $table->integer('number_of_seats');
-            $table->integer('mileage');
+            $table->integer('door');
+            $table->integer('seats');
+            $table->string('color');
             $table->string('plate_number')->unique();
 
             $table->timestamps();

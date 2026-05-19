@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Car;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class AddCarRequest extends FormRequest
@@ -17,18 +18,19 @@ class AddCarRequest extends FormRequest
     /**
      * Get the validation rules that apply to the request.
      *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'make' => 'required',
-            'model' => 'required',
-            'plate_number' => 'required',
-            'mileage' => 'required|integer',
-            'type' => 'required',
-            'number_of_seats' => 'required|integer',
-            'year' => 'integer',
+            'type' => 'required|string',
+            'door' => 'required|integer',
+            'seats' => 'required|integer',
+            'year' => 'required|integer',
+            'color' => 'required|string',
+            'make' => 'required|string',
+            'model' => 'required|string',
+            'plate_number' => 'required|string',
         ];
     }
 }

@@ -20,12 +20,13 @@ class CarResource extends JsonResource
             'createdAt' => $this->created_at?->toIso8601String(),
             'attributes' => [
                 'createdAt' => $this->created_at?->toIso8601String(),
+                'type' => $this->type,
+                'door' => $this->door,
+                'seats' => $this->seats,
+                'year' => $this->year,
+                'color' => $this->color,
                 'make' => $this->make,
                 'model' => $this->model,
-                'year' => $this->year,
-                'mileage' => $this->mileage,
-                'vehicleType' => $this->type,
-                'numberOfSeats' => $this->number_of_seats,
                 'plateNumber' => $this->plate_number,
             ],
         ];

@@ -14,7 +14,7 @@ function makeCsvFile(array $rows, string $filename = 'cars.csv'): string
 {
     Storage::fake('local');
 
-    $headers = ['make', 'model', 'year', 'type', 'number_of_seats', 'mileage', 'plate_number'];
+    $headers = ['type', 'door', 'seats', 'year', 'color', 'make', 'model', 'plate_number'];
     $lines = [implode(',', $headers)];
 
     foreach ($rows as $row) {
@@ -30,7 +30,7 @@ function makeCsvFile(array $rows, string $filename = 'cars.csv'): string
 describe('ImportCarsJob', function () {
     test('it sets status to processing then completed', function () {
         $path = makeCsvFile([
-            ['Toyota', 'Corolla', '2020', 'Sedan', '5', '10000', 'AAA-001'],
+            ['Sedan', '4', '5', '2020', 'Black', 'Toyota', 'Corolla', 'AAA-001'],
         ]);
 
         $carImport = CarImport::factory()->create(['file_path' => $path]);
@@ -42,8 +42,8 @@ describe('ImportCarsJob', function () {
 
     test('it imports all valid rows and updates counts', function () {
         $path = makeCsvFile([
-            ['Toyota', 'Corolla', '2020', 'Sedan', '5', '10000', 'AAA-001'],
-            ['Honda', 'Civic', '2021', 'Sedan', '5', '8000', 'BBB-002'],
+            ['Sedan', '4', '5', '2020', 'Black', 'Toyota', 'Corolla', 'AAA-001'],
+            ['Sedan', '4', '5', '2021', 'White', 'Honda', 'Civic', 'BBB-002'],
         ]);
 
         $carImport = CarImport::factory()->create(['file_path' => $path]);
@@ -63,7 +63,7 @@ describe('ImportCarsJob', function () {
 
     test('it records failures for rows with missing required fields', function () {
         $path = makeCsvFile([
-            ['', '', '2020', 'Sedan', '5', '10000', 'AAA-001'],
+            ['Sedan', '', '5', '2020', 'Black', '', '', 'AAA-001'],
         ]);
 
         $carImport = CarImport::factory()->create(['file_path' => $path]);
@@ -82,7 +82,7 @@ describe('ImportCarsJob', function () {
         Car::factory()->create(['plate_number' => 'EXISTING-1']);
 
         $path = makeCsvFile([
-            ['Toyota', 'Corolla', '2020', 'Sedan', '5', '10000', 'EXISTING-1'],
+            ['Sedan', '4', '5', '2020', 'Black', 'Toyota', 'Corolla', 'EXISTING-1'],
         ]);
 
         $carImport = CarImport::factory()->create(['file_path' => $path]);
@@ -98,8 +98,8 @@ describe('ImportCarsJob', function () {
 
     test('it records failure for a duplicate plate_number within the csv', function () {
         $path = makeCsvFile([
-            ['Toyota', 'Corolla', '2020', 'Sedan', '5', '10000', 'DUP-001'],
-            ['Honda', 'Civic', '2021', 'Sedan', '5', '8000', 'DUP-001'],
+            ['Sedan', '4', '5', '2020', 'Black', 'Toyota', 'Corolla', 'DUP-001'],
+            ['Sedan', '4', '5', '2021', 'White', 'Honda', 'Civic', 'DUP-001'],
         ]);
 
         $carImport = CarImport::factory()->create(['file_path' => $path]);
@@ -115,9 +115,9 @@ describe('ImportCarsJob', function () {
 
     test('it handles a mix of valid and invalid rows', function () {
         $path = makeCsvFile([
-            ['Toyota', 'Corolla', '2020', 'Sedan', '5', '10000', 'MIX-001'],
-            ['', 'Civic', '2021', 'Sedan', '5', '8000', 'MIX-002'],
-            ['Ford', 'F-150', '2022', 'Truck', '3', '20000', 'MIX-003'],
+            ['Sedan', '4', '5', '2020', 'Black', 'Toyota', 'Corolla', 'MIX-001'],
+            ['Sedan', '4', '5', '2021', 'White', '', 'Civic', 'MIX-002'],
+            ['Truck', '2', '3', '2022', 'Red', 'Ford', 'F-150', 'MIX-003'],
         ]);
 
         $carImport = CarImport::factory()->create(['file_path' => $path]);
@@ -137,7 +137,7 @@ describe('ImportCarsJob', function () {
         Storage::fake('local');
 
         $path = 'imports/cars/trailing-blank-line.csv';
-        Storage::put($path, "make,model,year,type,number_of_seats,mileage,plate_number\nToyota,Corolla,2020,Sedan,5,10000,AAA-001\n\n");
+        Storage::put($path, "type,door,seats,year,color,make,model,plate_number\nSedan,4,5,2020,Black,Toyota,Corolla,AAA-001\n\n");
 
         $carImport = CarImport::factory()->create(['file_path' => $path]);
 

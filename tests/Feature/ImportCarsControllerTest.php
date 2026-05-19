@@ -28,7 +28,7 @@ describe('authenticated user', function () {
     test('it returns 202 and creates a pending car import record', function () {
         $file = UploadedFile::fake()->createWithContent(
             'cars.csv',
-            "make,model,year,type,number_of_seats,mileage,plate_number\nToyota,Corolla,2020,Sedan,5,10000,AAA-001"
+            "type,door,seats,year,color,make,model,plate_number\nSedan,4,5,2020,Black,Toyota,Corolla,AAA-001"
         );
 
         $response = $this->postJson('/api/v1/cars/import', ['file' => $file]);
@@ -53,7 +53,7 @@ describe('authenticated user', function () {
     test('it stores the csv file and dispatches the job', function () {
         $file = UploadedFile::fake()->createWithContent(
             'cars.csv',
-            "make,model,year,type,number_of_seats,mileage,plate_number\nToyota,Corolla,2020,Sedan,5,10000,AAA-001"
+            "type,door,seats,year,color,make,model,plate_number\nSedan,4,5,2020,Black,Toyota,Corolla,AAA-001"
         );
 
         $this->postJson('/api/v1/cars/import', ['file' => $file]);
