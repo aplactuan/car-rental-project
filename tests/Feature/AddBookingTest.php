@@ -41,6 +41,7 @@ describe('authenticated user', function () {
         $payload = bookingPayload([
             'car_id' => $car->id,
             'driver_id' => $driver->id,
+            'price' => 500,
             'start_date' => '2026-02-20 10:00:00',
             'end_date' => '2026-02-25 10:00:00',
         ]);
@@ -54,6 +55,7 @@ describe('authenticated user', function () {
         expect($data['type'])->toBe('booking');
         expect($data['attributes']['startDate'])->toBe('2026-02-20 10:00:00');
         expect($data['attributes']['endDate'])->toBe('2026-02-25 10:00:00');
+        expect($data['attributes']['price'])->toBe(500);
         expect($data['relationships']['car']['data']['id'])->toBe($car->id);
         expect($data['relationships']['driver']['data']['id'])->toBe($driver->id);
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Booking;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateBookingRequest extends FormRequest
@@ -12,7 +13,7 @@ class UpdateBookingRequest extends FormRequest
     }
 
     /**
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
@@ -20,6 +21,7 @@ class UpdateBookingRequest extends FormRequest
             'car_id' => 'sometimes|exists:cars,id',
             'driver_id' => 'sometimes|exists:drivers,id',
             'note' => 'nullable|string',
+            'price' => 'sometimes|integer|min:0',
             'start_date' => 'sometimes|date',
             'end_date' => 'sometimes|date|after_or_equal:start_date',
         ];

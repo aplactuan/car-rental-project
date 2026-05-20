@@ -19,6 +19,7 @@ class BookingResource extends JsonResource
             'id' => $this->id,
             'attributes' => [
                 'note' => $this->note,
+                'price' => $this->price,
                 'startDate' => $this->start_date?->format('Y-m-d H:i:s'),
                 'endDate' => $this->end_date?->format('Y-m-d H:i:s'),
             ],

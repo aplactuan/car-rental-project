@@ -3,13 +3,14 @@
 namespace App\Models;
 
 use App\Models\Traits\HasUuid;
+use Database\Factories\BookingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Booking extends Model
 {
-    /** @use HasFactory<\Database\Factories\BookingFactory> */
+    /** @use HasFactory<BookingFactory> */
     use HasFactory, HasUuid;
 
     protected $fillable = [
@@ -17,12 +18,14 @@ class Booking extends Model
         'car_id',
         'driver_id',
         'note',
+        'price',
         'start_date',
         'end_date',
     ];
 
     protected $casts = [
         'id' => 'string',
+        'price' => 'integer',
         'start_date' => 'datetime',
         'end_date' => 'datetime',
         'created_at' => 'datetime',

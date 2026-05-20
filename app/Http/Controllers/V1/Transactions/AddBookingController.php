@@ -48,6 +48,7 @@ class AddBookingController extends Controller
             'car_id' => $request->validated('car_id'),
             'driver_id' => $request->validated('driver_id'),
             'note' => $request->validated('note'),
+            'price' => $request->validated('price'),
             'start_date' => $request->validated('start_date'),
             'end_date' => $request->validated('end_date'),
         ]);

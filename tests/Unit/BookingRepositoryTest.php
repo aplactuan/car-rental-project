@@ -4,6 +4,7 @@ use App\Models\Booking;
 use App\Models\Car;
 use App\Models\Driver;
 use App\Models\Transaction;
+use App\Models\User;
 use App\Repositories\Eloquent\BookingRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -14,7 +15,7 @@ beforeEach(function () {
 });
 
 test('getCarIdsBookedInPeriod returns car ids with overlapping bookings', function () {
-    $user = \App\Models\User::factory()->create();
+    $user = User::factory()->create();
     $car1 = Car::factory()->create();
     $car2 = Car::factory()->create();
     $driver = Driver::factory()->create();
@@ -23,6 +24,7 @@ test('getCarIdsBookedInPeriod returns car ids with overlapping bookings', functi
     $transaction->bookings()->create([
         'car_id' => $car1->id,
         'driver_id' => $driver->id,
+        'price' => 500,
         'start_date' => '2026-02-10',
         'end_date' => '2026-02-15',
         'note' => null,
@@ -35,13 +37,14 @@ test('getCarIdsBookedInPeriod returns car ids with overlapping bookings', functi
 });
 
 test('getCarIdsBookedInPeriod excludes non-overlapping period', function () {
-    $user = \App\Models\User::factory()->create();
+    $user = User::factory()->create();
     $car = Car::factory()->create();
     $driver = Driver::factory()->create();
     $transaction = Transaction::factory()->create(['user_id' => $user->id]);
     $transaction->bookings()->create([
         'car_id' => $car->id,
         'driver_id' => $driver->id,
+        'price' => 500,
         'start_date' => '2026-02-10',
         'end_date' => '2026-02-15',
         'note' => null,
@@ -53,7 +56,7 @@ test('getCarIdsBookedInPeriod excludes non-overlapping period', function () {
 });
 
 test('getDriverIdsBookedInPeriod returns driver ids with overlapping bookings', function () {
-    $user = \App\Models\User::factory()->create();
+    $user = User::factory()->create();
     $car = Car::factory()->create();
     $driver1 = Driver::factory()->create();
     $driver2 = Driver::factory()->create();
@@ -62,6 +65,7 @@ test('getDriverIdsBookedInPeriod returns driver ids with overlapping bookings', 
     $transaction->bookings()->create([
         'car_id' => $car->id,
         'driver_id' => $driver1->id,
+        'price' => 500,
         'start_date' => '2026-02-10',
         'end_date' => '2026-02-15',
         'note' => null,

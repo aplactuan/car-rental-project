@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(vendor/bin/pint --dirty --format agent)"
+      "Bash(vendor/bin/pint --dirty --format agent)",
+      "Bash(php artisan *)"
     ]
   }
 }
