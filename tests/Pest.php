@@ -28,6 +28,7 @@ if (! function_exists('bookingPayload')) {
             'car_id' => null,
             'driver_id' => null,
             'note' => 'Test booking note',
+            'price' => 500,
             'start_date' => now()->addDays(1)->format('Y-m-d'),
             'end_date' => now()->addDays(3)->format('Y-m-d'),
         ], $overrides);

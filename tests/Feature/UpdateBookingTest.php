@@ -69,6 +69,28 @@ describe('authenticated user', function () {
         expect($booking->end_date->format('Y-m-d'))->toBe('2026-02-28');
     });
 
+    test('can update the price', function () {
+        $transaction = Transaction::factory()->create(['user_id' => $this->user->id]);
+        $car = Car::factory()->create();
+        $driver = Driver::factory()->create();
+        $booking = Booking::factory()->create([
+            'transaction_id' => $transaction->id,
+            'car_id' => $car->id,
+            'driver_id' => $driver->id,
+            'price' => 500,
+        ]);
+
+        $response = putJson("/api/v1/transactions/{$transaction->id}/bookings/{$booking->id}", [
+            'price' => 750,
+        ]);
+
+        $response->assertStatus(200);
+        expect($response->json('data.attributes.price'))->toBe(750);
+
+        $booking->refresh();
+        expect($booking->price)->toBe(750);
+    });
+
     test('can update only the note without changing dates or car or driver', function () {
         $transaction = Transaction::factory()->create(['user_id' => $this->user->id]);
         $car = Car::factory()->create();
