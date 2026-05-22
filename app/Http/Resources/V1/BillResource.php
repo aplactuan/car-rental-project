@@ -17,6 +17,7 @@ class BillResource extends JsonResource
             'id' => $this->id,
             'attributes' => [
                 'billNumber' => $this->bill_number,
+                'invoiceNumber' => $this->invoice_number,
                 'amount' => $this->amount,
                 'status' => $this->status,
                 'notes' => $this->notes,

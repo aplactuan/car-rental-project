@@ -40,11 +40,16 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.status', 'draft')
             ->assertJsonPath('data.relationships.transaction.data.id', $transaction->id);
 
+        $period = now()->format('ym');
+
         $this->assertDatabaseHas('bills', [
             'transaction_id' => $transaction->id,
             'amount' => 750000,
             'status' => 'draft',
+            'invoice_number' => "INV-{$period}00001",
         ]);
+
+        $response->assertJsonPath('data.attributes.invoiceNumber', "INV-{$period}00001");
     });
 
     test('returns 409 when bill already exists for transaction', function () {
@@ -66,6 +71,23 @@ describe('authenticated user', function () {
         postJson("/api/v1/transactions/{$transaction->id}/bill", [
             'amount' => 0,
         ])->assertStatus(422);
+    });
+
+    test('increments invoice number for bills created in the same month', function () {
+        $this->travelTo('2026-05-15');
+
+        $firstTransaction = Transaction::factory()->create(['user_id' => $this->user->id]);
+        $secondTransaction = Transaction::factory()->create(['user_id' => $this->user->id]);
+
+        postJson("/api/v1/transactions/{$firstTransaction->id}/bill", [
+            'amount' => 500000,
+        ])->assertCreated()
+            ->assertJsonPath('data.attributes.invoiceNumber', 'INV-260500001');
+
+        postJson("/api/v1/transactions/{$secondTransaction->id}/bill", [
+            'amount' => 600000,
+        ])->assertCreated()
+            ->assertJsonPath('data.attributes.invoiceNumber', 'INV-260500002');
     });
 
     test('increments bill number for bills created on the same day', function () {
