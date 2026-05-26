@@ -18,6 +18,7 @@ trait InteractsWithBillListQueryParameters
             'sort' => ['sometimes', 'string', Rule::in(['issued_at', '-issued_at', 'created_at', '-created_at'])],
             'filter' => ['sometimes', 'array'],
             'filter.status' => ['sometimes', 'string', $this->billListStatusRule()],
+            'filter.invoice_number' => ['sometimes', 'string'],
             'filter.issued_at' => ['sometimes', 'array'],
             'filter.issued_at.from' => ['sometimes', 'nullable', 'date'],
             'filter.issued_at.to' => ['sometimes', 'nullable', 'date', $this->billListIssuedAtToRule()],
@@ -85,6 +86,7 @@ trait InteractsWithBillListQueryParameters
     /**
      * @return array{
      *     status?: array<int, string>,
+     *     invoice_number?: string,
      *     issued_at_from?: string,
      *     issued_at_to?: string,
      *     sort?: string
@@ -100,6 +102,14 @@ trait InteractsWithBillListQueryParameters
                 'trim',
                 explode(',', $filterInput['status'])
             ))));
+        }
+
+        if (isset($filterInput['invoice_number']) && is_string($filterInput['invoice_number'])) {
+            $invoiceNumber = trim($filterInput['invoice_number']);
+
+            if ($invoiceNumber !== '') {
+                $filters['invoice_number'] = $invoiceNumber;
+            }
         }
 
         if (isset($filterInput['issued_at']['from']) && $filterInput['issued_at']['from'] !== null && $filterInput['issued_at']['from'] !== '') {

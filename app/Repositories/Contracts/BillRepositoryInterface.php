@@ -21,6 +21,7 @@ interface BillRepositoryInterface
      *
      * @param  array{
      *     status?: array<int, string>,
+     *     invoice_number?: string,
      *     issued_at_from?: string,
      *     issued_at_to?: string,
      *     sort?: string
@@ -33,6 +34,7 @@ interface BillRepositoryInterface
      *
      * @param  array{
      *     status?: array<int, string>,
+     *     invoice_number?: string,
      *     issued_at_from?: string,
      *     issued_at_to?: string,
      *     sort?: string

@@ -66,6 +66,29 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.0.id', $paid->id);
     });
 
+    test('can search bills by invoice number', function () {
+        $customer = Customer::factory()->create();
+        $matchingTransaction = Transaction::factory()->create(['user_id' => $this->user->id, 'customer_id' => $customer->id]);
+        $otherTransaction = Transaction::factory()->create(['user_id' => $this->user->id, 'customer_id' => $customer->id]);
+        $matchingBill = Bill::factory()->create([
+            'transaction_id' => $matchingTransaction->id,
+            'invoice_number' => 'INV-260500123',
+        ]);
+        Bill::factory()->create([
+            'transaction_id' => $otherTransaction->id,
+            'invoice_number' => 'INV-260500999',
+        ]);
+
+        $query = http_build_query([
+            'filter' => ['invoice_number' => '0123'],
+        ]);
+
+        getJson("/api/v1/bills?{$query}")
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $matchingBill->id);
+    });
+
     test('includes transactions when include is set', function () {
         $customer = Customer::factory()->create();
         $tx = Transaction::factory()->create([

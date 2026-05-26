@@ -114,6 +114,7 @@ class BillRepository implements BillRepositoryInterface
     /**
      * @param  array{
      *     status?: array<int, string>,
+     *     invoice_number?: string,
      *     issued_at_from?: string,
      *     issued_at_to?: string,
      *     sort?: string
@@ -123,6 +124,10 @@ class BillRepository implements BillRepositoryInterface
     {
         if (! empty($filters['status'])) {
             $query->whereIn('status', $filters['status']);
+        }
+
+        if (isset($filters['invoice_number'])) {
+            $query->where('invoice_number', 'like', '%'.$filters['invoice_number'].'%');
         }
 
         if (isset($filters['issued_at_from'])) {

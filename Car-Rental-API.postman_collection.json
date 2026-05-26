@@ -639,7 +639,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/v1/bills?per_page=15&sort=-issued_at&include=transaction&filter[status]=draft,issued&filter[issued_at][from]=2026-01-01&filter[issued_at][to]=2026-12-31",
+							"raw": "{{base_url}}/api/v1/bills?per_page=15&sort=-issued_at&include=transaction&filter[status]=draft,issued&filter[invoice_number]=260500123&filter[issued_at][from]=2026-01-01&filter[issued_at][to]=2026-12-31",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "bills"],
 							"query": [
@@ -664,6 +664,11 @@
 									"description": "Optional. Comma-separated: draft, issued, paid, cancelled."
 								},
 								{
+									"key": "filter[invoice_number]",
+									"value": "260500123",
+									"description": "Optional. Partial match against the bill invoice number, for example `INV-260500123`."
+								},
+								{
 									"key": "filter[issued_at][from]",
 									"value": "2026-01-01",
 									"description": "Optional. Use with filter[issued_at][to]."
@@ -675,7 +680,7 @@
 								}
 							]
 						},
-						"description": "**Bearer required.** Paginated bills for the current user across all customers. Response attributes include `billNumber`, `invoiceNumber`, `amount`, `status`, `issuedAt`, `dueAt`, `paidAt`."
+						"description": "**Bearer required.** Paginated bills for the current user across all customers. Response attributes include `billNumber`, `invoiceNumber`, `amount`, `status`, `issuedAt`, `dueAt`, `paidAt`. Supports partial invoice lookup with `filter[invoice_number]`."
 					}
 				}
 			]
@@ -891,7 +896,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{base_url}}/api/v1/customers/{{customer_id}}/bills?per_page=15&sort=-issued_at&include=transaction&filter[status]=paid&filter[issued_at][from]=2026-01-01&filter[issued_at][to]=2026-12-31",
+							"raw": "{{base_url}}/api/v1/customers/{{customer_id}}/bills?per_page=15&sort=-issued_at&include=transaction&filter[status]=paid&filter[invoice_number]=260500321&filter[issued_at][from]=2026-01-01&filter[issued_at][to]=2026-12-31",
 							"host": ["{{base_url}}"],
 							"path": ["api", "v1", "customers", "{{customer_id}}", "bills"],
 							"query": [
@@ -916,6 +921,11 @@
 									"description": "Optional. Comma-separated bill statuses: draft, issued, paid, cancelled."
 								},
 								{
+									"key": "filter[invoice_number]",
+									"value": "260500321",
+									"description": "Optional. Partial match against the bill invoice number, for example `INV-260500321`."
+								},
+								{
 									"key": "filter[issued_at][from]",
 									"value": "2026-01-01",
 									"description": "Optional. Pair with filter[issued_at][to]."
@@ -927,7 +937,7 @@
 								}
 							]
 						},
-						"description": "**Bearer required.** Bills for `{{customer_id}}` belonging to the authenticated user. Same optional query keys as **List bills (all)** but scoped to this customer."
+						"description": "**Bearer required.** Bills for `{{customer_id}}` belonging to the authenticated user. Same optional query keys as **List bills (all)**, including partial `filter[invoice_number]` search, but scoped to this customer."
 					}
 				},
 				{
