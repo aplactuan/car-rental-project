@@ -145,6 +145,36 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.0.id', $inRange->id);
     });
 
+    test('filters by partial invoice number', function () {
+        $matchingTransaction = Transaction::factory()->create([
+            'user_id' => $this->user->id,
+            'customer_id' => $this->customer->id,
+        ]);
+        $otherTransaction = Transaction::factory()->create([
+            'user_id' => $this->user->id,
+            'customer_id' => $this->customer->id,
+        ]);
+        $matchingBill = Bill::factory()->create([
+            'transaction_id' => $matchingTransaction->id,
+            'invoice_number' => 'INV-260500321',
+        ]);
+        Bill::factory()->create([
+            'transaction_id' => $otherTransaction->id,
+            'invoice_number' => 'INV-260500654',
+        ]);
+
+        $query = http_build_query([
+            'filter' => [
+                'invoice_number' => '0321',
+            ],
+        ]);
+
+        getJson("/api/v1/customers/{$this->customer->id}/bills?{$query}")
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $matchingBill->id);
+    });
+
     test('sorts by negative issued at with most recent first', function () {
         $tOld = Transaction::factory()->create([
             'user_id' => $this->user->id,
