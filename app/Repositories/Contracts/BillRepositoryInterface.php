@@ -9,6 +9,8 @@ interface BillRepositoryInterface
 {
     public function findByTransaction(string $transactionId): Bill;
 
+    public function findByTransactionWithDetails(string $transactionId): Bill;
+
     /**
      * @param  array{transaction_id: string, amount: int, notes?: string|null, due_at?: string|null}  $data
      */
