@@ -20,6 +20,14 @@ class BillRepository implements BillRepositoryInterface
             ->firstOrFail();
     }
 
+    public function findByTransactionWithDetails(string $transactionId): Bill
+    {
+        return $this->model->newQuery()
+            ->with(['transaction.customer', 'transaction.bookings.car', 'transaction.bookings.driver'])
+            ->where('transaction_id', $transactionId)
+            ->firstOrFail();
+    }
+
     public function create(array $data): Bill
     {
         return DB::transaction(function () use ($data): Bill {
