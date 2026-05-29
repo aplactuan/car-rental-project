@@ -8,6 +8,7 @@ use App\Http\Controllers\V1\Bills\InvoiceController;
 use App\Http\Controllers\V1\Bills\ListBillsController;
 use App\Http\Controllers\V1\Bills\ShowBillController;
 use App\Http\Controllers\V1\Bills\UpdateBillController;
+use App\Http\Controllers\V1\Bookings\ListAllBookingsController;
 use App\Http\Controllers\V1\Cars\AddCarController;
 use App\Http\Controllers\V1\Cars\ImportCarsController;
 use App\Http\Controllers\V1\Cars\ListAvailableCarsController;
@@ -89,6 +90,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::delete('/transactions/{transaction}/bookings/{booking}', DeleteBookingController::class);
 
     Route::get('/availability', ListAvailabilityController::class);
+
+    Route::get('/bookings', ListAllBookingsController::class);
 });
 
 Route::prefix('v1')->group(function () {

@@ -4,6 +4,7 @@ namespace App\Support;
 
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use InvalidArgumentException;
 
 final class BookingListFilters
@@ -20,6 +21,14 @@ final class BookingListFilters
 
     public const STATUS_PREVIOUS = 'previous';
 
+    public const STATUS_COMPLETED = 'completed';
+
+    public const STATUS_TODAY = 'today';
+
+    public const STATUS_ONGOING = 'ongoing';
+
+    public const STATUS_INCOMING = 'incoming';
+
     public const PERIOD_WEEK = 'week';
 
     public const PERIOD_MONTH = 'month';
@@ -32,6 +41,19 @@ final class BookingListFilters
         return [
             self::STATUS_UPCOMING,
             self::STATUS_PREVIOUS,
+        ];
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    public static function allowedDetailedStatuses(): array
+    {
+        return [
+            self::STATUS_COMPLETED,
+            self::STATUS_TODAY,
+            self::STATUS_ONGOING,
+            self::STATUS_INCOMING,
         ];
     }
 
@@ -58,6 +80,25 @@ final class BookingListFilters
             self::STATUS_UPCOMING => ['column' => 'start_date', 'operator' => '>='],
             self::STATUS_PREVIOUS => ['column' => 'end_date', 'operator' => '<'],
             default => throw new InvalidArgumentException("Unsupported status filter [{$status}]."),
+        };
+    }
+
+    /**
+     * Applies a detailed status constraint to the query builder.
+     *
+     * - completed: end_date < now()
+     * - today:     DATE(start_date) = today
+     * - ongoing:   start_date <= now() AND end_date >= now()
+     * - incoming:  start_date > now()
+     */
+    public static function applyDetailedStatusConstraint(Builder $builder, string $status): void
+    {
+        match ($status) {
+            self::STATUS_COMPLETED => $builder->where('end_date', '<', now()),
+            self::STATUS_TODAY => $builder->whereDate('start_date', today()),
+            self::STATUS_ONGOING => $builder->where('start_date', '<=', now())->where('end_date', '>=', now()),
+            self::STATUS_INCOMING => $builder->where('start_date', '>', now()),
+            default => throw new InvalidArgumentException("Unsupported detailed status filter [{$status}]."),
         };
     }
 
