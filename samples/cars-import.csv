@@ -1,6 +1,19 @@
 type,door,seats,year,color,make,model,plate_number
-Sedan,4,5,2020,Black,Toyota,Corolla,ABC-001
-Sedan,4,5,2021,White,Honda,Civic,ABC-002
-SUV,5,7,2022,Silver,Ford,Explorer,ABC-003
-Truck,2,3,2019,Red,Chevrolet,Silverado,ABC-004
-Van,4,8,2018,Blue,Toyota,Hiace,ABC-005
+Van,5,10,2023,Silver,Toyota,Super Grandia Elite,XKK1456
+Van,5,10,2017,White,Toyota,Super Grandia LXV,JHG7678
+Van,5,10,2018,White,Toyota,Super Grandia LXV,KLH5896
+Van,5,10,2017,White,Toyota,Super Grandia,JHN8971
+Van,5,14,2019,White,Toyota,Grandia Tourier,SXC7421
+Van,5,14,2022,White,Toyota,Grandia Tourier,DKD3830
+Van,5,14,2023,White,Toyota,Grandia Tourier,GYR1235
+Van,5,14,2025,White,Toyota,Grandia Tourier,PQH7023
+Van,5,12,2017,White,Toyota,Grandia GL,JHJ8965
+Van,5,12,2018,White,Toyota,Grandia GL,UCX3923
+Van,5,12,2019,White,Toyota,Grandia GL,LKU8726
+Van,5,12,2022,White,Toyota,Grandia GL,NNT1234
+Van,5,15,2021,White,Toyota,Conmuter Deluxe,JUY1293
+Van,5,15,2022,White,Toyota,Conmuter Deluxe,MNY9765
+Van,5,15,2023,White,Toyota,Conmuter Deluxe,KKY8765
+Van,5,15,2022,Silver,Toyota,Conmuter Deluxe,BZQ5928
+Van,5,15,2024,Silver,Toyota,Conmuter Deluxe,RZX1239
+Van,4,14,2022,White,Nisan,Premium,CGH4567
