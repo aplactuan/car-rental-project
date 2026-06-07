@@ -2,6 +2,9 @@
 
 use App\Http\Controllers\V1\Availability\ListAvailabilityController;
 use App\Http\Controllers\V1\Billing\BillingSummaryController;
+use App\Http\Controllers\V1\BillPayments\AddBillPaymentController;
+use App\Http\Controllers\V1\BillPayments\DeleteBillPaymentController;
+use App\Http\Controllers\V1\BillPayments\ListBillPaymentsController;
 use App\Http\Controllers\V1\Bills\AddBillController;
 use App\Http\Controllers\V1\Bills\DeleteBillController;
 use App\Http\Controllers\V1\Bills\InvoiceController;
@@ -82,6 +85,9 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/transactions/{transaction}/bill/invoice', InvoiceController::class);
     Route::patch('/transactions/{transaction}/bill', UpdateBillController::class);
     Route::delete('/transactions/{transaction}/bill', DeleteBillController::class);
+    Route::post('/transactions/{transaction}/bill/payments', AddBillPaymentController::class);
+    Route::get('/transactions/{transaction}/bill/payments', ListBillPaymentsController::class);
+    Route::delete('/transactions/{transaction}/bill/payments/{payment}', DeleteBillPaymentController::class);
 
     Route::post('/transactions/{transaction}/book', AddBookingController::class);
     Route::get('/transactions/{transaction}/bookings', ListBookingsController::class);

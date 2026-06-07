@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Booking;
 use App\Observers\BookingObserver;
+use App\Repositories\Contracts\BillPaymentRepositoryInterface;
 use App\Repositories\Contracts\BillRepositoryInterface;
 use App\Repositories\Contracts\BookingRepositoryInterface;
 use App\Repositories\Contracts\CarRepositoryInterface;
@@ -11,6 +12,7 @@ use App\Repositories\Contracts\CustomerRepositoryInterface;
 use App\Repositories\Contracts\DriverRepositoryInterface;
 use App\Repositories\Contracts\ScheduleRepositoryInterface;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
+use App\Repositories\Eloquent\BillPaymentRepository;
 use App\Repositories\Eloquent\BillRepository;
 use App\Repositories\Eloquent\BookingRepository;
 use App\Repositories\Eloquent\CarRepository;
@@ -29,6 +31,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(BookingRepositoryInterface::class, BookingRepository::class);
         $this->app->bind(BillRepositoryInterface::class, BillRepository::class);
+        $this->app->bind(BillPaymentRepositoryInterface::class, BillPaymentRepository::class);
         $this->app->bind(ScheduleRepositoryInterface::class, ScheduleRepository::class);
         $this->app->bind(CarRepositoryInterface::class, CarRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
