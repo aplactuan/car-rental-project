@@ -7,6 +7,7 @@ use Database\Factories\BillFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 class Bill extends Model
@@ -39,6 +40,21 @@ class Bill extends Model
     public function transaction(): BelongsTo
     {
         return $this->belongsTo(Transaction::class);
+    }
+
+    public function payments(): HasMany
+    {
+        return $this->hasMany(BillPayment::class);
+    }
+
+    public function amountPaid(): int
+    {
+        return (int) $this->payments()->sum('amount');
+    }
+
+    public function balance(): int
+    {
+        return max(0, $this->amount - $this->amountPaid());
     }
 
     protected static function booted(): void
