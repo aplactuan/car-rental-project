@@ -20,7 +20,7 @@ A production-grade REST API for managing car rental operations — bookings, ava
 | **Business logic** | Availability conflict detection, multi-tenant ownership enforcement, billing lifecycle |
 | **API design** | Versioned routes (`/api/v1`), nested resources, JSON:API-style error envelopes |
 | **Auth** | Laravel Sanctum token-based authentication with login/logout lifecycle |
-| **Testing** | 200+ Pest tests — happy paths, failure paths, authorization boundaries, conflict detection |
+| **Testing** | 300+ Pest tests — happy paths, failure paths, authorization boundaries, conflict detection |
 | **Code quality** | Laravel Pint formatting, PHPDoc typing, no raw `DB::` queries |
 
 ---
@@ -158,8 +158,17 @@ User ──< Transaction >── Customer
 |---|---|---|
 | `POST` | `/api/v1/transactions/{transaction}/bill` | Create a bill for a transaction |
 | `GET` | `/api/v1/transactions/{transaction}/bill` | View the bill |
+| `GET` | `/api/v1/transactions/{transaction}/bill/invoice` | Printable invoice payload (bill + customer + bookings) |
 | `PATCH` | `/api/v1/transactions/{transaction}/bill` | Update the bill |
 | `DELETE` | `/api/v1/transactions/{transaction}/bill` | Delete the bill |
+
+#### Bill Payments
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/v1/transactions/{transaction}/bill/payments` | Record a payment (installment) against the bill |
+| `GET` | `/api/v1/transactions/{transaction}/bill/payments` | List all payments for the bill |
+| `DELETE` | `/api/v1/transactions/{transaction}/bill/payments/{payment}` | Delete a payment record |
 
 #### Availability
 
@@ -208,7 +217,8 @@ User ──< Transaction >── Customer
 
 - **Availability conflict detection** — before any booking is confirmed, the API checks for date overlaps in the `schedules` table for both the requested car and driver. Double-booking is rejected with a descriptive error.
 - **Ownership enforcement** — users can only read and mutate their own transactions. Attempts to access another user's resources return `403 Forbidden`.
-- **Billing lifecycle** — a bill tracks amount, status, issued date, due date, and paid date. Status transitions are validated to prevent illegal state changes.
+- **Billing lifecycle** — a bill tracks amount, status, issued date, due date, and paid date. Status transitions are validated: `draft` → `issued` / `cancelled`; `issued` → `partially_paid` (via payment) / `cancelled`; `partially_paid` → `paid` (via payment) / `cancelled`. Illegal transitions are rejected.
+- **Installment payments** — payments are recorded against a bill via `POST .../bill/payments` (`multipart/form-data`). Each payment requires `amount`, `method` (`bank_transfer`, `cash`, `gcash`), `reference_number`, and a `proof_image` upload (jpg/jpeg/png/webp, ≤ 10 MB). The bill status is recomputed after every payment or deletion: partial sum → `partially_paid`; full sum → `paid`. Deleting a payment reverses the status accordingly.
 - **Customer types** — supports both `personal` and `business` customer profiles.
 
 ---
@@ -216,7 +226,7 @@ User ──< Transaction >── Customer
 ## Testing
 
 ```
-Tests:    200+ passing
+Tests:    300+ passing
 Runner:   Pest 3 (Feature + Unit)
 Database: SQLite in-memory (isolated per test)
 ```
