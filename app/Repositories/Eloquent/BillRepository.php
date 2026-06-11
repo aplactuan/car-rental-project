@@ -56,7 +56,8 @@ class BillRepository implements BillRepositoryInterface
      */
     public function paginateForUserAndCustomer(int $userId, string $customerId, int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        $query = $this->baseQueryForUserTransactions($userId, $customerId);
+        $query = $this->baseQueryForUserTransactions($userId, $customerId)
+            ->withSum('payments', 'amount');
 
         $this->applyListFilters($query, $filters);
         $this->applyListSort($query, $filters);
@@ -69,7 +70,8 @@ class BillRepository implements BillRepositoryInterface
      */
     public function paginateForUser(int $userId, int $perPage = 15, array $filters = []): LengthAwarePaginator
     {
-        $query = $this->baseQueryForUserTransactions($userId);
+        $query = $this->baseQueryForUserTransactions($userId)
+            ->withSum('payments', 'amount');
 
         $this->applyListFilters($query, $filters);
         $this->applyListSort($query, $filters);
@@ -95,16 +97,20 @@ class BillRepository implements BillRepositoryInterface
             $cashQuery->where('paid_at', '<=', Carbon::parse($filters['paid_at_to'])->endOfDay());
         }
 
-        $arQuery = $this->baseQueryForUserTransactions($userId, $customerId)
-            ->where('status', 'issued');
+        $unpaidQuery = $this->baseQueryForUserTransactions($userId, $customerId)
+            ->whereIn('status', ['issued', 'partially_paid']);
 
         if (isset($filters['as_of'])) {
-            $arQuery->where('issued_at', '<=', Carbon::parse($filters['as_of'])->endOfDay());
+            $unpaidQuery->where('issued_at', '<=', Carbon::parse($filters['as_of'])->endOfDay());
         }
 
+        $totalUnpaid = (int) $unpaidQuery
+            ->selectRaw('COALESCE(SUM(amount - COALESCE((SELECT SUM(bp.amount) FROM bill_payments bp WHERE bp.bill_id = bills.id), 0)), 0) as total_unpaid')
+            ->value('total_unpaid');
+
         return [
-            'cash_received_total' => (int) $cashQuery->sum('amount'),
-            'accounts_receivable_total' => (int) $arQuery->sum('amount'),
+            'total_paid' => (int) $cashQuery->sum('amount'),
+            'total_unpaid' => $totalUnpaid,
         ];
     }
 

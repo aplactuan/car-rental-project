@@ -49,12 +49,21 @@ class Bill extends Model
 
     public function amountPaid(): int
     {
+        if (isset($this->payments_sum_amount)) {
+            return (int) $this->payments_sum_amount;
+        }
+
         return (int) $this->payments()->sum('amount');
+    }
+
+    public function remainingBalance(): int
+    {
+        return max(0, $this->amount - $this->amountPaid());
     }
 
     public function balance(): int
     {
-        return max(0, $this->amount - $this->amountPaid());
+        return $this->remainingBalance();
     }
 
     protected static function booted(): void
