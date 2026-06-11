@@ -89,6 +89,28 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.0.id', $matchingBill->id);
     });
 
+    test('includes amount paid and remaining balance on each bill', function () {
+        $customer = Customer::factory()->create();
+        $transaction = Transaction::factory()->create(['user_id' => $this->user->id, 'customer_id' => $customer->id]);
+        $bill = Bill::factory()->create([
+            'transaction_id' => $transaction->id,
+            'status' => 'partially_paid',
+            'amount' => 100_000,
+        ]);
+        $bill->payments()->create([
+            'amount' => 35_000,
+            'method' => 'cash',
+            'reference_number' => 'REF-12345678',
+            'paid_at' => now(),
+        ]);
+
+        getJson('/api/v1/bills')
+            ->assertOk()
+            ->assertJsonPath('data.0.attributes.amount', 100_000)
+            ->assertJsonPath('data.0.attributes.amountPaid', 35_000)
+            ->assertJsonPath('data.0.attributes.remainingBalance', 65_000);
+    });
+
     test('includes transactions when include is set', function () {
         $customer = Customer::factory()->create();
         $tx = Transaction::factory()->create([

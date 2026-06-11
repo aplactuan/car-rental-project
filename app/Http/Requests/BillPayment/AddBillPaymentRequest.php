@@ -38,7 +38,7 @@ class AddBillPaymentRequest extends FormRequest
             'method' => ['required', Rule::enum(PaymentMethod::class)],
             'reference_number' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'proof_image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'proof_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
         ];
     }
 
@@ -48,7 +48,7 @@ class AddBillPaymentRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'proof_image.required' => 'A proof of payment image is required.',
+            'proof_image.nullable' => 'A proof of payment image is optional.',
             'proof_image.image' => 'The proof of payment must be an image.',
             'proof_image.max' => 'The proof of payment image must not exceed 10MB.',
         ];

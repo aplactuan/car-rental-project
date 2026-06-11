@@ -23,7 +23,7 @@ describe('authenticated user', function () {
         Sanctum::actingAs($this->user);
     });
 
-    test('returns cash received total from paid bills and ar total from issued bills', function () {
+    test('returns total paid from paid bills and total unpaid from issued bills', function () {
         $customer = Customer::factory()->create();
         $tPaid = Transaction::factory()->create([
             'user_id' => $this->user->id,
@@ -49,8 +49,8 @@ describe('authenticated user', function () {
         getJson('/api/v1/billing/summary')
             ->assertOk()
             ->assertJsonPath('data.type', 'billingSummary')
-            ->assertJsonPath('data.attributes.cashReceivedTotal', 500_000)
-            ->assertJsonPath('data.attributes.accountsReceivableTotal', 120_000);
+            ->assertJsonPath('data.attributes.totalPaid', 500_000)
+            ->assertJsonPath('data.attributes.totalUnpaid', 120_000);
     });
 
     test('scopes totals to a customer when filter customer id is set', function () {
@@ -77,11 +77,11 @@ describe('authenticated user', function () {
 
         getJson("/api/v1/billing/summary?{$query}")
             ->assertOk()
-            ->assertJsonPath('data.attributes.cashReceivedTotal', 100_000)
-            ->assertJsonPath('data.attributes.accountsReceivableTotal', 0);
+            ->assertJsonPath('data.attributes.totalPaid', 100_000)
+            ->assertJsonPath('data.attributes.totalUnpaid', 0);
     });
 
-    test('filters cash received by paid at date range', function () {
+    test('filters total paid by paid at date range', function () {
         $customer = Customer::factory()->create();
         $tIn = Transaction::factory()->create(['user_id' => $this->user->id, 'customer_id' => $customer->id]);
         $tOut = Transaction::factory()->create(['user_id' => $this->user->id, 'customer_id' => $customer->id]);
@@ -109,10 +109,10 @@ describe('authenticated user', function () {
 
         getJson("/api/v1/billing/summary?{$query}")
             ->assertOk()
-            ->assertJsonPath('data.attributes.cashReceivedTotal', 50_000);
+            ->assertJsonPath('data.attributes.totalPaid', 50_000);
     });
 
-    test('limits accounts receivable to bills issued on or before as of', function () {
+    test('limits total unpaid to bills issued on or before as of', function () {
         $customer = Customer::factory()->create();
         $tOld = Transaction::factory()->create(['user_id' => $this->user->id, 'customer_id' => $customer->id]);
         $tNew = Transaction::factory()->create(['user_id' => $this->user->id, 'customer_id' => $customer->id]);
@@ -135,7 +135,32 @@ describe('authenticated user', function () {
 
         getJson("/api/v1/billing/summary?{$query}")
             ->assertOk()
-            ->assertJsonPath('data.attributes.accountsReceivableTotal', 10_000);
+            ->assertJsonPath('data.attributes.totalUnpaid', 10_000);
+    });
+
+    test('counts remaining balance for partially paid bills in total unpaid', function () {
+        $customer = Customer::factory()->create();
+        $transaction = Transaction::factory()->create([
+            'user_id' => $this->user->id,
+            'customer_id' => $customer->id,
+        ]);
+        $bill = Bill::factory()->create([
+            'transaction_id' => $transaction->id,
+            'status' => 'partially_paid',
+            'amount' => 100_000,
+            'issued_at' => '2026-06-01 12:00:00',
+        ]);
+        $bill->payments()->create([
+            'amount' => 40_000,
+            'method' => 'cash',
+            'reference_number' => 'REF-12345678',
+            'paid_at' => '2026-06-02 12:00:00',
+        ]);
+
+        getJson('/api/v1/billing/summary')
+            ->assertOk()
+            ->assertJsonPath('data.attributes.totalPaid', 0)
+            ->assertJsonPath('data.attributes.totalUnpaid', 60_000);
     });
 
     test('excludes another users bills from totals', function () {
@@ -158,7 +183,7 @@ describe('authenticated user', function () {
 
         getJson('/api/v1/billing/summary')
             ->assertOk()
-            ->assertJsonPath('data.attributes.cashReceivedTotal', 1);
+            ->assertJsonPath('data.attributes.totalPaid', 1);
     });
 
     test('rejects unknown customer id for filter', function () {

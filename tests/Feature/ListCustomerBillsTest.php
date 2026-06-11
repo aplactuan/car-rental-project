@@ -49,6 +49,30 @@ describe('authenticated user', function () {
         expect($ids)->toEqual(collect([$b1->id, $b2->id])->sort()->values()->all());
     });
 
+    test('includes amount paid and remaining balance on each bill', function () {
+        $transaction = Transaction::factory()->create([
+            'user_id' => $this->user->id,
+            'customer_id' => $this->customer->id,
+        ]);
+        $bill = Bill::factory()->create([
+            'transaction_id' => $transaction->id,
+            'status' => 'partially_paid',
+            'amount' => 200_000,
+        ]);
+        $bill->payments()->create([
+            'amount' => 50_000,
+            'method' => 'cash',
+            'reference_number' => 'REF-87654321',
+            'paid_at' => now(),
+        ]);
+
+        getJson("/api/v1/customers/{$this->customer->id}/bills")
+            ->assertOk()
+            ->assertJsonPath('data.0.attributes.amount', 200_000)
+            ->assertJsonPath('data.0.attributes.amountPaid', 50_000)
+            ->assertJsonPath('data.0.attributes.remainingBalance', 150_000);
+    });
+
     test('does not return bills from another users transactions for the same customer', function () {
         $other = User::factory()->create();
         $ownTx = Transaction::factory()->create([

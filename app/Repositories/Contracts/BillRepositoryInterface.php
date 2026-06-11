@@ -45,7 +45,7 @@ interface BillRepositoryInterface
     public function paginateForUser(int $userId, int $perPage = 15, array $filters = []): LengthAwarePaginator;
 
     /**
-     * Aggregate cash collected (paid bills) and accounts receivable (issued, unpaid bills).
+     * Aggregate paid and unpaid bill totals for the rental company.
      *
      * @param  array{
      *     customer_id?: string,
@@ -53,7 +53,7 @@ interface BillRepositoryInterface
      *     paid_at_to?: string,
      *     as_of?: string
      * }  $filters
-     * @return array{cash_received_total: int, accounts_receivable_total: int}
+     * @return array{total_paid: int, total_unpaid: int}
      */
     public function summarizeForUser(int $userId, array $filters = []): array;
 }
