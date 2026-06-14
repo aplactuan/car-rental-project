@@ -33,19 +33,26 @@ describe('guest user', function () {
 });
 
 describe('authenticated user', function () {
-    beforeEach(function () {
-        $this->user = User::factory()->create();
+    test('it forbids a regular user from updating a driver', function () {
+        $user = User::factory()->create();
+        $driver = Driver::factory()->create();
 
-        Sanctum::actingAs($this->user);
+        Sanctum::actingAs($user);
+
+        putJson("/api/v1/drivers/{$driver->id}", updateDriverPayload())
+            ->assertForbidden();
     });
 
-    test('it can update a driver through api', function () {
+    test('it allows an admin user to update a driver through api', function () {
+        $admin = User::factory()->admin()->create();
         $driver = Driver::factory()->create();
+
+        Sanctum::actingAs($admin);
 
         $payload = updateDriverPayload();
 
         putJson("/api/v1/drivers/{$driver->id}", $payload)
-            ->assertStatus(200)
+            ->assertOk()
             ->assertJsonStructure([
                 'data' => [
                     'type',
@@ -71,5 +78,32 @@ describe('authenticated user', function () {
             'last_name' => $payload['last_name'],
             'license_number' => $payload['license_number'],
         ]);
+    });
+
+    test('it allows a linked driver user to update their own driver profile', function () {
+        $driverUser = User::factory()->create();
+        $driver = Driver::factory()->forUser($driverUser)->create();
+
+        Sanctum::actingAs($driverUser);
+
+        putJson("/api/v1/drivers/{$driver->id}", [
+            'first_name' => 'Updated',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.attributes.firstName', 'Updated');
+
+        expect($driver->fresh()->first_name)->toBe('Updated');
+    });
+
+    test('it forbids a linked driver user from updating another driver profile', function () {
+        $driverUser = User::factory()->create();
+        Driver::factory()->forUser($driverUser)->create();
+        $otherDriver = Driver::factory()->create();
+
+        Sanctum::actingAs($driverUser);
+
+        putJson("/api/v1/drivers/{$otherDriver->id}", [
+            'first_name' => 'Updated',
+        ])->assertForbidden();
     });
 });

@@ -14,7 +14,7 @@ it('only seeds required data in production environment', function () {
 
     $this->seed(DatabaseSeeder::class);
 
-    expect(User::query()->count())->toBe(1)
+    expect(User::query()->count())->toBe(2)
         ->and(Car::query()->count())->toBe(0)
         ->and(Driver::query()->count())->toBe(0)
         ->and(Customer::query()->count())->toBe(0);
@@ -25,7 +25,7 @@ it('seeds sample data outside production environment', function () {
 
     $this->seed(DatabaseSeeder::class);
 
-    expect(User::query()->count())->toBe(1)
+    expect(User::query()->count())->toBe(2)
         ->and(Car::query()->count())->toBe(10)
         ->and(Driver::query()->count())->toBe(10)
         ->and(Customer::query()->count())->toBe(10);

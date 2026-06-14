@@ -26,6 +26,7 @@ class DriverResource extends JsonResource
                 'licenseExpiryDate' => $this->license_expiry_date?->format('Y-m-d'),
                 'address' => $this->address,
                 'phoneNumber' => $this->phone_number,
+                'userId' => $this->user_id,
             ],
         ];
     }

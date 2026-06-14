@@ -23,6 +23,12 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
+        User::factory()->admin()->create([
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'password' => Hash::make('password'),
+        ]);
+
         if (config('app.env') !== 'production') {
             Car::factory(10)->create();
             Driver::factory(10)->create();
