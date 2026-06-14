@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Driver;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Driver>
+ * @extends Factory<Driver>
  */
 class DriverFactory extends Factory
 {
@@ -25,5 +27,12 @@ class DriverFactory extends Factory
             'address' => $this->faker->address(),
             'phone_number' => $this->faker->phoneNumber(),
         ];
+    }
+
+    public function forUser(User $user): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'user_id' => $user->id,
+        ]);
     }
 }

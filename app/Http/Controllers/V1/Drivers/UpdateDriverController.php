@@ -3,10 +3,10 @@
 namespace App\Http\Controllers\V1\Drivers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Driver\UpdateDriverRequest;
 use App\Http\Resources\V1\DriverResource;
 use App\Models\Driver;
 use App\Repositories\Contracts\DriverRepositoryInterface;
-use Illuminate\Http\Request;
 
 class UpdateDriverController extends Controller
 {
@@ -15,7 +15,7 @@ class UpdateDriverController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(Driver $driver, Request $request)
+    public function __invoke(Driver $driver, UpdateDriverRequest $request)
     {
         $driver = $this->driver->find($driver->id);
 
@@ -23,7 +23,7 @@ class UpdateDriverController extends Controller
             return $this->error('Driver not found', 404);
         }
 
-        $driver = $this->driver->update($driver->id, $request->all());
+        $driver = $this->driver->update($driver->id, $request->validated());
 
         return new DriverResource($driver);
     }

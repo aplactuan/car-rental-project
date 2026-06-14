@@ -2,26 +2,29 @@
 
 namespace App\Http\Requests\Driver;
 
+use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateDriverRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+        $driver = $this->route('driver');
+
+        if ($user->isAdmin()) {
+            return true;
+        }
+
+        return $user->driver?->is($driver) ?? false;
     }
 
     /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     * @return array<string, ValidationRule|array<mixed>|string>
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'first_name' => 'sometimes|string',
             'last_name' => 'sometimes|string',
             'license_number' => 'sometimes|string|unique:drivers,license_number,'.$this->route('driver')->id,
@@ -29,5 +32,11 @@ class UpdateDriverRequest extends FormRequest
             'address' => 'sometimes|string',
             'phone_number' => 'sometimes|string',
         ];
+
+        if ($this->user()?->isAdmin()) {
+            $rules['user_id'] = 'nullable|integer|exists:users,id|unique:drivers,user_id,'.$this->route('driver')->id;
+        }
+
+        return $rules;
     }
 }
