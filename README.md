@@ -19,7 +19,7 @@ A production-grade REST API for managing car rental operations — bookings, ava
 | **Architecture** | Single-action controllers, Repository pattern with interface contracts, Form Request validation |
 | **Business logic** | Availability conflict detection, multi-tenant ownership enforcement, billing lifecycle |
 | **API design** | Versioned routes (`/api/v1`), nested resources, JSON:API-style error envelopes |
-| **Auth** | Laravel Sanctum token-based authentication with login/logout lifecycle |
+| **Auth** | Laravel Sanctum token-based authentication with login/logout lifecycle; user roles (`admin` / `user`) |
 | **Testing** | 300+ Pest tests — happy paths, failure paths, authorization boundaries, conflict detection |
 | **Code quality** | Laravel Pint formatting, PHPDoc typing, no raw `DB::` queries |
 
@@ -68,12 +68,12 @@ User ──< Transaction >── Customer
 
 | Model | Responsibility |
 |---|---|
-| `User` | Authenticated API consumer; owns transactions |
+| `User` | Authenticated API consumer; owns transactions; role: `admin` or `user` |
 | `Customer` | Person or business renting a vehicle (personal / business type) |
 | `Transaction` | Parent rental record linking a user to a customer |
 | `Booking` | Car + driver assignment for a specific date range |
 | `Car` | Rentable vehicle (make, model, year, plate, seats, mileage) |
-| `Driver` | Assignable driver with license details |
+| `Driver` | Assignable driver with license details; optionally linked to a `User` account |
 | `Schedule` | Polymorphic availability block; used for overlap conflict detection |
 | `Bill` | Invoice attached to a transaction (amount, status, issue/due/paid dates) |
 
@@ -220,6 +220,8 @@ User ──< Transaction >── Customer
 - **Billing lifecycle** — a bill tracks amount, status, issued date, due date, and paid date. Status transitions are validated: `draft` → `issued` / `cancelled`; `issued` → `partially_paid` (via payment) / `cancelled`; `partially_paid` → `paid` (via payment) / `cancelled`. Illegal transitions are rejected.
 - **Installment payments** — payments are recorded against a bill via `POST .../bill/payments` (`multipart/form-data`). Each payment requires `amount`, `method` (`bank_transfer`, `cash`, `gcash`), `reference_number`, and a `proof_image` upload (jpg/jpeg/png/webp, ≤ 10 MB). The bill status is recomputed after every payment or deletion: partial sum → `partially_paid`; full sum → `paid`. Deleting a payment reverses the status accordingly.
 - **Customer types** — supports both `personal` and `business` customer profiles.
+- **User roles** — every user has a `role` of `admin` or `user`. Admin users can update any driver record and manage the driver-user link.
+- **Driver-user link** — a driver record can be optionally linked to a user account via `user_id` (set by admins only). A non-admin user linked to a driver can update their own driver record, but the `user_id` field is silently ignored for non-admins. Unlinked or unrelated users receive `403 Forbidden`.
 
 ---
 
