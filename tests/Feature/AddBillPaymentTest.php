@@ -101,16 +101,26 @@ describe('authenticated user', function () {
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/amount');
     });
 
-    test('requires a proof of payment image', function () {
+    test('can record a payment without a proof of payment image', function () {
         $transaction = Transaction::factory()->create(['user_id' => $this->user->id]);
-        createIssuedBill($transaction);
+        $bill = createIssuedBill($transaction);
 
-        $this->postJson("/api/v1/transactions/{$transaction->id}/bill/payments", [
+        $response = $this->postJson("/api/v1/transactions/{$transaction->id}/bill/payments", [
             'amount' => 100000,
             'method' => 'cash',
             'reference_number' => 'OR-0003',
-        ])->assertStatus(422)
-            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/proof_image');
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.attributes.amount', 100000)
+            ->assertJsonPath('data.attributes.proofImageUrl', null);
+
+        $this->assertDatabaseHas('bill_payments', [
+            'bill_id' => $bill->id,
+            'amount' => 100000,
+            'method' => 'cash',
+            'reference_number' => 'OR-0003',
+        ]);
     });
 
     test('rejects an invalid payment method', function () {

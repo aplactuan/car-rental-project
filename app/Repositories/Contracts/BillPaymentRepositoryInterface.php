@@ -17,7 +17,7 @@ interface BillPaymentRepositoryInterface
     /**
      * @param  array{amount: int, method: string, reference_number: string, notes?: string|null}  $data
      */
-    public function create(Bill $bill, array $data, UploadedFile $proofImage): BillPayment;
+    public function create(Bill $bill, array $data, ?UploadedFile $proofImage = null): BillPayment;
 
     public function delete(BillPayment $payment): void;
 }

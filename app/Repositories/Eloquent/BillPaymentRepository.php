@@ -23,7 +23,7 @@ class BillPaymentRepository implements BillPaymentRepositoryInterface
             ->get();
     }
 
-    public function create(Bill $bill, array $data, UploadedFile $proofImage): BillPayment
+    public function create(Bill $bill, array $data, ?UploadedFile $proofImage = null): BillPayment
     {
         return DB::transaction(function () use ($bill, $data, $proofImage): BillPayment {
             $payment = $this->model->create([
@@ -35,7 +35,9 @@ class BillPaymentRepository implements BillPaymentRepositoryInterface
                 'paid_at' => now(),
             ]);
 
-            $payment->addMedia($proofImage)->toMediaCollection(BillPayment::PROOF_MEDIA_COLLECTION);
+            if ($proofImage !== null) {
+                $payment->addMedia($proofImage)->toMediaCollection(BillPayment::PROOF_MEDIA_COLLECTION);
+            }
 
             $this->recomputeBillStatus($bill->fresh());
 
