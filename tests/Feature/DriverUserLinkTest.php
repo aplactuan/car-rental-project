@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use App\Models\Driver;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -20,6 +21,8 @@ function linkedDriverPayload(array $overrides = []): array
         'license_expiry_date' => '2030-01-01',
         'address' => '123 Main St',
         'phone_number' => '+15555550123',
+        'email' => 'john.doe.'.uniqid().'@example.com',
+        'password' => 'password123',
     ], $overrides);
 }
 
@@ -29,43 +32,45 @@ describe('driver user link', function () {
         Sanctum::actingAs($this->admin);
     });
 
-    test('it can create a driver linked to a user account', function () {
-        $driverUser = User::factory()->create();
-
-        $payload = linkedDriverPayload(['user_id' => $driverUser->id]);
-
-        postJson('/api/v1/drivers', $payload)
-            ->assertCreated()
-            ->assertJsonPath('data.attributes.userId', $driverUser->id);
-
-        assertDatabaseHas('drivers', [
-            'user_id' => $driverUser->id,
-            'license_number' => $payload['license_number'],
-        ]);
-    });
-
-    test('it creates a driver without a linked user by default', function () {
+    test('it automatically creates a user when a driver is added', function () {
         $payload = linkedDriverPayload();
 
-        postJson('/api/v1/drivers', $payload)
-            ->assertCreated()
-            ->assertJsonPath('data.attributes.userId', null);
+        $response = postJson('/api/v1/drivers', $payload);
+
+        $response->assertCreated();
+
+        $createdUser = User::where('email', $payload['email'])->first();
+
+        expect($createdUser)->not->toBeNull();
 
         assertDatabaseHas('drivers', [
             'license_number' => $payload['license_number'],
-            'user_id' => null,
+            'user_id' => $createdUser->id,
+        ]);
+
+        $response->assertJsonPath('data.attributes.userId', $createdUser->id);
+    });
+
+    test('it uses the driver name as the auto-created user name', function () {
+        $payload = linkedDriverPayload(['first_name' => 'Jane', 'last_name' => 'Smith']);
+
+        postJson('/api/v1/drivers', $payload)->assertCreated();
+
+        assertDatabaseHas('users', [
+            'email' => $payload['email'],
+            'name' => 'Jane Smith',
         ]);
     });
 
-    test('it rejects linking a user account that is already linked to another driver', function () {
-        $driverUser = User::factory()->create();
-        Driver::factory()->forUser($driverUser)->create();
+    test('it sets the auto-created user role to user', function () {
+        $payload = linkedDriverPayload();
 
-        $payload = linkedDriverPayload(['user_id' => $driverUser->id]);
+        postJson('/api/v1/drivers', $payload)->assertCreated();
 
-        postJson('/api/v1/drivers', $payload)
-            ->assertUnprocessable()
-            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/user_id');
+        assertDatabaseHas('users', [
+            'email' => $payload['email'],
+            'role' => UserRole::User->value,
+        ]);
     });
 
     test('it can link a user account when updating a driver', function () {

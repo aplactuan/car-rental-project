@@ -18,6 +18,8 @@ function driverPayload(array $overrides = []): array
         'license_expiry_date' => '2030-01-01',
         'address' => '123 Main St',
         'phone_number' => '+15555550123',
+        'email' => 'john.doe.'.uniqid().'@example.com',
+        'password' => 'password123',
     ], $overrides);
 }
 
@@ -38,10 +40,18 @@ describe('authenticated user', function () {
 
         $response = postJson('/api/v1/drivers', $payload);
 
+        $createdUser = User::where('email', $payload['email'])->first();
+
+        assertDatabaseHas('users', [
+            'email' => $payload['email'],
+            'name' => $payload['first_name'].' '.$payload['last_name'],
+        ]);
+
         assertDatabaseHas('drivers', [
             'first_name' => $payload['first_name'],
             'last_name' => $payload['last_name'],
             'license_number' => $payload['license_number'],
+            'user_id' => $createdUser->id,
         ]);
 
         $response->assertStatus(201)
@@ -57,12 +67,14 @@ describe('authenticated user', function () {
                         'licenseExpiryDate',
                         'address',
                         'phoneNumber',
+                        'userId',
                     ],
                 ],
             ])
             ->assertJsonPath('data.type', 'driver')
             ->assertJsonPath('data.attributes.firstName', $payload['first_name'])
             ->assertJsonPath('data.attributes.lastName', $payload['last_name'])
-            ->assertJsonPath('data.attributes.licenseNumber', $payload['license_number']);
+            ->assertJsonPath('data.attributes.licenseNumber', $payload['license_number'])
+            ->assertJsonPath('data.attributes.userId', $createdUser->id);
     });
 });
