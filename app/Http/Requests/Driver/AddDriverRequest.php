@@ -20,7 +20,8 @@ class AddDriverRequest extends FormRequest
             'license_expiry_date' => 'required|date',
             'address' => 'required|string',
             'phone_number' => 'required|string',
-            'user_id' => 'nullable|integer|exists:users,id|unique:drivers,user_id',
+            'email' => 'required|string|email|unique:users,email',
+            'password' => 'required|string|min:8',
         ];
     }
 }
