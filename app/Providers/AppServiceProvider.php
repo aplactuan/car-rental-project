@@ -12,6 +12,7 @@ use App\Repositories\Contracts\CustomerRepositoryInterface;
 use App\Repositories\Contracts\DriverRepositoryInterface;
 use App\Repositories\Contracts\ScheduleRepositoryInterface;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
+use App\Repositories\Contracts\TripReportRepositoryInterface;
 use App\Repositories\Eloquent\BillPaymentRepository;
 use App\Repositories\Eloquent\BillRepository;
 use App\Repositories\Eloquent\BookingRepository;
@@ -20,6 +21,7 @@ use App\Repositories\Eloquent\CustomerRepository;
 use App\Repositories\Eloquent\DriverRepository;
 use App\Repositories\Eloquent\ScheduleRepository;
 use App\Repositories\Eloquent\TransactionRepository;
+use App\Repositories\Eloquent\TripReportRepository;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -37,6 +39,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(DriverRepositoryInterface::class, DriverRepository::class);
         $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
+        $this->app->bind(TripReportRepositoryInterface::class, TripReportRepository::class);
     }
 
     /**
