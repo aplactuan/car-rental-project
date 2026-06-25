@@ -43,6 +43,11 @@ use App\Http\Controllers\V1\Transactions\ListTransactionsController;
 use App\Http\Controllers\V1\Transactions\SingleBookingController;
 use App\Http\Controllers\V1\Transactions\SingleTransactionController;
 use App\Http\Controllers\V1\Transactions\UpdateBookingController;
+use App\Http\Controllers\V1\TripReports\AddTripReportController;
+use App\Http\Controllers\V1\TripReports\DeleteTripReportController;
+use App\Http\Controllers\V1\TripReports\ListTripReportsController;
+use App\Http\Controllers\V1\TripReports\SingleTripReportController;
+use App\Http\Controllers\V1\TripReports\UpdateTripReportController;
 use App\Http\Controllers\V1\Users\AddUserController;
 use Illuminate\Support\Facades\Route;
 
@@ -94,6 +99,11 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/transactions/{transaction}/bookings/{booking}', SingleBookingController::class);
     Route::put('/transactions/{transaction}/bookings/{booking}', UpdateBookingController::class);
     Route::delete('/transactions/{transaction}/bookings/{booking}', DeleteBookingController::class);
+    Route::post('/transactions/{transaction}/bookings/{booking}/trip-reports', AddTripReportController::class);
+    Route::get('/transactions/{transaction}/bookings/{booking}/trip-reports', ListTripReportsController::class);
+    Route::get('/transactions/{transaction}/bookings/{booking}/trip-reports/{tripReport}', SingleTripReportController::class);
+    Route::put('/transactions/{transaction}/bookings/{booking}/trip-reports/{tripReport}', UpdateTripReportController::class);
+    Route::delete('/transactions/{transaction}/bookings/{booking}/trip-reports/{tripReport}', DeleteTripReportController::class);
 
     Route::get('/availability', ListAvailabilityController::class);
 

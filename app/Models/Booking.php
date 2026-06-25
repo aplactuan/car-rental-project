@@ -7,6 +7,7 @@ use Database\Factories\BookingFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Booking extends Model
 {
@@ -45,5 +46,12 @@ class Booking extends Model
     public function driver(): BelongsTo
     {
         return $this->belongsTo(Driver::class);
+    }
+
+    public function tripReports(): HasMany
+    {
+        return $this->hasMany(TripReport::class)
+            ->orderByDesc('report_date')
+            ->orderByDesc('created_at');
     }
 }
