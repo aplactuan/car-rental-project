@@ -45,4 +45,9 @@ interface BookingRepositoryInterface
      * @return Collection<int, Booking>|LengthAwarePaginator
      */
     public function getAllByUser(int $userId, array $filters = [], ?int $perPage = null): Collection|LengthAwarePaginator;
+
+    /**
+     * @return Collection<int, Booking>|LengthAwarePaginator
+     */
+    public function getAllByDriver(string $driverId, array $filters = [], ?int $perPage = null): Collection|LengthAwarePaginator;
 }

@@ -17,11 +17,12 @@ class ListAllBookingsController extends Controller
     public function __invoke(ListAllBookingsRequest $request): AnonymousResourceCollection
     {
         $perPage = $request->integer('per_page', 15);
-        $bookings = $this->bookingRepository->getAllByUser(
-            $request->user()->id,
-            $request->filters(),
-            $perPage
-        );
+        $user = $request->user()->loadMissing('driver');
+        $filters = $request->filters();
+
+        $bookings = $user->driver !== null && ! $user->isAdmin()
+            ? $this->bookingRepository->getAllByDriver($user->driver->id, $filters, $perPage)
+            : $this->bookingRepository->getAllByUser($user->id, $filters, $perPage);
 
         return BookingResource::collection($bookings);
     }

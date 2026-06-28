@@ -15,6 +15,10 @@
 			"value": ""
 		},
 		{
+			"key": "user_role",
+			"value": ""
+		},
+		{
 			"key": "car_id",
 			"value": ""
 		},
@@ -91,7 +95,7 @@
 							"host": ["{{base_url}}"],
 							"path": ["api", "login"]
 						},
-						"description": "Public endpoint — **do not** send `Authorization`. Send JSON `email` and `password`. On success, use `data.token` as `Bearer` for all `/api/v1/*` routes (except register). Postman saves `token` automatically."
+						"description": "Public endpoint - **do not** send `Authorization`. Send JSON `email` and `password`. On success, use `data.token` as `Bearer` for all `/api/v1/*` routes (except register). Frontend clients should also read `data.role` and `data.user.attributes.role`; both now resolve to `admin` or `driver`."
 					},
 					"event": [
 						{
@@ -100,8 +104,11 @@
 								"exec": [
 									"if (pm.response.code === 200) {",
 									"    const json = pm.response.json();",
-									"    if (json.data && json.data.token) {",
+																		"    if (json.data && json.data.token) {",
 									"        pm.collectionVariables.set('token', json.data.token);",
+									"    }",
+									"    if (json.data && json.data.role) {",
+									"        pm.collectionVariables.set('user_role', json.data.role);",
 									"    }",
 									"}"
 								],
@@ -131,7 +138,7 @@
 				{
 					"name": "Get Current User",
 					"request": {
-						"description": "**Bearer required.** Returns the authenticated user for the current token.",
+						"description": "**Bearer required.** Returns the authenticated user resource for the current token. Frontend clients should read `data.attributes.role`, which now resolves to `admin` or `driver`.",
 						"method": "GET",
 						"header": [
 							{
@@ -1377,7 +1384,7 @@
 								}
 							]
 						},
-						"description": "**Bearer required.** Paginated bookings across all of the authenticated user's transactions. Ordered by `start_date` descending. Optional `status`: `completed` (end_date < now), `today` (start_date is today), `ongoing` (start_date <= now and end_date >= now), `incoming` (start_date > now)."
+						"description": "**Bearer required.** Paginated bookings with the same response shape for admin and driver flows. Admin users receive bookings across their own transactions. Linked driver users receive only bookings assigned to their linked driver record. Ordered by `start_date` descending. Optional `status`: `completed` (end_date < now), `today` (start_date is today), `ongoing` (start_date <= now and end_date >= now), `incoming` (start_date > now)."
 					},
 					"event": [
 						{
@@ -1418,7 +1425,7 @@
 								}
 							]
 						},
-						"description": "**Bearer required.** Bookings that have ended (end_date < now)."
+						"description": "**Bearer required.** Completed bookings in the authenticated scope. Admin scope = their transactions. Driver scope = bookings assigned to the linked driver."
 					}
 				},
 				{
@@ -1443,7 +1450,7 @@
 								}
 							]
 						},
-						"description": "**Bearer required.** Bookings scheduled to start today."
+						"description": "**Bearer required.** Today bookings in the authenticated scope. Admin scope = their transactions. Driver scope = bookings assigned to the linked driver."
 					}
 				},
 				{
@@ -1468,7 +1475,7 @@
 								}
 							]
 						},
-						"description": "**Bearer required.** Bookings currently in progress."
+						"description": "**Bearer required.** Ongoing bookings in the authenticated scope. Admin scope = their transactions. Driver scope = bookings assigned to the linked driver."
 					}
 				},
 				{
@@ -1493,7 +1500,7 @@
 								}
 							]
 						},
-						"description": "**Bearer required.** Upcoming bookings that have not started yet."
+						"description": "**Bearer required.** Incoming bookings in the authenticated scope. Admin scope = their transactions. Driver scope = bookings assigned to the linked driver."
 					}
 				},
 				{
@@ -2122,3 +2129,6 @@
 		}
 	]
 }
+
+
+
