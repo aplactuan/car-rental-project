@@ -119,6 +119,28 @@ class BookingRepository implements BookingRepositoryInterface
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getAllByDriver(string $driverId, array $filters = [], ?int $perPage = null): Collection|LengthAwarePaginator
+    {
+        $query = $this->model->newQuery()
+            ->with(['car', 'driver'])
+            ->where('driver_id', $driverId)
+            ->when(
+                isset($filters[BookingListFilters::PARAM_STATUS]),
+                fn (Builder $builder) => BookingListFilters::applyDetailedStatusConstraint(
+                    $builder,
+                    $filters[BookingListFilters::PARAM_STATUS]
+                )
+            )
+            ->orderByDesc('start_date');
+
+        return $perPage
+            ? $query->paginate($perPage)
+            : $query->get();
+    }
+
+    /**
      * Get distinct resource IDs (car_id or driver_id) that have overlapping bookings.
      * Overlap: start_date < request_end AND end_date > request_start.
      */

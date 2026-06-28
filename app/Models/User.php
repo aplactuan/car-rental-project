@@ -57,6 +57,19 @@ class User extends Authenticatable
         return $this->role === UserRole::Admin;
     }
 
+    public function apiRole(): string
+    {
+        if ($this->isAdmin()) {
+            return UserRole::Admin->value;
+        }
+
+        if ($this->relationLoaded('driver')) {
+            return $this->driver !== null ? 'driver' : $this->role->value;
+        }
+
+        return $this->driver()->exists() ? 'driver' : $this->role->value;
+    }
+
     public function transactions(): HasMany
     {
         return $this->hasMany(Transaction::class);

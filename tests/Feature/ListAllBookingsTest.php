@@ -136,6 +136,25 @@ describe('authenticated user', function () {
             ->assertJsonCount(0, 'data');
     });
 
+    test('passes linked driver filters to the repository', function () {
+        $driverUser = User::factory()->create();
+        $linkedDriver = Driver::factory()->forUser($driverUser)->create();
+        Sanctum::actingAs($driverUser);
+
+        $repository = Mockery::mock(BookingRepositoryInterface::class);
+        $repository->shouldReceive('getAllByDriver')
+            ->once()
+            ->with($linkedDriver->id, ['status' => 'incoming'], 15)
+            ->andReturn(collect());
+        $repository->shouldNotReceive('getAllByUser');
+
+        app()->instance(BookingRepositoryInterface::class, $repository);
+
+        getJson('/api/v1/bookings?status=incoming')
+            ->assertSuccessful()
+            ->assertJsonCount(0, 'data');
+    });
+
     test('filters completed bookings', function () {
         Carbon::setTestNow('2026-05-29 10:00:00');
 
@@ -298,5 +317,89 @@ describe('authenticated user', function () {
         $response->assertSuccessful()
             ->assertJsonPath('data.0.relationships.car.data.id', $this->car->id)
             ->assertJsonPath('data.0.relationships.driver.data.id', $this->driver->id);
+    });
+
+    test('linked driver users only see their assigned bookings', function () {
+        $driverUser = User::factory()->create();
+        $linkedDriver = Driver::factory()->forUser($driverUser)->create();
+        $otherDriver = Driver::factory()->create();
+        Sanctum::actingAs($driverUser);
+
+        $firstTransaction = Transaction::factory()->create(['user_id' => $this->user->id]);
+        $secondTransaction = Transaction::factory()->create(['user_id' => User::factory()->create()->id]);
+
+        $assignedBooking = $firstTransaction->bookings()->create([
+            'car_id' => $this->car->id,
+            'driver_id' => $linkedDriver->id,
+            'price' => 500,
+            'start_date' => '2026-06-01 09:00:00',
+            'end_date' => '2026-06-03 09:00:00',
+        ]);
+
+        $secondTransaction->bookings()->create([
+            'car_id' => $this->car->id,
+            'driver_id' => $otherDriver->id,
+            'price' => 500,
+            'start_date' => '2026-06-05 09:00:00',
+            'end_date' => '2026-06-07 09:00:00',
+        ]);
+
+        getJson('/api/v1/bookings')
+            ->assertSuccessful()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $assignedBooking->id);
+    });
+
+    test('linked driver users still honor status and pagination', function () {
+        Carbon::setTestNow('2026-05-29 10:00:00');
+
+        $driverUser = User::factory()->create();
+        $linkedDriver = Driver::factory()->forUser($driverUser)->create();
+        $otherDriver = Driver::factory()->create();
+        Sanctum::actingAs($driverUser);
+
+        $transaction = Transaction::factory()->create(['user_id' => $this->user->id]);
+
+        $firstIncomingBooking = $transaction->bookings()->create([
+            'car_id' => $this->car->id,
+            'driver_id' => $linkedDriver->id,
+            'price' => 500,
+            'start_date' => '2026-06-01 09:00:00',
+            'end_date' => '2026-06-02 09:00:00',
+        ]);
+
+        $secondIncomingBooking = $transaction->bookings()->create([
+            'car_id' => $this->car->id,
+            'driver_id' => $linkedDriver->id,
+            'price' => 500,
+            'start_date' => '2026-06-03 09:00:00',
+            'end_date' => '2026-06-04 09:00:00',
+        ]);
+
+        $transaction->bookings()->create([
+            'car_id' => $this->car->id,
+            'driver_id' => $linkedDriver->id,
+            'price' => 500,
+            'start_date' => '2026-05-20 09:00:00',
+            'end_date' => '2026-05-21 09:00:00',
+        ]);
+
+        $transaction->bookings()->create([
+            'car_id' => $this->car->id,
+            'driver_id' => $otherDriver->id,
+            'price' => 500,
+            'start_date' => '2026-06-06 09:00:00',
+            'end_date' => '2026-06-07 09:00:00',
+        ]);
+
+        $response = getJson('/api/v1/bookings?status=incoming&per_page=1');
+
+        $response->assertSuccessful()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('meta.per_page', 1);
+
+        expect($response->json('data.*.id'))
+            ->toContain($secondIncomingBooking->id)
+            ->not->toContain($firstIncomingBooking->id);
     });
 });

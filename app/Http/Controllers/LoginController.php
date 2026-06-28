@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\LoginRequest;
+use App\Http\Resources\V1\UserResource;
 use App\Models\User;
 use App\Traits\ApiResponses;
-use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
@@ -15,7 +16,7 @@ class LoginController extends Controller
     /**
      * Handle the incoming request.
      */
-    public function __invoke(LoginRequest $request)
+    public function __invoke(LoginRequest $request): JsonResponse
     {
         $request->validated($request->all());
 
@@ -23,12 +24,15 @@ class LoginController extends Controller
             return $this->error('Invalid username or password', 401);
         }
 
-        $user = User::firstWhere('email', $request->email);
+        /** @var User $user */
+        $user = Auth::user()->loadMissing('driver');
 
         return $this->ok(
             'Authenticated',
             [
                 'token' => $user->createToken('API token for '.$user->email)->plainTextToken,
+                'role' => $user->apiRole(),
+                'user' => new UserResource($user),
             ]
         );
     }
