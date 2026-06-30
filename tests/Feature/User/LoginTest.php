@@ -40,7 +40,7 @@ describe('user login test', function () {
             ]);
     });
 
-    test('login returns driver role for linked driver users', function () {
+    test('login returns stored role for linked driver users', function () {
         $driverUser = User::factory()->create([
             'email' => 'driver@test.com',
             'password' => Hash::make('password1234'),
@@ -51,11 +51,11 @@ describe('user login test', function () {
             'email' => 'driver@test.com',
             'password' => 'password1234',
         ])->assertSuccessful()
-            ->assertJsonPath('data.role', 'driver')
-            ->assertJsonPath('data.user.attributes.role', 'driver');
+            ->assertJsonPath('data.role', 'user')
+            ->assertJsonPath('data.user.attributes.role', 'user');
     });
 
-    test('authenticated user endpoint returns resolved driver role', function () {
+    test('authenticated user endpoint returns stored role for driver users', function () {
         $driverUser = User::factory()->create();
         Driver::factory()->forUser($driverUser)->create();
         Sanctum::actingAs($driverUser);
@@ -63,6 +63,6 @@ describe('user login test', function () {
         getJson('/api/user')
             ->assertSuccessful()
             ->assertJsonPath('data.type', 'user')
-            ->assertJsonPath('data.attributes.role', 'driver');
+            ->assertJsonPath('data.attributes.role', 'user');
     });
 });

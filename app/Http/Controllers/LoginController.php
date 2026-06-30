@@ -31,7 +31,7 @@ class LoginController extends Controller
             'Authenticated',
             [
                 'token' => $user->createToken('API token for '.$user->email)->plainTextToken,
-                'role' => $user->apiRole(),
+                'role' => $user->role->value,
                 'user' => new UserResource($user),
             ]
         );

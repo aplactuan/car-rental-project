@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
@@ -83,13 +84,40 @@ describe('add user', function () {
                     'attributes' => [
                         'name',
                         'email',
+                        'role',
                         'createdAt',
                     ],
                 ],
             ])
             ->assertJsonPath('data.attributes.name', 'John Doe')
-            ->assertJsonPath('data.attributes.email', 'john@example.com');
+            ->assertJsonPath('data.attributes.email', 'john@example.com')
+            ->assertJsonPath('data.attributes.role', UserRole::User->value);
 
-        expect(User::where('email', 'john@example.com')->exists())->toBeTrue();
+        expect(User::where('email', 'john@example.com')->first()->role)->toBe(UserRole::User);
+    });
+
+    test('defaults role to user when not provided', function () {
+        config(['app.allow_user_registration' => true]);
+
+        postJson('/api/v1/users', [
+            'name' => 'Jane Doe',
+            'email' => 'jane@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ])->assertCreated();
+
+        expect(User::where('email', 'jane@example.com')->first()->role)->toBe(UserRole::User);
+    });
+
+    test('rejects admin role on public registration', function () {
+        config(['app.allow_user_registration' => true]);
+
+        postJson('/api/v1/users', [
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'role' => UserRole::Admin->value,
+        ])->assertUnprocessable();
     });
 });
