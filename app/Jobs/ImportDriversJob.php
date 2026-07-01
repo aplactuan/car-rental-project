@@ -3,10 +3,13 @@
 namespace App\Jobs;
 
 use App\Enums\DriverImportStatus;
+use App\Enums\UserRole;
 use App\Models\DriverImport;
+use App\Models\User;
 use App\Repositories\Contracts\DriverRepositoryInterface;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Throwable;
@@ -30,6 +33,7 @@ class ImportDriversJob implements ShouldQueue
         $importedCount = 0;
         $failures = [];
         $seenLicenseNumbers = [];
+        $seenEmails = [];
 
         foreach ($file as $row) {
             if (! is_array($row)) {
@@ -71,15 +75,22 @@ class ImportDriversJob implements ShouldQueue
                 'license_expiry_date' => ['required', 'date'],
                 'address' => ['required', 'string'],
                 'phone_number' => ['required', 'string'],
+                'email' => ['required', 'string', 'email', 'unique:users,email'],
+                'password' => ['required', 'string', 'min:8'],
             ]);
 
             $licenseNumber = $data['license_number'] ?? null;
+            $email = isset($data['email']) ? mb_strtolower(trim($data['email'])) : null;
 
             if (isset($seenLicenseNumbers[$licenseNumber])) {
                 $validator->errors()->add('license_number', 'The license number is duplicated within the CSV.');
             }
 
-            if ($validator->fails() || isset($seenLicenseNumbers[$licenseNumber])) {
+            if (isset($seenEmails[$email])) {
+                $validator->errors()->add('email', 'The email is duplicated within the CSV.');
+            }
+
+            if ($validator->fails() || isset($seenLicenseNumbers[$licenseNumber]) || isset($seenEmails[$email])) {
                 $failures[] = [
                     'row' => $rowNumber,
                     'errors' => $validator->errors()->toArray(),
@@ -88,8 +99,21 @@ class ImportDriversJob implements ShouldQueue
                 continue;
             }
 
-            $driverRepository->create($validator->validated());
+            $validated = $validator->validated();
+
+            $user = User::create([
+                'name' => $validated['first_name'].' '.$validated['last_name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'role' => UserRole::User,
+            ]);
+
+            $driverRepository->create([
+                ...$validated,
+                'user_id' => $user->id,
+            ]);
             $seenLicenseNumbers[$licenseNumber] = true;
+            $seenEmails[$email] = true;
             $importedCount++;
         }
 

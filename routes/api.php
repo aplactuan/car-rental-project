@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ChangePasswordController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogoutController;
 use App\Http\Resources\V1\UserResource;
@@ -11,6 +12,7 @@ Route::middleware('auth:sanctum')->group(function () {
         return new UserResource($request->user()->loadMissing('driver'));
     });
 
+    Route::put('/password', ChangePasswordController::class);
     Route::post('/logout', LogoutController::class);
 });
 
