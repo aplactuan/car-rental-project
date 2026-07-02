@@ -35,4 +35,19 @@ class DriverFactory extends Factory
             'user_id' => $user->id,
         ]);
     }
+
+    public function withUser(): static
+    {
+        return $this->afterCreating(function (Driver $driver): void {
+            if ($driver->user_id !== null) {
+                return;
+            }
+
+            $user = User::factory()->create([
+                'name' => $driver->first_name.' '.$driver->last_name,
+            ]);
+
+            $driver->update(['user_id' => $user->id]);
+        });
+    }
 }
