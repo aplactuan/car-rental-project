@@ -31,7 +31,7 @@ class DatabaseSeeder extends Seeder
 
         if (config('app.env') !== 'production') {
             Car::factory(10)->create();
-            Driver::factory(10)->create();
+            Driver::factory(10)->withUser()->create();
             Customer::factory(10)->create();
         }
     }
