@@ -53,6 +53,8 @@ class AddBookingController extends Controller
             'end_date' => $request->validated('end_date'),
         ]);
 
+        $booking->load(['car', 'driver', 'transaction']);
+
         return (new BookingResource($booking))->response()->setStatusCode(201);
     }
 }

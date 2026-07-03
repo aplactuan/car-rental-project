@@ -58,6 +58,9 @@ describe('authenticated user', function () {
         expect($data['attributes']['price'])->toBe(500);
         expect($data['relationships']['car']['data']['id'])->toBe($car->id);
         expect($data['relationships']['driver']['data']['id'])->toBe($driver->id);
+        expect($data['relationships']['transaction']['data']['id'])->toBe($transaction->id);
+        expect($data['relationships']['transaction']['data']['attributes']['name'])->toBe($transaction->name);
+        expect($data['relationships']['transaction']['data']['attributes']['customerId'])->toBe($transaction->customer_id);
 
         $this->assertDatabaseHas('bookings', [
             'transaction_id' => $transaction->id,

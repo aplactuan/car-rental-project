@@ -37,7 +37,7 @@ class BookingRepository implements BookingRepositoryInterface
 
     public function find(string $id): Booking
     {
-        return $this->model->with(['car', 'driver'])->findOrFail($id);
+        return $this->model->with(['car', 'driver', 'transaction'])->findOrFail($id);
     }
 
     public function update(string $id, array $data): Booking
@@ -45,7 +45,7 @@ class BookingRepository implements BookingRepositoryInterface
         $booking = $this->model->findOrFail($id);
         $booking->update($data);
 
-        return $booking->fresh(['car', 'driver']);
+        return $booking->fresh(['car', 'driver', 'transaction']);
     }
 
     public function delete(string $id): bool
