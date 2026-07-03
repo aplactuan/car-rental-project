@@ -62,6 +62,8 @@ describe('authenticated user', function () {
         expect($json['data']['attributes']['note'])->toBe('Updated note');
         expect($json['data']['attributes']['startDate'])->toBe('2026-02-26 10:00:00');
         expect($json['data']['attributes']['endDate'])->toBe('2026-02-28 10:00:00');
+        expect($json['data']['relationships']['transaction']['data']['id'])->toBe($transaction->id);
+        expect($json['data']['relationships']['transaction']['data']['attributes']['name'])->toBe($transaction->name);
 
         $booking->refresh();
         expect($booking->note)->toBe('Updated note');

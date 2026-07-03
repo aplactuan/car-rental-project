@@ -52,7 +52,9 @@ describe('authenticated user', function () {
 
         $response->assertSuccessful()
             ->assertJsonCount(2, 'data')
-            ->assertJsonPath('data.0.type', 'booking');
+            ->assertJsonPath('data.0.type', 'booking')
+            ->assertJsonPath('data.0.relationships.transaction.data.id', $transaction->id)
+            ->assertJsonMissingPath('data.0.relationships.transaction.data.attributes');
     });
 
     test('does not return bookings from another users transactions', function () {

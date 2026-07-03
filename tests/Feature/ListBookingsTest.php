@@ -61,7 +61,9 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.0.attributes.startDate', '2026-02-20 10:00:00')
             ->assertJsonPath('data.0.attributes.endDate', '2026-02-25 10:00:00')
             ->assertJsonPath('data.0.relationships.car.data.id', $car->id)
-            ->assertJsonPath('data.0.relationships.driver.data.id', $driver->id);
+            ->assertJsonPath('data.0.relationships.driver.data.id', $driver->id)
+            ->assertJsonPath('data.0.relationships.transaction.data.id', $transaction->id)
+            ->assertJsonMissingPath('data.0.relationships.transaction.data.attributes');
     });
 
     test('returns empty array when transaction has no bookings', function () {

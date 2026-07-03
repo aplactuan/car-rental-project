@@ -49,6 +49,23 @@ class BookingResource extends JsonResource
                     ])
                 ),
             ],
+            'transaction' => [
+                'data' => array_merge(
+                    ['type' => 'transaction', 'id' => $this->transaction_id],
+                    $this->when(
+                        $this->relationLoaded('transaction') && $this->transaction,
+                        [
+                            'attributes' => [
+                                'name' => $this->transaction->name,
+                                'userId' => $this->transaction->user_id,
+                                'customerId' => $this->transaction->customer_id,
+                                'createdAt' => $this->transaction->created_at?->toIso8601String(),
+                            ],
+                        ],
+                        []
+                    )
+                ),
+            ],
         ];
 
         return $data;
