@@ -23,7 +23,7 @@ class AddUserRequest extends FormRequest
             'name' => 'required|string',
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
-            'role' => ['sometimes', Rule::enum(UserRole::class)->only([UserRole::User])],
+            'role' => ['sometimes', Rule::enum(UserRole::class)],
         ];
     }
 
