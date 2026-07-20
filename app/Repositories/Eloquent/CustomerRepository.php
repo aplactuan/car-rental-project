@@ -17,4 +17,26 @@ class CustomerRepository extends BaseRepository implements CustomerRepositoryInt
     {
         return $this->model->paginate($perPage);
     }
+
+    public function find($id)
+    {
+        return $this->model->with('parent')->findOrFail($id);
+    }
+
+    public function create(array $data)
+    {
+        $customer = $this->model->create($data);
+        $customer->load('parent');
+
+        return $customer;
+    }
+
+    public function update($id, array $data)
+    {
+        $customer = $this->find($id);
+        $customer->update($data);
+        $customer->load('parent');
+
+        return $customer;
+    }
 }

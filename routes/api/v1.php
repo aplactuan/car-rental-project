@@ -22,6 +22,7 @@ use App\Http\Controllers\V1\Customers\AddCustomerController;
 use App\Http\Controllers\V1\Customers\AddCustomerTransactionController;
 use App\Http\Controllers\V1\Customers\DeleteCustomerController;
 use App\Http\Controllers\V1\Customers\DeleteCustomerTransactionController;
+use App\Http\Controllers\V1\Customers\GetCustomerParentController;
 use App\Http\Controllers\V1\Customers\ListCustomerBillsController;
 use App\Http\Controllers\V1\Customers\ListCustomersController;
 use App\Http\Controllers\V1\Customers\ListCustomerTransactionsController;
@@ -68,6 +69,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
 
     Route::post('/customers', AddCustomerController::class);
     Route::get('/customers', ListCustomersController::class);
+    Route::get('/customers/{customer}/parent', GetCustomerParentController::class);
     Route::get('/customers/{customer}', SingleCustomerController::class);
     Route::put('/customers/{customer}', UpdateCustomerController::class);
     Route::delete('/customers/{customer}', DeleteCustomerController::class);

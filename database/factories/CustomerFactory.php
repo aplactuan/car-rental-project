@@ -32,4 +32,11 @@ class CustomerFactory extends Factory
     {
         return $this->state(fn (array $attributes) => ['type' => Customer::TYPE_BUSINESS]);
     }
+
+    public function forParent(Customer $parent): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'parent_id' => $parent->id,
+        ]);
+    }
 }

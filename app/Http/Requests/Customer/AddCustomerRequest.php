@@ -17,6 +17,18 @@ class AddCustomerRequest extends FormRequest
         return [
             'name' => 'required|string',
             'type' => 'required|string|in:'.Customer::TYPE_PERSONAL.','.Customer::TYPE_BUSINESS,
+            'parent_id' => ['sometimes', 'nullable', 'uuid', 'exists:customers,id'],
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function messages(): array
+    {
+        return [
+            'parent_id.uuid' => 'The selected parent must be a valid UUID.',
+            'parent_id.exists' => 'The selected parent account does not exist.',
         ];
     }
 }
