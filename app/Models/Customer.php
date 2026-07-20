@@ -22,6 +22,9 @@ class Customer extends Model
         'name',
         'type',
         'parent_id',
+        'contact_person',
+        'contact_mobile_number',
+        'contact_email',
     ];
 
     protected $casts = [
