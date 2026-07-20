@@ -23,6 +23,22 @@ test('create persists customer', function () {
     expect($customer->type)->toBe($data['type']);
 });
 
+test('create persists sub-account with parent', function () {
+    $parent = Customer::factory()->business()->create([
+        'name' => 'Iligan City Local Government Unit',
+    ]);
+
+    $customer = $this->repository->create([
+        'name' => 'Iligan City Engineers Office',
+        'type' => Customer::TYPE_BUSINESS,
+        'parent_id' => $parent->id,
+    ]);
+
+    expect($customer->parent_id)->toBe($parent->id);
+    expect($customer->isSubAccount())->toBeTrue();
+    expect($customer->parent->is($parent))->toBeTrue();
+});
+
 test('find returns customer by id', function () {
     $customer = Customer::factory()->create(['name' => 'Test Customer']);
 

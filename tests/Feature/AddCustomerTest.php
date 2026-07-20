@@ -49,12 +49,17 @@ describe('authenticated user', function () {
                         'createdAt',
                         'name',
                         'type',
+                        'parentId',
+                    ],
+                    'relationships' => [
+                        'parent',
                     ],
                 ],
             ])
             ->assertJsonPath('data.type', 'customer')
             ->assertJsonPath('data.attributes.name', $payload['name'])
-            ->assertJsonPath('data.attributes.type', $payload['type']);
+            ->assertJsonPath('data.attributes.type', $payload['type'])
+            ->assertJsonPath('data.relationships.parent.data', null);
     });
 
     test('it can add a personal customer', function () {

@@ -64,4 +64,22 @@ describe('authenticated user', function () {
             ->assertStatus(422)
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/per_page');
     });
+
+    test('it does not include parent name on list responses', function () {
+        $parent = Customer::factory()->business()->create([
+            'name' => 'Iligan City Local Government Unit',
+        ]);
+        Customer::factory()->business()->forParent($parent)->create([
+            'name' => 'Iligan City Engineers Office',
+        ]);
+
+        $response = getJson('/api/v1/customers');
+
+        $subAccount = collect($response->json('data'))
+            ->firstWhere('attributes.name', 'Iligan City Engineers Office');
+
+        expect($subAccount)->not->toBeNull();
+        expect($subAccount['relationships']['parent']['data']['id'])->toBe($parent->id);
+        expect($subAccount['relationships']['parent']['data'])->not->toHaveKey('attributes');
+    });
 });

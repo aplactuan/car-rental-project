@@ -34,11 +34,30 @@ describe('authenticated user', function () {
                     'createdAt',
                     'name',
                     'type',
+                    'parentId',
+                ],
+                'relationships' => [
+                    'parent',
                 ],
             ]])
             ->assertJsonPath('data.type', 'customer')
             ->assertJsonPath('data.id', $customer->id)
             ->assertJsonPath('data.attributes.name', $customer->name)
-            ->assertJsonPath('data.attributes.type', $customer->type);
+            ->assertJsonPath('data.attributes.type', $customer->type)
+            ->assertJsonPath('data.relationships.parent.data', null);
+    });
+
+    test('it includes parent name when viewing a sub-account', function () {
+        $parent = Customer::factory()->business()->create([
+            'name' => 'Iligan City Local Government Unit',
+        ]);
+        $child = Customer::factory()->business()->forParent($parent)->create([
+            'name' => 'Iligan City Engineers Office',
+        ]);
+
+        getJson("/api/v1/customers/{$child->id}")
+            ->assertSuccessful()
+            ->assertJsonPath('data.relationships.parent.data.id', $parent->id)
+            ->assertJsonPath('data.relationships.parent.data.attributes.name', $parent->name);
     });
 });
