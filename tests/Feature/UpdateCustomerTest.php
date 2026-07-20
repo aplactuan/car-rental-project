@@ -57,4 +57,35 @@ describe('authenticated user', function () {
             'type' => $payload['type'],
         ]);
     });
+
+    test('it can update a customer contact details', function () {
+        $customer = Customer::factory()->create();
+
+        $payload = [
+            'contact_person' => 'John Smith',
+            'contact_mobile_number' => '0198765432',
+            'contact_email' => 'john@example.com',
+        ];
+
+        putJson("/api/v1/customers/{$customer->id}", $payload)
+            ->assertStatus(200)
+            ->assertJsonPath('data.attributes.contactPerson', 'John Smith')
+            ->assertJsonPath('data.attributes.contactMobileNumber', '0198765432')
+            ->assertJsonPath('data.attributes.contactEmail', 'john@example.com');
+
+        assertDatabaseHas('customers', [
+            'id' => $customer->id,
+            'contact_person' => 'John Smith',
+            'contact_mobile_number' => '0198765432',
+            'contact_email' => 'john@example.com',
+        ]);
+    });
+
+    test('it fails to update a customer with an invalid contact email', function () {
+        $customer = Customer::factory()->create();
+
+        putJson("/api/v1/customers/{$customer->id}", ['contact_email' => 'not-an-email'])
+            ->assertStatus(422)
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/contact_email');
+    });
 });

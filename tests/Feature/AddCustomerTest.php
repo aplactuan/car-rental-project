@@ -70,4 +70,45 @@ describe('authenticated user', function () {
         $response->assertStatus(201)
             ->assertJsonPath('data.attributes.type', Customer::TYPE_PERSONAL);
     });
+
+    test('it can add a customer with contact details', function () {
+        $payload = customerPayload([
+            'contact_person' => 'Jane Doe',
+            'contact_mobile_number' => '0123456789',
+            'contact_email' => 'jane@example.com',
+        ]);
+
+        $response = postJson('/api/v1/customers', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.attributes.contactPerson', 'Jane Doe')
+            ->assertJsonPath('data.attributes.contactMobileNumber', '0123456789')
+            ->assertJsonPath('data.attributes.contactEmail', 'jane@example.com');
+
+        assertDatabaseHas('customers', [
+            'name' => $payload['name'],
+            'contact_person' => 'Jane Doe',
+            'contact_mobile_number' => '0123456789',
+            'contact_email' => 'jane@example.com',
+        ]);
+    });
+
+    test('it can add a customer without contact details', function () {
+        $payload = customerPayload();
+
+        $response = postJson('/api/v1/customers', $payload);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.attributes.contactPerson', null)
+            ->assertJsonPath('data.attributes.contactMobileNumber', null)
+            ->assertJsonPath('data.attributes.contactEmail', null);
+    });
+
+    test('it fails to add a customer with an invalid contact email', function () {
+        $payload = customerPayload(['contact_email' => 'not-an-email']);
+
+        postJson('/api/v1/customers', $payload)
+            ->assertStatus(422)
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/contact_email');
+    });
 });

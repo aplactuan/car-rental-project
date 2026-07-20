@@ -18,6 +18,9 @@ class AddCustomerRequest extends FormRequest
             'name' => 'required|string',
             'type' => 'required|string|in:'.Customer::TYPE_PERSONAL.','.Customer::TYPE_BUSINESS,
             'parent_id' => ['sometimes', 'nullable', 'uuid', 'exists:customers,id'],
+            'contact_person' => ['sometimes', 'nullable', 'string'],
+            'contact_mobile_number' => ['sometimes', 'nullable', 'string'],
+            'contact_email' => ['sometimes', 'nullable', 'email'],
         ];
     }
 
