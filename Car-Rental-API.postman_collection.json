@@ -869,6 +869,24 @@
 					}
 				},
 				{
+					"name": "Get Customer Children",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/customers/{{customer_id}}/children",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "customers", "{{customer_id}}", "children"]
+						},
+						"description": "**Bearer required.** Returns the immediate child accounts for `{{customer_id}}` as a customer resource collection. When children exist, each item includes parent linkage and may include the parent name under `relationships.parent.data.attributes`. When the customer has no children, the API returns an empty `data` array."
+					}
+				},
+				{
 					"name": "Update Customer",
 					"request": {
 						"method": "PUT",
@@ -2213,4 +2231,3 @@
 		}
 	]
 }
-
