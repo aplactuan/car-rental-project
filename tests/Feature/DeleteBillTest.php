@@ -39,7 +39,22 @@ describe('authenticated user', function () {
         ]);
     });
 
-    test('returns 422 when deleting non draft bill', function () {
+    test('can delete a cancelled bill', function () {
+        $transaction = Transaction::factory()->create(['user_id' => $this->user->id]);
+        $bill = Bill::factory()->create([
+            'transaction_id' => $transaction->id,
+            'status' => 'cancelled',
+        ]);
+
+        deleteJson("/api/v1/transactions/{$transaction->id}/bill")
+            ->assertNoContent();
+
+        $this->assertDatabaseMissing('bills', [
+            'id' => $bill->id,
+        ]);
+    });
+
+    test('returns 422 when deleting non draft or cancelled bill', function () {
         $transaction = Transaction::factory()->create(['user_id' => $this->user->id]);
         Bill::factory()->create([
             'transaction_id' => $transaction->id,
@@ -48,7 +63,7 @@ describe('authenticated user', function () {
         ]);
 
         deleteJson("/api/v1/transactions/{$transaction->id}/bill")
-            ->assertStatus(422);
+            ->assertUnprocessable();
     });
 
     test('returns 404 when deleting another users bill', function () {
