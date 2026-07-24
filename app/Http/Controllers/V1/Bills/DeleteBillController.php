@@ -20,9 +20,9 @@ class DeleteBillController extends Controller
 
         $bill = $this->billRepository->findByTransaction($transaction->id);
 
-        if ($bill->status !== 'draft') {
+        if (! in_array($bill->status, ['draft', 'cancelled'], true)) {
             return response()->json([
-                'message' => 'Only draft bills can be deleted.',
+                'message' => 'Only draft or cancelled bills can be deleted.',
             ], 422);
         }
 
