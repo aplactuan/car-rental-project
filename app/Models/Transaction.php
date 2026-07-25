@@ -19,6 +19,7 @@ class Transaction extends Model
         'user_id',
         'customer_id',
         'name',
+        'po_number',
     ];
 
     protected $casts = [

@@ -21,6 +21,7 @@ class TransactionFactory extends Factory
             'user_id' => User::factory(),
             'customer_id' => Customer::factory(),
             'name' => $this->faker->words(3, true),
+            'po_number' => null,
         ];
     }
 }

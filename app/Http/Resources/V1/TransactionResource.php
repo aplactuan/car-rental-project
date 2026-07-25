@@ -23,6 +23,7 @@ class TransactionResource extends JsonResource
                 'userId' => $this->user_id,
                 'customerId' => $this->customer_id,
                 'name' => $this->name,
+                'poNumber' => $this->po_number,
             ],
             'relationships' => [
                 'bookings' => [

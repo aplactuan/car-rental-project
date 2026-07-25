@@ -21,6 +21,7 @@ class AddCustomerTransactionController extends Controller
             'user_id' => $request->user()->id,
             'customer_id' => $customer->id,
             'name' => $request->validated('name'),
+            'po_number' => $request->validated('po_number'),
         ]);
 
         return (new TransactionResource($transaction))->response()->setStatusCode(201);
