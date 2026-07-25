@@ -20,6 +20,12 @@ class UpdateTransactionRequest extends FormRequest
         return [
             'customer_id' => ['required', 'uuid', 'exists:customers,id'],
             'name' => ['required', 'string', 'max:255'],
+            'po_number' => [
+                'nullable',
+                'string',
+                'max:255',
+                'unique:transactions,po_number,'.$this->route('transaction')->id,
+            ],
         ];
     }
 
@@ -33,6 +39,7 @@ class UpdateTransactionRequest extends FormRequest
             'customer_id.uuid' => 'The selected customer must be a valid UUID.',
             'customer_id.exists' => 'The selected customer does not exist.',
             'name.required' => 'A name is required for this transaction.',
+            'po_number.unique' => 'This PO number is already in use.',
         ];
     }
 }

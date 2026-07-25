@@ -19,6 +19,7 @@ class AddCustomerTransactionRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
+            'po_number' => ['nullable', 'string', 'max:255', 'unique:transactions,po_number'],
         ];
     }
 }

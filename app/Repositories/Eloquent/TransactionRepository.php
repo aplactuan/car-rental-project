@@ -62,6 +62,10 @@ class TransactionRepository implements TransactionRepositoryInterface
                     ? $builder->whereHas('bill')
                     : $builder->whereDoesntHave('bill')
             )
+            ->when(
+                isset($filters['po_number']),
+                fn (Builder $builder) => $builder->where('po_number', $filters['po_number'])
+            )
             ->paginate($perPage);
     }
 
@@ -75,6 +79,10 @@ class TransactionRepository implements TransactionRepositoryInterface
                 fn (Builder $builder) => $filters['has_bill']
                     ? $builder->whereHas('bill')
                     : $builder->whereDoesntHave('bill')
+            )
+            ->when(
+                isset($filters['po_number']),
+                fn (Builder $builder) => $builder->where('po_number', $filters['po_number'])
             )
             ->paginate($perPage);
     }
