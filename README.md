@@ -407,13 +407,13 @@ php artisan test --compact
 Run a single file:
 
 ```bash
-php artisan test --compact tests/Feature/TripReportTest.php
+php artisan test --compact tests/Feature/AddBookingTest.php
 ```
 
 Filter by test name:
 
 ```bash
-php artisan test --compact --filter=can_create_a_trip_report
+php artisan test --compact --filter=can_create_a_booking
 ```
 
 ---
