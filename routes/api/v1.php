@@ -37,6 +37,11 @@ use App\Http\Controllers\V1\Drivers\ListDriversController;
 use App\Http\Controllers\V1\Drivers\ShowDriverImportController;
 use App\Http\Controllers\V1\Drivers\SingleDriverController;
 use App\Http\Controllers\V1\Drivers\UpdateDriverController;
+use App\Http\Controllers\V1\PurchaseOrders\AddPurchaseOrderController;
+use App\Http\Controllers\V1\PurchaseOrders\DeletePurchaseOrderController;
+use App\Http\Controllers\V1\PurchaseOrders\ListPurchaseOrdersController;
+use App\Http\Controllers\V1\PurchaseOrders\SinglePurchaseOrderController;
+use App\Http\Controllers\V1\PurchaseOrders\UpdatePurchaseOrderController;
 use App\Http\Controllers\V1\Transactions\AddBookingController;
 use App\Http\Controllers\V1\Transactions\AddTransactionController;
 use App\Http\Controllers\V1\Transactions\DeleteBookingController;
@@ -70,6 +75,12 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/customers/{customer}', SingleCustomerController::class);
     Route::put('/customers/{customer}', UpdateCustomerController::class);
     Route::delete('/customers/{customer}', DeleteCustomerController::class);
+
+    Route::post('/purchase-orders', AddPurchaseOrderController::class);
+    Route::get('/purchase-orders', ListPurchaseOrdersController::class);
+    Route::get('/purchase-orders/{purchaseOrder}', SinglePurchaseOrderController::class);
+    Route::put('/purchase-orders/{purchaseOrder}', UpdatePurchaseOrderController::class);
+    Route::delete('/purchase-orders/{purchaseOrder}', DeletePurchaseOrderController::class);
 
     Route::get('/billing/summary', BillingSummaryController::class);
     Route::get('/bills', ListBillsController::class);
