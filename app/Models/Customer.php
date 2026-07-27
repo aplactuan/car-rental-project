@@ -49,6 +49,11 @@ class Customer extends Model
         return $this->hasMany(Transaction::class);
     }
 
+    public function purchaseOrders(): HasMany
+    {
+        return $this->hasMany(PurchaseOrder::class);
+    }
+
     public function isSubAccount(): bool
     {
         return $this->parent_id !== null;

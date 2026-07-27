@@ -1,10 +1,13 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\PurchaseOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
 
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\deleteJson;
 
 uses(RefreshDatabase::class);
@@ -30,8 +33,25 @@ describe('authenticated user', function () {
         deleteJson("/api/v1/customers/{$customer->id}")
             ->assertNoContent();
 
-        $this->assertDatabaseMissing('customers', [
+        assertDatabaseMissing('customers', [
             'id' => $customer->id,
+        ]);
+    });
+
+    test('deleting a customer keeps related purchase orders', function () {
+        $customer = Customer::factory()->create();
+        $purchaseOrder = PurchaseOrder::factory()->forCustomer($customer)->create();
+
+        deleteJson("/api/v1/customers/{$customer->id}")
+            ->assertNoContent();
+
+        assertDatabaseMissing('customers', [
+            'id' => $customer->id,
+        ]);
+
+        assertDatabaseHas('purchase_orders', [
+            'id' => $purchaseOrder->id,
+            'customer_id' => null,
         ]);
     });
 });
