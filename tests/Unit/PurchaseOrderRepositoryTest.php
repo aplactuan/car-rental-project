@@ -70,3 +70,16 @@ test('paginate returns paginated purchase orders', function () {
     expect($result->count())->toBe(2)
         ->and($result->total())->toBe(5);
 });
+
+test('paginate can filter by customer', function () {
+    $customer = Customer::factory()->create();
+    $otherCustomer = Customer::factory()->create();
+
+    PurchaseOrder::factory()->count(2)->forCustomer($customer)->create();
+    PurchaseOrder::factory()->forCustomer($otherCustomer)->create();
+
+    $result = $this->repository->paginate(15, ['customer_id' => $customer->id]);
+
+    expect($result->total())->toBe(2)
+        ->and($result->every(fn (PurchaseOrder $purchaseOrder) => $purchaseOrder->customer_id === $customer->id))->toBeTrue();
+});

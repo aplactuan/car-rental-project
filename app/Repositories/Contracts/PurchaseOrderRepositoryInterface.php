@@ -6,7 +6,10 @@ interface PurchaseOrderRepositoryInterface
 {
     public function all();
 
-    public function paginate(int $perPage = 15);
+    /**
+     * @param  array{customer_id?: string}  $filters
+     */
+    public function paginate(int $perPage = 15, array $filters = []);
 
     public function find($id);
 

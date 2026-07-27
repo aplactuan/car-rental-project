@@ -13,8 +13,8 @@ class ListPurchaseOrdersController extends Controller
 
     public function __invoke(ListPurchaseOrdersRequest $request)
     {
-        $perPage = $request->input('per_page', 15);
-        $purchaseOrders = $this->purchaseOrder->paginate($perPage);
+        $perPage = $request->integer('per_page', 15);
+        $purchaseOrders = $this->purchaseOrder->paginate($perPage, $request->filters());
 
         return PurchaseOrderResource::collection($purchaseOrders);
     }

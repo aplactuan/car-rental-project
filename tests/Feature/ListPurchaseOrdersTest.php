@@ -84,4 +84,26 @@ describe('authenticated user', function () {
         expect($purchaseOrder['relationships']['customer']['data']['id'])->toBe($customer->id);
         expect($purchaseOrder['relationships']['customer']['data'])->not->toHaveKey('attributes');
     });
+
+    test('it can filter purchase orders by customer', function () {
+        $customer = Customer::factory()->create();
+        $otherCustomer = Customer::factory()->create();
+
+        $matching = PurchaseOrder::factory()->forCustomer($customer)->create(['po_number' => 'PO-MATCH']);
+        PurchaseOrder::factory()->forCustomer($otherCustomer)->create(['po_number' => 'PO-OTHER']);
+
+        $response = getJson("/api/v1/purchase-orders?customer_id={$customer->id}");
+
+        $response
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $matching->id)
+            ->assertJsonPath('data.0.attributes.customerId', $customer->id);
+    });
+
+    test('it validates customer_id filter', function () {
+        getJson('/api/v1/purchase-orders?customer_id=not-a-uuid')
+            ->assertStatus(422)
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/customer_id');
+    });
 });
