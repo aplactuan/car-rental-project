@@ -7,56 +7,42 @@ use Database\Factories\TripReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class TripReport extends Model
+class TripReport extends Model implements HasMedia
 {
     /** @use HasFactory<TripReportFactory> */
-    use HasFactory, HasUuid;
+    use HasFactory, HasUuid, InteractsWithMedia;
+
+    public const TRIP_REPORT_IMAGE_MEDIA_COLLECTION = 'trip_report_image';
 
     protected $fillable = [
-        'booking_id',
+        'purchase_order_id',
         'report_date',
-        'po_number',
-        'time_in',
-        'time_out',
-        'rate',
-        'odometer_in',
-        'odometer_out',
-        'fuel_liters',
-        'fuel_amount',
-        'invoice_or_or_number',
-        'collection_amount',
-        'percentage',
+        'driver',
         'destinations',
-        'driver_id_snapshot',
-        'driver_name_snapshot',
-        'car_id_snapshot',
-        'car_make_snapshot',
-        'car_model_snapshot',
-        'car_plate_number_snapshot',
-        'customer_id_snapshot',
-        'customer_name_snapshot',
-        'transaction_name_snapshot',
+        'amount',
     ];
 
     protected $casts = [
         'id' => 'string',
-        'booking_id' => 'string',
+        'purchase_order_id' => 'string',
         'report_date' => 'date',
-        'rate' => 'integer',
-        'odometer_in' => 'integer',
-        'odometer_out' => 'integer',
-        'fuel_liters' => 'decimal:2',
-        'fuel_amount' => 'integer',
-        'collection_amount' => 'integer',
-        'percentage' => 'decimal:2',
-        'destinations' => 'array',
+        'amount' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
 
-    public function booking(): BelongsTo
+    public function purchaseOrder(): BelongsTo
     {
-        return $this->belongsTo(Booking::class);
+        return $this->belongsTo(PurchaseOrder::class);
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection(self::TRIP_REPORT_IMAGE_MEDIA_COLLECTION)
+            ->singleFile()
+            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
     }
 }

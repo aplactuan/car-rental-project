@@ -50,6 +50,11 @@ use App\Http\Controllers\V1\Transactions\ListTransactionsController;
 use App\Http\Controllers\V1\Transactions\SingleBookingController;
 use App\Http\Controllers\V1\Transactions\SingleTransactionController;
 use App\Http\Controllers\V1\Transactions\UpdateBookingController;
+use App\Http\Controllers\V1\TripReports\AddTripReportController;
+use App\Http\Controllers\V1\TripReports\DeleteTripReportController;
+use App\Http\Controllers\V1\TripReports\ListTripReportsController;
+use App\Http\Controllers\V1\TripReports\ShowTripReportController;
+use App\Http\Controllers\V1\TripReports\UpdateTripReportController;
 use App\Http\Controllers\V1\Users\AddUserController;
 use Illuminate\Support\Facades\Route;
 
@@ -81,6 +86,11 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/purchase-orders/{purchaseOrder}', SinglePurchaseOrderController::class);
     Route::put('/purchase-orders/{purchaseOrder}', UpdatePurchaseOrderController::class);
     Route::delete('/purchase-orders/{purchaseOrder}', DeletePurchaseOrderController::class);
+    Route::post('/purchase-orders/{purchaseOrder}/trip-reports', AddTripReportController::class);
+    Route::get('/purchase-orders/{purchaseOrder}/trip-reports', ListTripReportsController::class);
+    Route::get('/purchase-orders/{purchaseOrder}/trip-reports/{tripReport}', ShowTripReportController::class);
+    Route::put('/purchase-orders/{purchaseOrder}/trip-reports/{tripReport}', UpdateTripReportController::class);
+    Route::delete('/purchase-orders/{purchaseOrder}/trip-reports/{tripReport}', DeleteTripReportController::class);
 
     Route::get('/billing/summary', BillingSummaryController::class);
     Route::get('/bills', ListBillsController::class);
