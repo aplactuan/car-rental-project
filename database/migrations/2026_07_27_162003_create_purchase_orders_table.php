@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignUuid('customer_id')->nullable()->constrained('customers')->nullOnDelete();
             $table->string('po_number')->unique();
             $table->date('date');
-            $table->integer('amount');
+            $table->unsignedBigInteger('amount');
             $table->string('request_person')->nullable();
             $table->text('description')->nullable();
             $table->timestamps();
