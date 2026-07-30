@@ -77,7 +77,24 @@ describe('authenticated user', function () {
             ->assertCreated()
             ->assertJsonPath('data.attributes.paymentReceiptUrl', null)
             ->assertJsonPath('data.attributes.disbursementVoucherUrl', null)
-            ->assertJsonPath('data.attributes.note', null);
+            ->assertJsonPath('data.attributes.note', null)
+            ->assertJsonPath('data.attributes.status', 'unpaid');
+    });
+
+    test('can add an invoice with paid status', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices", purchaseOrderInvoicePayload([
+            'status' => 'paid',
+        ]))
+            ->assertCreated()
+            ->assertJsonPath('data.attributes.status', 'paid');
+
+        assertDatabaseHas('invoices', [
+            'purchase_order_id' => $purchaseOrder->id,
+            'invoice_number' => 'INV-1001',
+            'status' => 'paid',
+        ]);
     });
 
     test('validates invoice attributes', function () {

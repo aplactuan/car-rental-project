@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Invoice;
 
+use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -32,6 +33,7 @@ class UpdateInvoiceRequest extends FormRequest
             ],
             'lddap_adap_no' => ['sometimes', 'required', 'string', 'max:255'],
             'note' => ['sometimes', 'nullable', 'string'],
+            'status' => ['sometimes', Rule::enum(InvoiceStatus::class)],
             'remove_payment_receipt' => ['sometimes', 'boolean'],
             'remove_disbursement_voucher' => ['sometimes', 'boolean'],
             'payment_receipt' => [
@@ -57,6 +59,7 @@ class UpdateInvoiceRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'status.enum' => 'The status must be either unpaid or paid.',
             'payment_receipt.mimes' => 'The payment receipt must be an image or PDF.',
             'payment_receipt.max' => 'The payment receipt must not exceed 10MB.',
             'payment_receipt.prohibited_if' => 'Do not upload a payment receipt when removing it.',
