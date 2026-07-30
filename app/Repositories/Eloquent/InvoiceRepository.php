@@ -89,4 +89,11 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             return $invoice->fresh('media');
         });
     }
+
+    public function delete(PurchaseOrder $purchaseOrder, Invoice $invoice): void
+    {
+        $invoice = $this->findForPurchaseOrder($purchaseOrder, $invoice);
+
+        $invoice->delete();
+    }
 }

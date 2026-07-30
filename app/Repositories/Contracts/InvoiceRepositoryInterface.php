@@ -38,4 +38,6 @@ interface InvoiceRepositoryInterface
         bool $removePaymentReceipt = false,
         bool $removeDisbursementVoucher = false
     ): Invoice;
+
+    public function delete(PurchaseOrder $purchaseOrder, Invoice $invoice): void;
 }
