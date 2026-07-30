@@ -25,4 +25,17 @@ interface InvoiceRepositoryInterface
         ?UploadedFile $paymentReceipt = null,
         ?UploadedFile $disbursementVoucher = null
     ): Invoice;
+
+    /**
+     * @param  array{invoice_number?: string, lddap_adap_no?: string, note?: string|null}  $data
+     */
+    public function update(
+        PurchaseOrder $purchaseOrder,
+        Invoice $invoice,
+        array $data,
+        ?UploadedFile $paymentReceipt = null,
+        ?UploadedFile $disbursementVoucher = null,
+        bool $removePaymentReceipt = false,
+        bool $removeDisbursementVoucher = false
+    ): Invoice;
 }

@@ -53,4 +53,40 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             return $invoice->fresh('media');
         });
     }
+
+    public function update(
+        PurchaseOrder $purchaseOrder,
+        Invoice $invoice,
+        array $data,
+        ?UploadedFile $paymentReceipt = null,
+        ?UploadedFile $disbursementVoucher = null,
+        bool $removePaymentReceipt = false,
+        bool $removeDisbursementVoucher = false
+    ): Invoice {
+        $invoice = $this->findForPurchaseOrder($purchaseOrder, $invoice);
+
+        return DB::transaction(function () use ($invoice, $data, $paymentReceipt, $disbursementVoucher, $removePaymentReceipt, $removeDisbursementVoucher): Invoice {
+            $invoice->update($data);
+
+            if ($removePaymentReceipt) {
+                $invoice->clearMediaCollection(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION);
+            }
+
+            if ($removeDisbursementVoucher) {
+                $invoice->clearMediaCollection(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION);
+            }
+
+            if ($paymentReceipt !== null) {
+                $invoice->addMedia($paymentReceipt)
+                    ->toMediaCollection(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION);
+            }
+
+            if ($disbursementVoucher !== null) {
+                $invoice->addMedia($disbursementVoucher)
+                    ->toMediaCollection(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION);
+            }
+
+            return $invoice->fresh('media');
+        });
+    }
 }

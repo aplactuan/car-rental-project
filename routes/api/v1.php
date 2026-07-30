@@ -40,6 +40,7 @@ use App\Http\Controllers\V1\Drivers\UpdateDriverController;
 use App\Http\Controllers\V1\Invoices\AddInvoiceController;
 use App\Http\Controllers\V1\Invoices\ListInvoicesController;
 use App\Http\Controllers\V1\Invoices\ShowInvoiceController;
+use App\Http\Controllers\V1\Invoices\UpdateInvoiceController;
 use App\Http\Controllers\V1\PurchaseOrders\AddPurchaseOrderController;
 use App\Http\Controllers\V1\PurchaseOrders\DeletePurchaseOrderController;
 use App\Http\Controllers\V1\PurchaseOrders\ListPurchaseOrdersController;
@@ -97,6 +98,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/purchase-orders/{purchaseOrder}/invoices', AddInvoiceController::class);
     Route::get('/purchase-orders/{purchaseOrder}/invoices', ListInvoicesController::class);
     Route::get('/purchase-orders/{purchaseOrder}/invoices/{invoice}', ShowInvoiceController::class);
+    Route::put('/purchase-orders/{purchaseOrder}/invoices/{invoice}', UpdateInvoiceController::class);
 
     Route::get('/billing/summary', BillingSummaryController::class);
     Route::get('/bills', ListBillsController::class);
