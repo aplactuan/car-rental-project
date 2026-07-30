@@ -52,6 +52,7 @@ describe('authenticated user', function () {
             'invoice_number' => 'INV-UPDATED-002',
             'lddap_adap_no' => 'LDDAP-UPDATED',
             'note' => 'Updated note',
+            'status' => 'paid',
             'payment_receipt' => UploadedFile::fake()->image('new-receipt.png'),
             'disbursement_voucher' => UploadedFile::fake()->image('new-voucher.webp'),
         ]);
@@ -60,7 +61,8 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.id', $invoice->id)
             ->assertJsonPath('data.attributes.invoiceNumber', 'INV-UPDATED-002')
             ->assertJsonPath('data.attributes.lddapAdapNo', 'LDDAP-UPDATED')
-            ->assertJsonPath('data.attributes.note', 'Updated note');
+            ->assertJsonPath('data.attributes.note', 'Updated note')
+            ->assertJsonPath('data.attributes.status', 'paid');
 
         expect($response->json('data.attributes.paymentReceiptUrl'))->not->toBeNull()
             ->and($response->json('data.attributes.disbursementVoucherUrl'))->not->toBeNull();
@@ -70,6 +72,7 @@ describe('authenticated user', function () {
             'invoice_number' => 'INV-UPDATED-002',
             'lddap_adap_no' => 'LDDAP-UPDATED',
             'note' => 'Updated note',
+            'status' => 'paid',
         ]);
 
         $invoice->refresh();
@@ -146,6 +149,7 @@ describe('authenticated user', function () {
         putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
             'invoice_number' => 'INV-TAKEN',
             'lddap_adap_no' => '',
+            'status' => 'pending',
             'payment_receipt' => UploadedFile::fake()->create('receipt.txt', 100, 'text/plain'),
         ])->assertUnprocessable();
     });

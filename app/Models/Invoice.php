@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InvoiceStatus;
 use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -22,14 +23,19 @@ class Invoice extends Model implements HasMedia
         'invoice_number',
         'lddap_adap_no',
         'note',
+        'status',
     ];
 
-    protected $casts = [
-        'id' => 'string',
-        'purchase_order_id' => 'string',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'id' => 'string',
+            'purchase_order_id' => 'string',
+            'status' => InvoiceStatus::class,
+            'created_at' => 'datetime',
+            'updated_at' => 'datetime',
+        ];
+    }
 
     public function purchaseOrder(): BelongsTo
     {

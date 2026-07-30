@@ -52,6 +52,7 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.0.attributes.invoiceNumber', 'INV-LIST-001')
             ->assertJsonPath('data.0.attributes.lddapAdapNo', 'LDDAP-001')
             ->assertJsonPath('data.0.attributes.note', 'First invoice')
+            ->assertJsonPath('data.0.attributes.status', 'unpaid')
             ->assertJsonPath('data.0.relationships.purchaseOrder.data.id', $purchaseOrder->id);
     });
 
@@ -70,6 +71,7 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.invoiceNumber', 'INV-SHOW-001')
             ->assertJsonPath('data.attributes.lddapAdapNo', 'LDDAP-SHOW')
             ->assertJsonPath('data.attributes.note', null)
+            ->assertJsonPath('data.attributes.status', 'unpaid')
             ->assertJsonPath('data.attributes.paymentReceiptUrl', null)
             ->assertJsonPath('data.attributes.disbursementVoucherUrl', null)
             ->assertJsonPath('data.relationships.purchaseOrder.data.id', $purchaseOrder->id);
