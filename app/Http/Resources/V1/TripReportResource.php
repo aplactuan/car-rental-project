@@ -29,6 +29,12 @@ class TripReportResource extends JsonResource
                         'id' => $this->purchase_order_id,
                     ],
                 ],
+                'invoice' => [
+                    'data' => $this->invoice_id === null ? null : [
+                        'type' => 'purchase-order-invoice',
+                        'id' => $this->invoice_id,
+                    ],
+                ],
             ],
         ];
     }
