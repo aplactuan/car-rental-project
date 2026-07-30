@@ -19,6 +19,7 @@ class TripReport extends Model implements HasMedia
 
     protected $fillable = [
         'purchase_order_id',
+        'invoice_id',
         'report_date',
         'driver',
         'destinations',
@@ -28,6 +29,7 @@ class TripReport extends Model implements HasMedia
     protected $casts = [
         'id' => 'string',
         'purchase_order_id' => 'string',
+        'invoice_id' => 'string',
         'report_date' => 'date',
         'amount' => 'integer',
         'created_at' => 'datetime',
@@ -37,6 +39,11 @@ class TripReport extends Model implements HasMedia
     public function purchaseOrder(): BelongsTo
     {
         return $this->belongsTo(PurchaseOrder::class);
+    }
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoice::class);
     }
 
     public function registerMediaCollections(): void
