@@ -10,6 +10,7 @@ use App\Repositories\Contracts\BookingRepositoryInterface;
 use App\Repositories\Contracts\CarRepositoryInterface;
 use App\Repositories\Contracts\CustomerRepositoryInterface;
 use App\Repositories\Contracts\DriverRepositoryInterface;
+use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use App\Repositories\Contracts\PurchaseOrderRepositoryInterface;
 use App\Repositories\Contracts\ScheduleRepositoryInterface;
 use App\Repositories\Contracts\TransactionRepositoryInterface;
@@ -19,6 +20,7 @@ use App\Repositories\Eloquent\BookingRepository;
 use App\Repositories\Eloquent\CarRepository;
 use App\Repositories\Eloquent\CustomerRepository;
 use App\Repositories\Eloquent\DriverRepository;
+use App\Repositories\Eloquent\InvoiceRepository;
 use App\Repositories\Eloquent\PurchaseOrderRepository;
 use App\Repositories\Eloquent\ScheduleRepository;
 use App\Repositories\Eloquent\TransactionRepository;
@@ -38,6 +40,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CarRepositoryInterface::class, CarRepository::class);
         $this->app->bind(CustomerRepositoryInterface::class, CustomerRepository::class);
         $this->app->bind(DriverRepositoryInterface::class, DriverRepository::class);
+        $this->app->bind(InvoiceRepositoryInterface::class, InvoiceRepository::class);
         $this->app->bind(PurchaseOrderRepositoryInterface::class, PurchaseOrderRepository::class);
         $this->app->bind(TransactionRepositoryInterface::class, TransactionRepository::class);
     }
