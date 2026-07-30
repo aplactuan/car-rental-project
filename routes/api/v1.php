@@ -38,7 +38,9 @@ use App\Http\Controllers\V1\Drivers\ShowDriverImportController;
 use App\Http\Controllers\V1\Drivers\SingleDriverController;
 use App\Http\Controllers\V1\Drivers\UpdateDriverController;
 use App\Http\Controllers\V1\Invoices\AddInvoiceController;
+use App\Http\Controllers\V1\Invoices\AttachTripReportsToInvoiceController;
 use App\Http\Controllers\V1\Invoices\DeleteInvoiceController;
+use App\Http\Controllers\V1\Invoices\DetachTripReportsFromInvoiceController;
 use App\Http\Controllers\V1\Invoices\ListInvoicesController;
 use App\Http\Controllers\V1\Invoices\ShowInvoiceController;
 use App\Http\Controllers\V1\Invoices\UpdateInvoiceController;
@@ -101,6 +103,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/purchase-orders/{purchaseOrder}/invoices/{invoice}', ShowInvoiceController::class);
     Route::put('/purchase-orders/{purchaseOrder}/invoices/{invoice}', UpdateInvoiceController::class);
     Route::delete('/purchase-orders/{purchaseOrder}/invoices/{invoice}', DeleteInvoiceController::class);
+    Route::post('/purchase-orders/{purchaseOrder}/invoices/{invoice}/trip-reports', AttachTripReportsToInvoiceController::class);
+    Route::delete('/purchase-orders/{purchaseOrder}/invoices/{invoice}/trip-reports', DetachTripReportsFromInvoiceController::class);
 
     Route::get('/billing/summary', BillingSummaryController::class);
     Route::get('/bills', ListBillsController::class);

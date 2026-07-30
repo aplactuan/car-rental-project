@@ -4,6 +4,7 @@ namespace App\Repositories\Eloquent;
 
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;
+use App\Models\TripReport;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
@@ -95,5 +96,48 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         $invoice = $this->findForPurchaseOrder($purchaseOrder, $invoice);
 
         $invoice->delete();
+    }
+
+    public function attachTripReports(
+        PurchaseOrder $purchaseOrder,
+        Invoice $invoice,
+        array $tripReportIds
+    ): Collection {
+        $invoice = $this->findForPurchaseOrder($purchaseOrder, $invoice);
+
+        return DB::transaction(function () use ($purchaseOrder, $invoice, $tripReportIds): Collection {
+            TripReport::query()
+                ->where('purchase_order_id', $purchaseOrder->id)
+                ->whereIn('id', $tripReportIds)
+                ->update(['invoice_id' => $invoice->id]);
+
+            return TripReport::query()
+                ->with('media')
+                ->where('purchase_order_id', $purchaseOrder->id)
+                ->whereIn('id', $tripReportIds)
+                ->get();
+        });
+    }
+
+    public function detachTripReports(
+        PurchaseOrder $purchaseOrder,
+        Invoice $invoice,
+        array $tripReportIds
+    ): Collection {
+        $invoice = $this->findForPurchaseOrder($purchaseOrder, $invoice);
+
+        return DB::transaction(function () use ($purchaseOrder, $invoice, $tripReportIds): Collection {
+            TripReport::query()
+                ->where('purchase_order_id', $purchaseOrder->id)
+                ->where('invoice_id', $invoice->id)
+                ->whereIn('id', $tripReportIds)
+                ->update(['invoice_id' => null]);
+
+            return TripReport::query()
+                ->with('media')
+                ->where('purchase_order_id', $purchaseOrder->id)
+                ->whereIn('id', $tripReportIds)
+                ->get();
+        });
     }
 }

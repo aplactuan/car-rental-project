@@ -4,6 +4,7 @@ namespace App\Repositories\Contracts;
 
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;
+use App\Models\TripReport;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 
@@ -40,4 +41,24 @@ interface InvoiceRepositoryInterface
     ): Invoice;
 
     public function delete(PurchaseOrder $purchaseOrder, Invoice $invoice): void;
+
+    /**
+     * @param  list<string>  $tripReportIds
+     * @return Collection<int, TripReport>
+     */
+    public function attachTripReports(
+        PurchaseOrder $purchaseOrder,
+        Invoice $invoice,
+        array $tripReportIds
+    ): Collection;
+
+    /**
+     * @param  list<string>  $tripReportIds
+     * @return Collection<int, TripReport>
+     */
+    public function detachTripReports(
+        PurchaseOrder $purchaseOrder,
+        Invoice $invoice,
+        array $tripReportIds
+    ): Collection;
 }
