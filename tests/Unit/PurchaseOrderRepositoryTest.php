@@ -4,10 +4,13 @@ use App\Models\Customer;
 use App\Models\PurchaseOrder;
 use App\Repositories\Eloquent\PurchaseOrderRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 uses(RefreshDatabase::class);
 
 beforeEach(function () {
+    Storage::fake('public');
     $this->repository = new PurchaseOrderRepository(new PurchaseOrder);
 });
 
@@ -29,7 +32,43 @@ test('create persists purchase order', function () {
         ->and($purchaseOrder->amount)->toBe($data['amount'])
         ->and($purchaseOrder->customer_id)->toBe($customer->id)
         ->and($purchaseOrder->relationLoaded('customer'))->toBeTrue()
-        ->and($purchaseOrder->customer->is($customer))->toBeTrue();
+        ->and($purchaseOrder->customer->is($customer))->toBeTrue()
+        ->and($purchaseOrder->relationLoaded('media'))->toBeTrue()
+        ->and($purchaseOrder->getMedia(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION))->toHaveCount(0);
+});
+
+test('create persists purchase order with attachments', function () {
+    $customer = Customer::factory()->create();
+
+    $purchaseOrder = $this->repository->create([
+        'customer_id' => $customer->id,
+        'po_number' => 'PO-REPO-ATTACH',
+        'date' => '2026-07-15',
+        'amount' => 250000,
+    ], [
+        UploadedFile::fake()->image('a.jpg'),
+        UploadedFile::fake()->createWithContent('b.pdf', '%PDF-1.4 fake'),
+    ]);
+
+    expect($purchaseOrder->getMedia(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION))->toHaveCount(2);
+});
+
+test('update can add and remove attachments', function () {
+    $purchaseOrder = PurchaseOrder::factory()->create();
+    $purchaseOrder->addMedia(UploadedFile::fake()->image('remove-me.jpg'))
+        ->toMediaCollection(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION);
+
+    $mediaUuid = $purchaseOrder->getFirstMedia(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION)->uuid;
+
+    $updated = $this->repository->update($purchaseOrder->id, [
+        'amount' => 175000,
+    ], [
+        UploadedFile::fake()->image('added.png'),
+    ], [$mediaUuid]);
+
+    expect($updated->amount)->toBe(175000)
+        ->and($updated->getMedia(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION))->toHaveCount(1)
+        ->and($updated->getFirstMedia(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION)->file_name)->toBe('added.png');
 });
 
 test('find returns purchase order by id with customer', function () {

@@ -23,7 +23,21 @@ class UpdatePurchaseOrderController extends Controller
             return $this->error('Purchase order not found', 404);
         }
 
-        $purchaseOrder = $this->purchaseOrder->update($purchaseOrder->id, $request->validated());
+        $data = $request->validated();
+        $removeAttachmentIds = $data['remove_attachment_ids'] ?? [];
+        unset($data['attachments'], $data['remove_attachment_ids']);
+
+        $attachments = $request->file('attachments', []);
+        if (! is_array($attachments)) {
+            $attachments = $attachments ? [$attachments] : [];
+        }
+
+        $purchaseOrder = $this->purchaseOrder->update(
+            $purchaseOrder->id,
+            $data,
+            $attachments,
+            $removeAttachmentIds
+        );
 
         return new PurchaseOrderResource($purchaseOrder);
     }

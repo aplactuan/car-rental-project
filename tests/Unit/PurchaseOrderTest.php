@@ -4,8 +4,16 @@ use App\Models\Customer;
 use App\Models\PurchaseOrder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\MediaLibrary\HasMedia;
 
 uses(RefreshDatabase::class);
+
+test('it implements media library for attachments', function () {
+    $purchaseOrder = new PurchaseOrder;
+
+    expect($purchaseOrder)->toBeInstanceOf(HasMedia::class)
+        ->and(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION)->toBe('attachments');
+});
 
 test('it belongs to a customer', function () {
     $customer = Customer::factory()->create();

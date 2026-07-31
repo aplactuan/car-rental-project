@@ -2,6 +2,7 @@
 
 namespace App\Http\Resources\V1;
 
+use App\Models\PurchaseOrder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
@@ -24,6 +25,7 @@ class PurchaseOrderResource extends JsonResource
                 'requestPerson' => $this->request_person,
                 'description' => $this->description,
                 'customerId' => $this->customer_id,
+                'attachments' => $this->attachmentsData(),
             ],
             'relationships' => [
                 'customer' => [
@@ -31,6 +33,23 @@ class PurchaseOrderResource extends JsonResource
                 ],
             ],
         ];
+    }
+
+    /**
+     * @return array<int, array{id: string, fileName: string, mimeType: string|null, size: int, url: string}>
+     */
+    private function attachmentsData(): array
+    {
+        return $this->getMedia(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION)
+            ->map(fn ($media) => [
+                'id' => $media->uuid,
+                'fileName' => $media->file_name,
+                'mimeType' => $media->mime_type,
+                'size' => $media->size,
+                'url' => $media->getUrl(),
+            ])
+            ->values()
+            ->all();
     }
 
     /**

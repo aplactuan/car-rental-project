@@ -6,6 +6,8 @@ use App\Models\PurchaseOrder;
 use App\Repositories\BaseRepository;
 use App\Repositories\Contracts\PurchaseOrderRepositoryInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 
 class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRepositoryInterface
 {
@@ -20,6 +22,7 @@ class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRep
     public function paginate(int $perPage = 15, array $filters = [])
     {
         return $this->model->newQuery()
+            ->with('media')
             ->when(
                 isset($filters['customer_id']),
                 fn (Builder $builder) => $builder->where('customer_id', $filters['customer_id'])
@@ -30,23 +33,63 @@ class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRep
 
     public function find($id)
     {
-        return $this->model->with('customer')->findOrFail($id);
+        return $this->model->with(['customer', 'media'])->findOrFail($id);
     }
 
-    public function create(array $data)
+    /**
+     * @param  array<int, UploadedFile>  $attachments
+     */
+    public function create(array $data, array $attachments = [])
     {
-        $purchaseOrder = $this->model->create($data);
-        $purchaseOrder->load('customer');
+        return DB::transaction(function () use ($data, $attachments) {
+            $purchaseOrder = $this->model->create($data);
 
-        return $purchaseOrder;
+            $this->addAttachments($purchaseOrder, $attachments);
+
+            return $purchaseOrder->fresh(['customer', 'media']);
+        });
     }
 
-    public function update($id, array $data)
+    /**
+     * @param  array<int, UploadedFile>  $attachments
+     * @param  array<int, string>  $removeAttachmentIds
+     */
+    public function update($id, array $data, array $attachments = [], array $removeAttachmentIds = [])
     {
         $purchaseOrder = $this->find($id);
-        $purchaseOrder->update($data);
-        $purchaseOrder->load('customer');
 
-        return $purchaseOrder;
+        return DB::transaction(function () use ($purchaseOrder, $data, $attachments, $removeAttachmentIds) {
+            $purchaseOrder->update($data);
+
+            $this->removeAttachments($purchaseOrder, $removeAttachmentIds);
+            $this->addAttachments($purchaseOrder, $attachments);
+
+            return $purchaseOrder->fresh(['customer', 'media']);
+        });
+    }
+
+    /**
+     * @param  array<int, UploadedFile>  $attachments
+     */
+    private function addAttachments(PurchaseOrder $purchaseOrder, array $attachments): void
+    {
+        foreach ($attachments as $attachment) {
+            $purchaseOrder->addMedia($attachment)
+                ->toMediaCollection(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION);
+        }
+    }
+
+    /**
+     * @param  array<int, string>  $removeAttachmentIds
+     */
+    private function removeAttachments(PurchaseOrder $purchaseOrder, array $removeAttachmentIds): void
+    {
+        if ($removeAttachmentIds === []) {
+            return;
+        }
+
+        $purchaseOrder->getMedia(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION)
+            ->whereIn('uuid', $removeAttachmentIds)
+            ->each(fn ($media) => $media->delete());
     }
 }

@@ -4,6 +4,8 @@ use App\Models\Customer;
 use App\Models\PurchaseOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -23,6 +25,7 @@ describe('guest user', function () {
 
 describe('authenticated user', function () {
     beforeEach(function () {
+        Storage::fake('public');
         $this->user = User::factory()->create();
         Sanctum::actingAs($this->user);
     });
@@ -54,6 +57,7 @@ describe('authenticated user', function () {
                         'amount',
                         'requestPerson',
                         'description',
+                        'attachments',
                     ],
                 ],
             ])
@@ -62,7 +66,8 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.date', $payload['date'])
             ->assertJsonPath('data.attributes.amount', $payload['amount'])
             ->assertJsonPath('data.attributes.requestPerson', $payload['request_person'])
-            ->assertJsonPath('data.attributes.description', $payload['description']);
+            ->assertJsonPath('data.attributes.description', $payload['description'])
+            ->assertJsonPath('data.attributes.attachments', []);
 
         assertDatabaseHas('purchase_orders', [
             'id' => $purchaseOrder->id,
@@ -71,6 +76,48 @@ describe('authenticated user', function () {
             'request_person' => $payload['request_person'],
             'description' => $payload['description'],
         ]);
+    });
+
+    test('it can add and remove purchase order attachments on update', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+        $purchaseOrder->addMedia(UploadedFile::fake()->image('old.jpg'))
+            ->toMediaCollection(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION);
+        $purchaseOrder->addMedia(UploadedFile::fake()->createWithContent('keep.pdf', '%PDF-1.4 fake'))
+            ->toMediaCollection(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION);
+
+        $oldAttachmentId = $purchaseOrder->getFirstMedia(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION)->uuid;
+
+        $response = putJson("/api/v1/purchase-orders/{$purchaseOrder->id}", [
+            'remove_attachment_ids' => [$oldAttachmentId],
+            'attachments' => [
+                UploadedFile::fake()->image('new.png'),
+            ],
+        ]);
+
+        $response->assertOk();
+
+        $attachments = collect($response->json('data.attributes.attachments'));
+
+        expect($attachments)->toHaveCount(2)
+            ->and($attachments->pluck('fileName')->all())->toContain('keep.pdf', 'new.png')
+            ->and($attachments->pluck('id')->all())->not->toContain($oldAttachmentId);
+
+        expect($purchaseOrder->fresh()->getMedia(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION))->toHaveCount(2);
+    });
+
+    test('it rejects removing attachments that do not belong to the purchase order', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+        $otherPurchaseOrder = PurchaseOrder::factory()->create();
+        $otherPurchaseOrder->addMedia(UploadedFile::fake()->image('other.jpg'))
+            ->toMediaCollection(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION);
+
+        $foreignAttachmentId = $otherPurchaseOrder->getFirstMedia(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION)->uuid;
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}", [
+            'remove_attachment_ids' => [$foreignAttachmentId],
+        ])
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/remove_attachment_ids/0');
     });
 
     test('it can reassign a purchase order to another customer', function () {

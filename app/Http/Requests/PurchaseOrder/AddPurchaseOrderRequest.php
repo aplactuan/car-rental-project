@@ -23,6 +23,8 @@ class AddPurchaseOrderRequest extends FormRequest
             'amount' => ['required', 'integer', 'min:0'],
             'request_person' => ['sometimes', 'nullable', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string'],
+            'attachments' => ['sometimes', 'array'],
+            'attachments.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx', 'max:10240'],
         ];
     }
 
@@ -35,6 +37,8 @@ class AddPurchaseOrderRequest extends FormRequest
             'customer_id.uuid' => 'The selected customer must be a valid UUID.',
             'customer_id.exists' => 'The selected customer does not exist.',
             'po_number.unique' => 'The purchase order number has already been taken.',
+            'attachments.*.mimes' => 'Each attachment must be an image, document, or PDF.',
+            'attachments.*.max' => 'Each attachment must not exceed 10MB.',
         ];
     }
 }
