@@ -54,6 +54,15 @@ class TripReport extends Model implements HasMedia
     {
         $this->addMediaCollection(self::TRIP_REPORT_IMAGE_MEDIA_COLLECTION)
             ->singleFile()
-            ->acceptsMimeTypes(['image/jpeg', 'image/png', 'image/webp']);
+            ->acceptsMimeTypes([
+                'image/jpeg',
+                'image/png',
+                'image/webp',
+                'application/pdf',
+                'application/msword',
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'application/vnd.ms-excel',
+                'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            ]);
     }
 }
