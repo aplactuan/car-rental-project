@@ -19,6 +19,8 @@ class CreateTripReportRequest extends FormRequest
     {
         return [
             'report_date' => ['required', 'date'],
+            'trip_start' => ['required', 'date'],
+            'trip_end' => ['required', 'date'],
             'driver' => ['required', 'string', 'max:255'],
             'destinations' => ['required', 'string'],
             'amount' => ['required', 'integer', 'min:0'],
