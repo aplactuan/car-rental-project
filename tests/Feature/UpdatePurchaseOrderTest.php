@@ -43,6 +43,7 @@ describe('authenticated user', function () {
             'amount' => 325000,
             'request_person' => 'Updated Person',
             'description' => 'Updated description',
+            'status' => 'ok',
         ];
 
         putJson("/api/v1/purchase-orders/{$purchaseOrder->id}", $payload)
@@ -57,6 +58,7 @@ describe('authenticated user', function () {
                         'amount',
                         'requestPerson',
                         'description',
+                        'status',
                         'attachments',
                     ],
                 ],
@@ -67,6 +69,7 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.amount', $payload['amount'])
             ->assertJsonPath('data.attributes.requestPerson', $payload['request_person'])
             ->assertJsonPath('data.attributes.description', $payload['description'])
+            ->assertJsonPath('data.attributes.status', 'ok')
             ->assertJsonPath('data.attributes.attachments', []);
 
         assertDatabaseHas('purchase_orders', [
@@ -75,7 +78,18 @@ describe('authenticated user', function () {
             'amount' => $payload['amount'],
             'request_person' => $payload['request_person'],
             'description' => $payload['description'],
+            'status' => 'ok',
         ]);
+    });
+
+    test('it rejects an invalid purchase order status on update', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}", [
+            'status' => 'approved',
+        ])
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/status');
     });
 
     test('it can add and remove purchase order attachments on update', function () {

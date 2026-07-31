@@ -24,6 +24,7 @@ class PurchaseOrderResource extends JsonResource
                 'amount' => $this->amount,
                 'requestPerson' => $this->request_person,
                 'description' => $this->description,
+                'status' => $this->status->value,
                 'customerId' => $this->customer_id,
                 'attachments' => $this->attachmentsData(),
             ],

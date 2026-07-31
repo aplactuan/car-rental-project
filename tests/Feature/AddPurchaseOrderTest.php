@@ -50,6 +50,7 @@ describe('authenticated user', function () {
             'amount' => $payload['amount'],
             'request_person' => $payload['request_person'],
             'description' => $payload['description'],
+            'status' => 'pending',
         ]);
 
         $response->assertStatus(201)
@@ -64,6 +65,7 @@ describe('authenticated user', function () {
                         'amount',
                         'requestPerson',
                         'description',
+                        'status',
                         'customerId',
                         'attachments',
                     ],
@@ -78,10 +80,38 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.amount', $payload['amount'])
             ->assertJsonPath('data.attributes.requestPerson', $payload['request_person'])
             ->assertJsonPath('data.attributes.description', $payload['description'])
+            ->assertJsonPath('data.attributes.status', 'pending')
             ->assertJsonPath('data.attributes.customerId', $customer->id)
             ->assertJsonPath('data.attributes.attachments', [])
             ->assertJsonPath('data.relationships.customer.data.id', $customer->id)
             ->assertJsonPath('data.relationships.customer.data.attributes.name', $customer->name);
+    });
+
+    test('it can add a purchase order with ok status', function () {
+        $customer = Customer::factory()->create();
+
+        postJson('/api/v1/purchase-orders', purchaseOrderPayload([
+            'customer_id' => $customer->id,
+            'status' => 'ok',
+        ]))
+            ->assertCreated()
+            ->assertJsonPath('data.attributes.status', 'ok');
+
+        assertDatabaseHas('purchase_orders', [
+            'po_number' => 'PO-1001',
+            'status' => 'ok',
+        ]);
+    });
+
+    test('it rejects an invalid purchase order status', function () {
+        $customer = Customer::factory()->create();
+
+        postJson('/api/v1/purchase-orders', purchaseOrderPayload([
+            'customer_id' => $customer->id,
+            'status' => 'approved',
+        ]))
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/status');
     });
 
     test('it can add a purchase order with multiple attachments', function () {
