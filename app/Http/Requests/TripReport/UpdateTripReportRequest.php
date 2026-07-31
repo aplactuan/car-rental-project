@@ -24,7 +24,7 @@ class UpdateTripReportRequest extends FormRequest
             'driver' => ['sometimes', 'required', 'string', 'max:255'],
             'destinations' => ['sometimes', 'required', 'string'],
             'amount' => ['sometimes', 'required', 'integer', 'min:0'],
-            'trip_report_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'trip_report_image' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx', 'max:10240'],
         ];
     }
 
@@ -34,8 +34,8 @@ class UpdateTripReportRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'trip_report_image.image' => 'The trip report image must be an image.',
-            'trip_report_image.max' => 'The trip report image must not exceed 10MB.',
+            'trip_report_image.mimes' => 'The trip report file must be an image, document, or PDF.',
+            'trip_report_image.max' => 'The trip report file must not exceed 10MB.',
         ];
     }
 }

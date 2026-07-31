@@ -82,6 +82,31 @@ describe('authenticated user', function () {
             ->and($tripReport->getFirstMedia('trip_report_image'))->not->toBeNull();
     });
 
+    test('can create a trip report with a pdf attachment', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        $response = postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/trip-reports", tripReportPayload([
+            'trip_report_image' => UploadedFile::fake()->createWithContent('trip-report.pdf', '%PDF-1.4 fake'),
+        ]));
+
+        $response->assertCreated();
+        expect($response->json('data.attributes.tripReportImageUrl'))->not->toBeNull();
+
+        $tripReport = TripReport::query()->latest('created_at')->firstOrFail();
+        expect($tripReport->getFirstMedia(TripReport::TRIP_REPORT_IMAGE_MEDIA_COLLECTION)->mime_type)
+            ->toBe('application/pdf');
+    });
+
+    test('rejects invalid trip report attachment types', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/trip-reports", tripReportPayload([
+            'trip_report_image' => UploadedFile::fake()->create('malware.exe', 100, 'application/octet-stream'),
+        ]))
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/trip_report_image');
+    });
+
     test('can create a trip report without an image', function () {
         $purchaseOrder = PurchaseOrder::factory()->create();
 
@@ -160,7 +185,7 @@ describe('authenticated user', function () {
             'driver' => '',
             'destinations' => '',
             'amount' => -1,
-            'trip_report_image' => UploadedFile::fake()->create('trip-report.pdf', 100, 'application/pdf'),
+            'trip_report_image' => UploadedFile::fake()->create('malware.exe', 100, 'application/octet-stream'),
         ])
             ->assertUnprocessable()
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/report_date');
