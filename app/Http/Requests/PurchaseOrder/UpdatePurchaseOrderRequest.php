@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\PurchaseOrder;
 
+use App\Enums\PurchaseOrderStatus;
 use App\Models\PurchaseOrder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -33,6 +34,18 @@ class UpdatePurchaseOrderRequest extends FormRequest
             'amount' => ['sometimes', 'integer', 'min:0'],
             'request_person' => ['sometimes', 'nullable', 'string', 'max:255'],
             'description' => ['sometimes', 'nullable', 'string'],
+            'status' => ['sometimes', Rule::enum(PurchaseOrderStatus::class)],
+            'attachments' => ['sometimes', 'array'],
+            'attachments.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx', 'max:10240'],
+            'remove_attachment_ids' => ['sometimes', 'array'],
+            'remove_attachment_ids.*' => [
+                'uuid',
+                Rule::exists('media', 'uuid')->where(function ($query) use ($purchaseOrder): void {
+                    $query->where('model_type', $purchaseOrder->getMorphClass())
+                        ->where('model_id', $purchaseOrder->id)
+                        ->where('collection_name', PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION);
+                }),
+            ],
         ];
     }
 
@@ -45,6 +58,11 @@ class UpdatePurchaseOrderRequest extends FormRequest
             'customer_id.uuid' => 'The selected customer must be a valid UUID.',
             'customer_id.exists' => 'The selected customer does not exist.',
             'po_number.unique' => 'The purchase order number has already been taken.',
+            'status.enum' => 'The status must be either pending or ok.',
+            'attachments.*.mimes' => 'Each attachment must be an image, document, or PDF.',
+            'attachments.*.max' => 'Each attachment must not exceed 10MB.',
+            'remove_attachment_ids.*.uuid' => 'Each attachment id to remove must be a valid UUID.',
+            'remove_attachment_ids.*.exists' => 'One or more attachments to remove were not found.',
         ];
     }
 }

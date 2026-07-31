@@ -13,7 +13,15 @@ class AddPurchaseOrderController extends Controller
 
     public function __invoke(AddPurchaseOrderRequest $request)
     {
-        $purchaseOrder = $this->purchaseOrder->create($request->validated());
+        $data = $request->validated();
+        unset($data['attachments']);
+
+        $attachments = $request->file('attachments', []);
+        if (! is_array($attachments)) {
+            $attachments = $attachments ? [$attachments] : [];
+        }
+
+        $purchaseOrder = $this->purchaseOrder->create($data, $attachments);
 
         return (new PurchaseOrderResource($purchaseOrder))
             ->response()

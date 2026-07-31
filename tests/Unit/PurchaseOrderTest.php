@@ -1,11 +1,32 @@
 <?php
 
+use App\Enums\PurchaseOrderStatus;
 use App\Models\Customer;
 use App\Models\PurchaseOrder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\MediaLibrary\HasMedia;
 
 uses(RefreshDatabase::class);
+
+test('it implements media library for attachments', function () {
+    $purchaseOrder = new PurchaseOrder;
+
+    expect($purchaseOrder)->toBeInstanceOf(HasMedia::class)
+        ->and(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION)->toBe('attachments');
+});
+
+test('it defaults status to pending', function () {
+    $purchaseOrder = PurchaseOrder::factory()->create();
+
+    expect($purchaseOrder->status)->toBe(PurchaseOrderStatus::Pending);
+});
+
+test('it casts status to purchase order status enum', function () {
+    $purchaseOrder = PurchaseOrder::factory()->ok()->create();
+
+    expect($purchaseOrder->status)->toBe(PurchaseOrderStatus::Ok);
+});
 
 test('it belongs to a customer', function () {
     $customer = Customer::factory()->create();

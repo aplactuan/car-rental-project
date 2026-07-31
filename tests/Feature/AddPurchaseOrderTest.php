@@ -4,6 +4,8 @@ use App\Models\Customer;
 use App\Models\PurchaseOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -31,6 +33,7 @@ describe('guest user', function () {
 
 describe('authenticated user', function () {
     beforeEach(function () {
+        Storage::fake('public');
         $this->user = User::factory()->create();
         Sanctum::actingAs($this->user);
     });
@@ -47,6 +50,7 @@ describe('authenticated user', function () {
             'amount' => $payload['amount'],
             'request_person' => $payload['request_person'],
             'description' => $payload['description'],
+            'status' => 'pending',
         ]);
 
         $response->assertStatus(201)
@@ -61,7 +65,9 @@ describe('authenticated user', function () {
                         'amount',
                         'requestPerson',
                         'description',
+                        'status',
                         'customerId',
+                        'attachments',
                     ],
                     'relationships' => [
                         'customer',
@@ -74,9 +80,76 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.amount', $payload['amount'])
             ->assertJsonPath('data.attributes.requestPerson', $payload['request_person'])
             ->assertJsonPath('data.attributes.description', $payload['description'])
+            ->assertJsonPath('data.attributes.status', 'pending')
             ->assertJsonPath('data.attributes.customerId', $customer->id)
+            ->assertJsonPath('data.attributes.attachments', [])
             ->assertJsonPath('data.relationships.customer.data.id', $customer->id)
             ->assertJsonPath('data.relationships.customer.data.attributes.name', $customer->name);
+    });
+
+    test('it can add a purchase order with ok status', function () {
+        $customer = Customer::factory()->create();
+
+        postJson('/api/v1/purchase-orders', purchaseOrderPayload([
+            'customer_id' => $customer->id,
+            'status' => 'ok',
+        ]))
+            ->assertCreated()
+            ->assertJsonPath('data.attributes.status', 'ok');
+
+        assertDatabaseHas('purchase_orders', [
+            'po_number' => 'PO-1001',
+            'status' => 'ok',
+        ]);
+    });
+
+    test('it rejects an invalid purchase order status', function () {
+        $customer = Customer::factory()->create();
+
+        postJson('/api/v1/purchase-orders', purchaseOrderPayload([
+            'customer_id' => $customer->id,
+            'status' => 'approved',
+        ]))
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/status');
+    });
+
+    test('it can add a purchase order with multiple attachments', function () {
+        $customer = Customer::factory()->create();
+        $payload = purchaseOrderPayload([
+            'customer_id' => $customer->id,
+            'attachments' => [
+                UploadedFile::fake()->image('quote.jpg'),
+                UploadedFile::fake()->image('scan.png'),
+                UploadedFile::fake()->createWithContent('spec.pdf', '%PDF-1.4 fake'),
+            ],
+        ]);
+
+        $response = postJson('/api/v1/purchase-orders', $payload);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.attributes.poNumber', $payload['po_number']);
+
+        expect($response->json('data.attributes.attachments'))->toHaveCount(3)
+            ->and($response->json('data.attributes.attachments.0.fileName'))->toBe('quote.jpg')
+            ->and($response->json('data.attributes.attachments.0.url'))->not->toBeEmpty()
+            ->and($response->json('data.attributes.attachments.0.id'))->not->toBeEmpty();
+
+        $purchaseOrder = PurchaseOrder::query()->where('po_number', $payload['po_number'])->firstOrFail();
+        expect($purchaseOrder->getMedia(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION))->toHaveCount(3);
+    });
+
+    test('it rejects invalid purchase order attachment types', function () {
+        $customer = Customer::factory()->create();
+
+        postJson('/api/v1/purchase-orders', purchaseOrderPayload([
+            'customer_id' => $customer->id,
+            'attachments' => [
+                UploadedFile::fake()->create('malware.exe', 100, 'application/octet-stream'),
+            ],
+        ]))
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/attachments/0');
     });
 
     test('it can add a purchase order without request person and description', function () {

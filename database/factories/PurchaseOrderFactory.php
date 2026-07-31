@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\PurchaseOrderStatus;
 use App\Models\Customer;
 use App\Models\PurchaseOrder;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -25,6 +26,7 @@ class PurchaseOrderFactory extends Factory
             'amount' => $this->faker->numberBetween(1000, 500000),
             'request_person' => $this->faker->optional()->name(),
             'description' => $this->faker->optional()->sentence(),
+            'status' => PurchaseOrderStatus::Pending,
         ];
     }
 
@@ -32,6 +34,13 @@ class PurchaseOrderFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'customer_id' => $customer->id,
+        ]);
+    }
+
+    public function ok(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'status' => PurchaseOrderStatus::Ok,
         ]);
     }
 }

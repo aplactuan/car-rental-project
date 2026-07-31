@@ -2,6 +2,8 @@
 
 namespace App\Repositories\Contracts;
 
+use Illuminate\Http\UploadedFile;
+
 interface PurchaseOrderRepositoryInterface
 {
     public function all();
@@ -13,9 +15,16 @@ interface PurchaseOrderRepositoryInterface
 
     public function find($id);
 
-    public function create(array $data);
+    /**
+     * @param  array<int, UploadedFile>  $attachments
+     */
+    public function create(array $data, array $attachments = []);
 
-    public function update($id, array $data);
+    /**
+     * @param  array<int, UploadedFile>  $attachments
+     * @param  array<int, string>  $removeAttachmentIds
+     */
+    public function update($id, array $data, array $attachments = [], array $removeAttachmentIds = []);
 
     public function delete($id);
 }
