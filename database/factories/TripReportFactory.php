@@ -16,6 +16,8 @@ class TripReportFactory extends Factory
         return [
             'purchase_order_id' => PurchaseOrder::factory(),
             'report_date' => $this->faker->date(),
+            'trip_start' => $this->faker->date(),
+            'trip_end' => $this->faker->date(),
             'driver' => $this->faker->name(),
             'destinations' => $this->faker->city(),
             'amount' => $this->faker->numberBetween(500, 20_000),

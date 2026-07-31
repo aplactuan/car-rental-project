@@ -19,6 +19,8 @@ class UpdateTripReportRequest extends FormRequest
     {
         return [
             'report_date' => ['sometimes', 'required', 'date'],
+            'trip_start' => ['sometimes', 'required', 'date'],
+            'trip_end' => ['sometimes', 'required', 'date'],
             'driver' => ['sometimes', 'required', 'string', 'max:255'],
             'destinations' => ['sometimes', 'required', 'string'],
             'amount' => ['sometimes', 'required', 'integer', 'min:0'],

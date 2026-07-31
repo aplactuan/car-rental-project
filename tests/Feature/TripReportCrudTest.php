@@ -21,6 +21,8 @@ function tripReportPayload(array $overrides = []): array
 {
     return array_merge([
         'report_date' => '2026-07-28',
+        'trip_start' => '2026-07-27',
+        'trip_end' => '2026-07-28',
         'driver' => 'Juan Dela Cruz',
         'destinations' => 'Manila to Quezon City',
         'amount' => 1_500,
@@ -58,6 +60,8 @@ describe('authenticated user', function () {
         $response->assertCreated()
             ->assertJsonPath('data.type', 'trip-report')
             ->assertJsonPath('data.attributes.reportDate', $payload['report_date'])
+            ->assertJsonPath('data.attributes.tripStart', $payload['trip_start'])
+            ->assertJsonPath('data.attributes.tripEnd', $payload['trip_end'])
             ->assertJsonPath('data.attributes.driver', $payload['driver'])
             ->assertJsonPath('data.attributes.destinations', $payload['destinations'])
             ->assertJsonPath('data.attributes.amount', $payload['amount'])
@@ -73,7 +77,9 @@ describe('authenticated user', function () {
         ]);
 
         $tripReport = TripReport::query()->latest('created_at')->firstOrFail();
-        expect($tripReport->getFirstMedia('trip_report_image'))->not->toBeNull();
+        expect($tripReport->trip_start->toDateString())->toBe($payload['trip_start'])
+            ->and($tripReport->trip_end->toDateString())->toBe($payload['trip_end'])
+            ->and($tripReport->getFirstMedia('trip_report_image'))->not->toBeNull();
     });
 
     test('can create a trip report without an image', function () {
@@ -113,6 +119,8 @@ describe('authenticated user', function () {
 
         $payload = [
             'report_date' => '2026-08-01',
+            'trip_start' => '2026-07-30',
+            'trip_end' => '2026-08-01',
             'driver' => 'Pedro Reyes',
             'destinations' => 'Makati to Pasig',
             'amount' => 2_500,
@@ -122,6 +130,8 @@ describe('authenticated user', function () {
         putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/trip-reports/{$tripReport->id}", $payload)
             ->assertOk()
             ->assertJsonPath('data.attributes.reportDate', $payload['report_date'])
+            ->assertJsonPath('data.attributes.tripStart', $payload['trip_start'])
+            ->assertJsonPath('data.attributes.tripEnd', $payload['trip_end'])
             ->assertJsonPath('data.attributes.driver', $payload['driver'])
             ->assertJsonPath('data.attributes.destinations', $payload['destinations'])
             ->assertJsonPath('data.attributes.amount', $payload['amount']);
@@ -133,7 +143,11 @@ describe('authenticated user', function () {
             'amount' => $payload['amount'],
         ]);
 
-        expect($tripReport->fresh()->getMedia('trip_report_image'))->toHaveCount(1);
+        $tripReport = $tripReport->fresh();
+
+        expect($tripReport->trip_start->toDateString())->toBe($payload['trip_start'])
+            ->and($tripReport->trip_end->toDateString())->toBe($payload['trip_end'])
+            ->and($tripReport->getMedia('trip_report_image'))->toHaveCount(1);
     });
 
     test('validates the trip report attributes', function () {
@@ -141,6 +155,8 @@ describe('authenticated user', function () {
 
         postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/trip-reports", [
             'report_date' => 'not-a-date',
+            'trip_start' => 'not-a-date',
+            'trip_end' => 'not-a-date',
             'driver' => '',
             'destinations' => '',
             'amount' => -1,
@@ -148,6 +164,20 @@ describe('authenticated user', function () {
         ])
             ->assertUnprocessable()
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/report_date');
+    });
+
+    test('requires trip start and trip end dates', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/trip-reports", [
+            'report_date' => '2026-07-28',
+            'driver' => 'Juan Dela Cruz',
+            'destinations' => 'Manila to Quezon City',
+            'amount' => 1_500,
+        ])
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/trip_start')
+            ->assertJsonPath('errors.1.source.pointer', '/data/attributes/trip_end');
     });
 
     test('can delete a trip report', function () {
