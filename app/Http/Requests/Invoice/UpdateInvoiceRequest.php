@@ -31,7 +31,7 @@ class UpdateInvoiceRequest extends FormRequest
                 'max:255',
                 Rule::unique('invoices', 'invoice_number')->ignore($invoice->id),
             ],
-            'lddap_adap_no' => ['sometimes', 'required', 'string', 'max:255'],
+            'lddap_adap_no' => ['sometimes', 'nullable', 'string', 'max:255'],
             'note' => ['sometimes', 'nullable', 'string'],
             'status' => ['sometimes', Rule::enum(InvoiceStatus::class)],
             'remove_payment_receipt' => ['sometimes', 'boolean'],

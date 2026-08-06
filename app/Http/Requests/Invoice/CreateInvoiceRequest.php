@@ -21,7 +21,7 @@ class CreateInvoiceRequest extends FormRequest
     {
         return [
             'invoice_number' => ['required', 'string', 'max:255', 'unique:invoices,invoice_number'],
-            'lddap_adap_no' => ['required', 'string', 'max:255'],
+            'lddap_adap_no' => ['nullable', 'string', 'max:255'],
             'note' => ['nullable', 'string'],
             'status' => ['sometimes', Rule::enum(InvoiceStatus::class)],
             'payment_receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:10240'],

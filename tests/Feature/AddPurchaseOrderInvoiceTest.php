@@ -68,6 +68,22 @@ describe('authenticated user', function () {
             ->and($invoice->getFirstMedia(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION))->not->toBeNull();
     });
 
+    test('can add an invoice without an lddap adap no', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices", purchaseOrderInvoicePayload([
+            'lddap_adap_no' => null,
+        ]))
+            ->assertCreated()
+            ->assertJsonPath('data.attributes.lddapAdapNo', null);
+
+        assertDatabaseHas('invoices', [
+            'purchase_order_id' => $purchaseOrder->id,
+            'invoice_number' => 'INV-1001',
+            'lddap_adap_no' => null,
+        ]);
+    });
+
     test('can add an invoice without files', function () {
         $purchaseOrder = PurchaseOrder::factory()->create();
 

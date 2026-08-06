@@ -83,6 +83,22 @@ describe('authenticated user', function () {
             ->and($invoice->getFirstMedia(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION)?->file_name)->toBe('new-voucher.webp');
     });
 
+    test('can clear lddap adap no on update', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+        $invoice = invoiceForUpdate($purchaseOrder);
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
+            'lddap_adap_no' => null,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.attributes.lddapAdapNo', null);
+
+        assertDatabaseHas('invoices', [
+            'id' => $invoice->id,
+            'lddap_adap_no' => null,
+        ]);
+    });
+
     test('can partially update an invoice without removing existing files', function () {
         $purchaseOrder = PurchaseOrder::factory()->create();
         $invoice = invoiceForUpdate($purchaseOrder);
