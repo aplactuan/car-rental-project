@@ -14,6 +14,7 @@ class TripReportResource extends JsonResource
             'type' => 'trip-report',
             'id' => $this->id,
             'attributes' => [
+                'tripReportNo' => $this->trip_report_no,
                 'reportDate' => $this->report_date?->toDateString(),
                 'tripStart' => $this->trip_start?->toDateString(),
                 'tripEnd' => $this->trip_end?->toDateString(),

@@ -15,6 +15,7 @@ class TripReportFactory extends Factory
     {
         return [
             'purchase_order_id' => PurchaseOrder::factory(),
+            'trip_report_no' => 'TR-'.strtoupper($this->faker->unique()->bothify('##########')),
             'report_date' => $this->faker->date(),
             'trip_start' => $this->faker->date(),
             'trip_end' => $this->faker->date(),

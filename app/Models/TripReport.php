@@ -20,6 +20,7 @@ class TripReport extends Model implements HasMedia
     protected $fillable = [
         'purchase_order_id',
         'invoice_id',
+        'trip_report_no',
         'report_date',
         'trip_start',
         'trip_end',
