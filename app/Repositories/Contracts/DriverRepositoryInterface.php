@@ -10,6 +10,11 @@ interface DriverRepositoryInterface
     public function all();
 
     /**
+     * All drivers with id and name columns only, ordered by last then first name.
+     */
+    public function names();
+
+    /**
      * @param  array{filter?: ?string}  $filters
      */
     public function paginate(int $perPage = 15, array $filters = []);

@@ -726,6 +726,31 @@
 					}
 				},
 				{
+					"name": "List Driver Names",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/drivers/names",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"drivers",
+								"names"
+							]
+						},
+						"description": "**Bearer required.** Returns all drivers with no pagination. Each item includes `id` plus attributes `firstName` and `lastName` only (ordered by last name, then first name). Suitable for dropdowns/select lists."
+					}
+				},
+				{
 					"name": "Get Single Driver",
 					"request": {
 						"method": "GET",
