@@ -25,6 +25,7 @@ use App\Http\Controllers\V1\Customers\DeleteCustomerTransactionController;
 use App\Http\Controllers\V1\Customers\GetCustomerChildrenController;
 use App\Http\Controllers\V1\Customers\GetCustomerParentController;
 use App\Http\Controllers\V1\Customers\ListCustomerBillsController;
+use App\Http\Controllers\V1\Customers\ListCustomerProgramsController;
 use App\Http\Controllers\V1\Customers\ListCustomersController;
 use App\Http\Controllers\V1\Customers\ListCustomerTransactionsController;
 use App\Http\Controllers\V1\Customers\SingleCustomerController;
@@ -44,6 +45,11 @@ use App\Http\Controllers\V1\Invoices\DetachTripReportsFromInvoiceController;
 use App\Http\Controllers\V1\Invoices\ListInvoicesController;
 use App\Http\Controllers\V1\Invoices\ShowInvoiceController;
 use App\Http\Controllers\V1\Invoices\UpdateInvoiceController;
+use App\Http\Controllers\V1\Programs\AddProgramController;
+use App\Http\Controllers\V1\Programs\DeleteProgramController;
+use App\Http\Controllers\V1\Programs\ListProgramsController;
+use App\Http\Controllers\V1\Programs\SingleProgramController;
+use App\Http\Controllers\V1\Programs\UpdateProgramController;
 use App\Http\Controllers\V1\PurchaseOrders\AddPurchaseOrderController;
 use App\Http\Controllers\V1\PurchaseOrders\DeletePurchaseOrderController;
 use App\Http\Controllers\V1\PurchaseOrders\ListPurchaseOrdersController;
@@ -84,9 +90,16 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::get('/customers', ListCustomersController::class);
     Route::get('/customers/{customer}/children', GetCustomerChildrenController::class);
     Route::get('/customers/{customer}/parent', GetCustomerParentController::class);
+    Route::get('/customers/{customer}/programs', ListCustomerProgramsController::class);
     Route::get('/customers/{customer}', SingleCustomerController::class);
     Route::put('/customers/{customer}', UpdateCustomerController::class);
     Route::delete('/customers/{customer}', DeleteCustomerController::class);
+
+    Route::post('/programs', AddProgramController::class);
+    Route::get('/programs', ListProgramsController::class);
+    Route::get('/programs/{program}', SingleProgramController::class);
+    Route::put('/programs/{program}', UpdateProgramController::class);
+    Route::delete('/programs/{program}', DeleteProgramController::class);
 
     Route::post('/purchase-orders', AddPurchaseOrderController::class);
     Route::get('/purchase-orders', ListPurchaseOrdersController::class);

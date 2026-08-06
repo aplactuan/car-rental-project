@@ -21,6 +21,7 @@ class PurchaseOrder extends Model implements HasMedia
 
     protected $fillable = [
         'customer_id',
+        'program_id',
         'po_number',
         'date',
         'amount',
@@ -32,6 +33,7 @@ class PurchaseOrder extends Model implements HasMedia
     protected $casts = [
         'id' => 'string',
         'customer_id' => 'string',
+        'program_id' => 'string',
         'date' => 'date',
         'amount' => 'integer',
         'status' => PurchaseOrderStatus::class,
@@ -42,6 +44,11 @@ class PurchaseOrder extends Model implements HasMedia
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function program(): BelongsTo
+    {
+        return $this->belongsTo(Program::class);
     }
 
     public function tripReports(): HasMany
