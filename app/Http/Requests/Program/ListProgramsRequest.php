@@ -1,11 +1,10 @@
 <?php
 
-namespace App\Http\Requests\PurchaseOrder;
+namespace App\Http\Requests\Program;
 
-use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class ListPurchaseOrdersRequest extends FormRequest
+class ListProgramsRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -13,14 +12,13 @@ class ListPurchaseOrdersRequest extends FormRequest
     }
 
     /**
-     * @return array<string, ValidationRule|array<mixed>|string>
+     * @return array<string, mixed>
      */
     public function rules(): array
     {
         return [
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
             'customer_id' => ['sometimes', 'nullable', 'uuid', 'exists:customers,id'],
-            'program_id' => ['sometimes', 'nullable', 'uuid', 'exists:programs,id'],
         ];
     }
 
@@ -32,13 +30,11 @@ class ListPurchaseOrdersRequest extends FormRequest
         return [
             'customer_id.uuid' => 'The selected customer must be a valid UUID.',
             'customer_id.exists' => 'The selected customer does not exist.',
-            'program_id.uuid' => 'The selected program must be a valid UUID.',
-            'program_id.exists' => 'The selected program does not exist.',
         ];
     }
 
     /**
-     * @return array{customer_id?: string, program_id?: string}
+     * @return array{customer_id?: string}
      */
     public function filters(): array
     {
@@ -46,10 +42,6 @@ class ListPurchaseOrdersRequest extends FormRequest
 
         if ($this->filled('customer_id')) {
             $filters['customer_id'] = $this->string('customer_id')->toString();
-        }
-
-        if ($this->filled('program_id')) {
-            $filters['program_id'] = $this->string('program_id')->toString();
         }
 
         return $filters;

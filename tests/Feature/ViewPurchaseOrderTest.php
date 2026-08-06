@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\Program;
 use App\Models\PurchaseOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -26,13 +27,17 @@ describe('authenticated user', function () {
 
     test('it can view a purchase order through api', function () {
         $customer = Customer::factory()->create(['name' => 'Acme Travel']);
-        $purchaseOrder = PurchaseOrder::factory()->forCustomer($customer)->create([
-            'po_number' => 'PO-VIEW-1',
-            'date' => '2026-07-20',
-            'amount' => 150000,
-            'request_person' => 'John Cruz',
-            'description' => 'City tour',
-        ]);
+        $program = Program::factory()->create(['name' => 'Tourism Drive']);
+        $purchaseOrder = PurchaseOrder::factory()
+            ->forCustomer($customer)
+            ->forProgram($program)
+            ->create([
+                'po_number' => 'PO-VIEW-1',
+                'date' => '2026-07-20',
+                'amount' => 150000,
+                'request_person' => 'John Cruz',
+                'description' => 'City tour',
+            ]);
 
         getJson("/api/v1/purchase-orders/{$purchaseOrder->id}")
             ->assertStatus(200)
@@ -48,9 +53,11 @@ describe('authenticated user', function () {
                         'requestPerson',
                         'description',
                         'customerId',
+                        'programId',
                     ],
                     'relationships' => [
                         'customer',
+                        'program',
                     ],
                 ],
             ])
@@ -61,7 +68,19 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.amount', 150000)
             ->assertJsonPath('data.attributes.requestPerson', 'John Cruz')
             ->assertJsonPath('data.attributes.description', 'City tour')
+            ->assertJsonPath('data.attributes.programId', $program->id)
             ->assertJsonPath('data.relationships.customer.data.id', $customer->id)
-            ->assertJsonPath('data.relationships.customer.data.attributes.name', $customer->name);
+            ->assertJsonPath('data.relationships.customer.data.attributes.name', $customer->name)
+            ->assertJsonPath('data.relationships.program.data.id', $program->id)
+            ->assertJsonPath('data.relationships.program.data.attributes.name', $program->name);
+    });
+
+    test('it can view a purchase order without a program', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create(['program_id' => null]);
+
+        getJson("/api/v1/purchase-orders/{$purchaseOrder->id}")
+            ->assertStatus(200)
+            ->assertJsonPath('data.attributes.programId', null)
+            ->assertJsonPath('data.relationships.program.data', null);
     });
 });

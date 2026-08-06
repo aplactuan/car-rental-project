@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\Program;
 use App\Models\PurchaseOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -43,6 +44,7 @@ describe('authenticated user', function () {
                         ],
                         'relationships' => [
                             'customer',
+                            'program',
                         ],
                     ],
                 ],
@@ -85,6 +87,20 @@ describe('authenticated user', function () {
         expect($purchaseOrder['relationships']['customer']['data'])->not->toHaveKey('attributes');
     });
 
+    test('it does not include program name on list responses', function () {
+        $program = Program::factory()->create(['name' => 'Tourism Drive']);
+        PurchaseOrder::factory()->forProgram($program)->create(['po_number' => 'PO-LIST-PROGRAM']);
+
+        $response = getJson('/api/v1/purchase-orders');
+
+        $purchaseOrder = collect($response->json('data'))
+            ->firstWhere('attributes.poNumber', 'PO-LIST-PROGRAM');
+
+        expect($purchaseOrder)->not->toBeNull();
+        expect($purchaseOrder['relationships']['program']['data']['id'])->toBe($program->id);
+        expect($purchaseOrder['relationships']['program']['data'])->not->toHaveKey('attributes');
+    });
+
     test('it can filter purchase orders by customer', function () {
         $customer = Customer::factory()->create();
         $otherCustomer = Customer::factory()->create();
@@ -101,9 +117,29 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.0.attributes.customerId', $customer->id);
     });
 
+    test('it can filter purchase orders by program', function () {
+        $program = Program::factory()->create();
+        $otherProgram = Program::factory()->create();
+
+        $matching = PurchaseOrder::factory()->forProgram($program)->create(['po_number' => 'PO-PROGRAM-MATCH']);
+        PurchaseOrder::factory()->forProgram($otherProgram)->create(['po_number' => 'PO-PROGRAM-OTHER']);
+
+        getJson("/api/v1/purchase-orders?program_id={$program->id}")
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $matching->id)
+            ->assertJsonPath('data.0.attributes.programId', $program->id);
+    });
+
     test('it validates customer_id filter', function () {
         getJson('/api/v1/purchase-orders?customer_id=not-a-uuid')
             ->assertStatus(422)
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/customer_id');
+    });
+
+    test('it validates program_id filter', function () {
+        getJson('/api/v1/purchase-orders?program_id=not-a-uuid')
+            ->assertStatus(422)
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/program_id');
     });
 });

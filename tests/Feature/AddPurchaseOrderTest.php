@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\Program;
 use App\Models\PurchaseOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -67,10 +68,12 @@ describe('authenticated user', function () {
                         'description',
                         'status',
                         'customerId',
+                        'programId',
                         'attachments',
                     ],
                     'relationships' => [
                         'customer',
+                        'program',
                     ],
                 ],
             ])
@@ -82,9 +85,40 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.description', $payload['description'])
             ->assertJsonPath('data.attributes.status', 'pending')
             ->assertJsonPath('data.attributes.customerId', $customer->id)
+            ->assertJsonPath('data.attributes.programId', null)
             ->assertJsonPath('data.attributes.attachments', [])
             ->assertJsonPath('data.relationships.customer.data.id', $customer->id)
-            ->assertJsonPath('data.relationships.customer.data.attributes.name', $customer->name);
+            ->assertJsonPath('data.relationships.customer.data.attributes.name', $customer->name)
+            ->assertJsonPath('data.relationships.program.data', null);
+    });
+
+    test('it can add a purchase order with a program', function () {
+        $customer = Customer::factory()->create();
+        $program = Program::factory()->create(['name' => 'Tourism Drive']);
+        $payload = purchaseOrderPayload([
+            'customer_id' => $customer->id,
+            'program_id' => $program->id,
+        ]);
+
+        $response = postJson('/api/v1/purchase-orders', $payload);
+
+        assertDatabaseHas('purchase_orders', [
+            'po_number' => $payload['po_number'],
+            'program_id' => $program->id,
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.attributes.programId', $program->id)
+            ->assertJsonPath('data.relationships.program.data.id', $program->id)
+            ->assertJsonPath('data.relationships.program.data.attributes.name', $program->name);
+    });
+
+    test('it fails to add a purchase order with an invalid program', function () {
+        postJson('/api/v1/purchase-orders', purchaseOrderPayload([
+            'program_id' => '00000000-0000-0000-0000-000000000000',
+        ]))
+            ->assertStatus(422)
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/program_id');
     });
 
     test('it can add a purchase order with ok status', function () {

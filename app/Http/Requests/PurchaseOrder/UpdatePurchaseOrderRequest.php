@@ -24,6 +24,7 @@ class UpdatePurchaseOrderRequest extends FormRequest
 
         return [
             'customer_id' => ['sometimes', 'nullable', 'uuid', 'exists:customers,id'],
+            'program_id' => ['sometimes', 'nullable', 'uuid', 'exists:programs,id'],
             'po_number' => [
                 'sometimes',
                 'string',
@@ -57,6 +58,8 @@ class UpdatePurchaseOrderRequest extends FormRequest
         return [
             'customer_id.uuid' => 'The selected customer must be a valid UUID.',
             'customer_id.exists' => 'The selected customer does not exist.',
+            'program_id.uuid' => 'The selected program must be a valid UUID.',
+            'program_id.exists' => 'The selected program does not exist.',
             'po_number.unique' => 'The purchase order number has already been taken.',
             'status.enum' => 'The status must be either pending or ok.',
             'attachments.*.mimes' => 'Each attachment must be an image, document, or PDF.',

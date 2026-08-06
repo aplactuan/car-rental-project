@@ -2,6 +2,7 @@
 
 use App\Enums\PurchaseOrderStatus;
 use App\Models\Customer;
+use App\Models\Program;
 use App\Models\PurchaseOrder;
 use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -36,12 +37,35 @@ test('it belongs to a customer', function () {
         ->and($purchaseOrder->customer->is($customer))->toBeTrue();
 });
 
+test('it belongs to a program', function () {
+    $program = Program::factory()->create();
+    $purchaseOrder = PurchaseOrder::factory()->forProgram($program)->create();
+
+    expect($purchaseOrder->program)->toBeInstanceOf(Program::class)
+        ->and($purchaseOrder->program->is($program))->toBeTrue();
+});
+
+test('program is optional on purchase order', function () {
+    $purchaseOrder = PurchaseOrder::factory()->create(['program_id' => null]);
+
+    expect($purchaseOrder->program_id)->toBeNull()
+        ->and($purchaseOrder->program)->toBeNull();
+});
+
 test('customer has many purchase orders', function () {
     $customer = Customer::factory()->create();
     PurchaseOrder::factory()->count(2)->forCustomer($customer)->create();
 
     expect($customer->purchaseOrders)->toHaveCount(2)
         ->and($customer->purchaseOrders->first())->toBeInstanceOf(PurchaseOrder::class);
+});
+
+test('program has many purchase orders', function () {
+    $program = Program::factory()->create();
+    PurchaseOrder::factory()->count(2)->forProgram($program)->create();
+
+    expect($program->purchaseOrders)->toHaveCount(2)
+        ->and($program->purchaseOrders->first())->toBeInstanceOf(PurchaseOrder::class);
 });
 
 test('it casts amount as integer and date as date', function () {
@@ -81,4 +105,17 @@ test('deleting a customer keeps the purchase order and nulls customer_id', funct
     expect($purchaseOrder->exists)->toBeTrue()
         ->and($purchaseOrder->customer_id)->toBeNull()
         ->and($purchaseOrder->customer)->toBeNull();
+});
+
+test('deleting a program keeps the purchase order and nulls program_id', function () {
+    $program = Program::factory()->create();
+    $purchaseOrder = PurchaseOrder::factory()->forProgram($program)->create();
+
+    $program->delete();
+
+    $purchaseOrder->refresh();
+
+    expect($purchaseOrder->exists)->toBeTrue()
+        ->and($purchaseOrder->program_id)->toBeNull()
+        ->and($purchaseOrder->program)->toBeNull();
 });

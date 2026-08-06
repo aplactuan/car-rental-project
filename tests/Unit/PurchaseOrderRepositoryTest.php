@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\Program;
 use App\Models\PurchaseOrder;
 use App\Repositories\Eloquent\PurchaseOrderRepository;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -78,7 +79,25 @@ test('find returns purchase order by id with customer', function () {
 
     expect($found->id)->toBe($purchaseOrder->id)
         ->and($found->po_number)->toBe('PO-FIND')
-        ->and($found->relationLoaded('customer'))->toBeTrue();
+        ->and($found->relationLoaded('customer'))->toBeTrue()
+        ->and($found->relationLoaded('program'))->toBeTrue();
+});
+
+test('create persists purchase order with program', function () {
+    $customer = Customer::factory()->create();
+    $program = Program::factory()->create();
+
+    $purchaseOrder = $this->repository->create([
+        'customer_id' => $customer->id,
+        'program_id' => $program->id,
+        'po_number' => 'PO-REPO-PROGRAM',
+        'date' => '2026-07-15',
+        'amount' => 250000,
+    ]);
+
+    expect($purchaseOrder->program_id)->toBe($program->id)
+        ->and($purchaseOrder->relationLoaded('program'))->toBeTrue()
+        ->and($purchaseOrder->program->is($program))->toBeTrue();
 });
 
 test('update modifies purchase order', function () {
@@ -121,4 +140,17 @@ test('paginate can filter by customer', function () {
 
     expect($result->total())->toBe(2)
         ->and($result->every(fn (PurchaseOrder $purchaseOrder) => $purchaseOrder->customer_id === $customer->id))->toBeTrue();
+});
+
+test('paginate can filter by program', function () {
+    $program = Program::factory()->create();
+    $otherProgram = Program::factory()->create();
+
+    PurchaseOrder::factory()->count(2)->forProgram($program)->create();
+    PurchaseOrder::factory()->forProgram($otherProgram)->create();
+
+    $result = $this->repository->paginate(15, ['program_id' => $program->id]);
+
+    expect($result->total())->toBe(2)
+        ->and($result->every(fn (PurchaseOrder $purchaseOrder) => $purchaseOrder->program_id === $program->id))->toBeTrue();
 });
