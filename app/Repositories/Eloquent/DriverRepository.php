@@ -16,6 +16,15 @@ class DriverRepository extends BaseRepository implements DriverRepositoryInterfa
         parent::__construct($model);
     }
 
+    public function names()
+    {
+        return $this->model->newQuery()
+            ->select(['id', 'first_name', 'last_name'])
+            ->orderBy('last_name')
+            ->orderBy('first_name')
+            ->get();
+    }
+
     public function paginate(int $perPage = 15, array $filters = [])
     {
         return $this->applyFilters($this->model->newQuery(), $filters)->paginate($perPage);
