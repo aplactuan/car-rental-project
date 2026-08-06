@@ -4,6 +4,7 @@ namespace App\Http\Requests\PurchaseOrder;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Validator;
 
 class ListPurchaseOrdersRequest extends FormRequest
 {
@@ -21,6 +22,7 @@ class ListPurchaseOrdersRequest extends FormRequest
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:100'],
             'customer_id' => ['sometimes', 'nullable', 'uuid', 'exists:customers,id'],
             'program_id' => ['sometimes', 'nullable', 'uuid', 'exists:programs,id'],
+            'unprogrammed' => ['sometimes', 'boolean'],
         ];
     }
 
@@ -37,8 +39,24 @@ class ListPurchaseOrdersRequest extends FormRequest
         ];
     }
 
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            if ($validator->errors()->isNotEmpty()) {
+                return;
+            }
+
+            if ($this->boolean('unprogrammed') && $this->filled('program_id')) {
+                $validator->errors()->add(
+                    'unprogrammed',
+                    'Cannot use unprogrammed together with program_id.'
+                );
+            }
+        });
+    }
+
     /**
-     * @return array{customer_id?: string, program_id?: string}
+     * @return array{customer_id?: string, program_id?: string, unprogrammed?: true}
      */
     public function filters(): array
     {
@@ -48,7 +66,9 @@ class ListPurchaseOrdersRequest extends FormRequest
             $filters['customer_id'] = $this->string('customer_id')->toString();
         }
 
-        if ($this->filled('program_id')) {
+        if ($this->boolean('unprogrammed')) {
+            $filters['unprogrammed'] = true;
+        } elseif ($this->filled('program_id')) {
             $filters['program_id'] = $this->string('program_id')->toString();
         }
 

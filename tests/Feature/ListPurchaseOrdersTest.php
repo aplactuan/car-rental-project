@@ -125,21 +125,71 @@ describe('authenticated user', function () {
         PurchaseOrder::factory()->forProgram($otherProgram)->create(['po_number' => 'PO-PROGRAM-OTHER']);
 
         getJson("/api/v1/purchase-orders?program_id={$program->id}")
-            ->assertStatus(200)
+            ->assertSuccessful()
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $matching->id)
             ->assertJsonPath('data.0.attributes.programId', $program->id);
     });
 
+    test('it can filter unprogrammed purchase orders', function () {
+        $program = Program::factory()->create();
+        $customer = Customer::factory()->create();
+
+        $unprogrammed = PurchaseOrder::factory()->forCustomer($customer)->create([
+            'po_number' => 'PO-UNPROGRAMMED',
+            'program_id' => null,
+        ]);
+        PurchaseOrder::factory()->forCustomer($customer)->forProgram($program)->create([
+            'po_number' => 'PO-HAS-PROGRAM',
+        ]);
+        PurchaseOrder::factory()->create([
+            'po_number' => 'PO-OTHER-CUSTOMER-UNPROGRAMMED',
+            'program_id' => null,
+        ]);
+
+        getJson("/api/v1/purchase-orders?customer_id={$customer->id}&unprogrammed=1&per_page=100")
+            ->assertSuccessful()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $unprogrammed->id)
+            ->assertJsonPath('data.0.attributes.programId', null)
+            ->assertJsonPath('data.0.relationships.program.data', null);
+    });
+
+    test('it treats unprogrammed false as no program filter', function () {
+        $program = Program::factory()->create();
+
+        PurchaseOrder::factory()->forProgram($program)->create(['po_number' => 'PO-WITH-PROGRAM']);
+        PurchaseOrder::factory()->create(['po_number' => 'PO-WITHOUT-PROGRAM', 'program_id' => null]);
+
+        getJson('/api/v1/purchase-orders?unprogrammed=0&per_page=100')
+            ->assertSuccessful()
+            ->assertJsonCount(2, 'data');
+    });
+
+    test('it rejects unprogrammed together with program_id', function () {
+        $program = Program::factory()->create();
+
+        getJson("/api/v1/purchase-orders?unprogrammed=1&program_id={$program->id}")
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/unprogrammed')
+            ->assertJsonPath('errors.0.detail', 'Cannot use unprogrammed together with program_id.');
+    });
+
+    test('it validates unprogrammed filter', function () {
+        getJson('/api/v1/purchase-orders?unprogrammed=notabool')
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/unprogrammed');
+    });
+
     test('it validates customer_id filter', function () {
         getJson('/api/v1/purchase-orders?customer_id=not-a-uuid')
-            ->assertStatus(422)
+            ->assertUnprocessable()
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/customer_id');
     });
 
     test('it validates program_id filter', function () {
         getJson('/api/v1/purchase-orders?program_id=not-a-uuid')
-            ->assertStatus(422)
+            ->assertUnprocessable()
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/program_id');
     });
 });
