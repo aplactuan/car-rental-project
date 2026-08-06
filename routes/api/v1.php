@@ -34,6 +34,7 @@ use App\Http\Controllers\V1\Customers\UpdateCustomerController;
 use App\Http\Controllers\V1\Customers\UpdateCustomerTransactionController;
 use App\Http\Controllers\V1\Drivers\AddDriverController;
 use App\Http\Controllers\V1\Drivers\ImportDriversController;
+use App\Http\Controllers\V1\Drivers\ListDriverNamesController;
 use App\Http\Controllers\V1\Drivers\ListDriversController;
 use App\Http\Controllers\V1\Drivers\ShowDriverImportController;
 use App\Http\Controllers\V1\Drivers\SingleDriverController;
@@ -82,6 +83,7 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
     Route::post('/drivers', AddDriverController::class);
     Route::post('/drivers/import', ImportDriversController::class);
     Route::get('/drivers/imports/{driverImport}', ShowDriverImportController::class);
+    Route::get('/drivers/names', ListDriverNamesController::class);
     Route::get('/drivers', ListDriversController::class);
     Route::get('/drivers/{driver}', SingleDriverController::class);
     Route::put('/drivers/{driver}', UpdateDriverController::class);
