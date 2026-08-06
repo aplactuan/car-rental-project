@@ -9,7 +9,7 @@ interface PurchaseOrderRepositoryInterface
     public function all();
 
     /**
-     * @param  array{customer_id?: string, program_id?: string}  $filters
+     * @param  array{customer_id?: string, program_id?: string, unprogrammed?: true}  $filters
      */
     public function paginate(int $perPage = 15, array $filters = []);
 
