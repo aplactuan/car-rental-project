@@ -18,7 +18,7 @@ interface InvoiceRepositoryInterface
     public function findForPurchaseOrder(PurchaseOrder $purchaseOrder, Invoice $invoice): Invoice;
 
     /**
-     * @param  array{invoice_number: string, lddap_adap_no: string, note?: string|null, status?: string}  $data
+     * @param  array{invoice_number: string, lddap_adap_no?: string|null, note?: string|null, status?: string}  $data
      */
     public function create(
         PurchaseOrder $purchaseOrder,
@@ -28,7 +28,7 @@ interface InvoiceRepositoryInterface
     ): Invoice;
 
     /**
-     * @param  array{invoice_number?: string, lddap_adap_no?: string, note?: string|null, status?: string}  $data
+     * @param  array{invoice_number?: string, lddap_adap_no?: string|null, note?: string|null, status?: string}  $data
      */
     public function update(
         PurchaseOrder $purchaseOrder,
