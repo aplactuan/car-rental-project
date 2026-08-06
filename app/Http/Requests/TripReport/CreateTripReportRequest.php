@@ -4,6 +4,7 @@ namespace App\Http\Requests\TripReport;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class CreateTripReportRequest extends FormRequest
 {
@@ -17,7 +18,16 @@ class CreateTripReportRequest extends FormRequest
      */
     public function rules(): array
     {
+        $purchaseOrderId = $this->route('purchaseOrder')->id;
+
         return [
+            'trip_report_no' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('trip_reports', 'trip_report_no')
+                    ->where('purchase_order_id', $purchaseOrderId),
+            ],
             'report_date' => ['required', 'date'],
             'trip_start' => ['required', 'date'],
             'trip_end' => ['required', 'date'],
@@ -34,6 +44,7 @@ class CreateTripReportRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'trip_report_no.unique' => 'This trip report number is already used for this purchase order.',
             'trip_report_image.mimes' => 'The trip report file must be an image, document, or PDF.',
             'trip_report_image.max' => 'The trip report file must not exceed 10MB.',
         ];

@@ -20,6 +20,7 @@ uses(RefreshDatabase::class);
 function tripReportPayload(array $overrides = []): array
 {
     return array_merge([
+        'trip_report_no' => 'TR-'.uniqid(),
         'report_date' => '2026-07-28',
         'trip_start' => '2026-07-27',
         'trip_end' => '2026-07-28',
@@ -59,6 +60,7 @@ describe('authenticated user', function () {
 
         $response->assertCreated()
             ->assertJsonPath('data.type', 'trip-report')
+            ->assertJsonPath('data.attributes.tripReportNo', $payload['trip_report_no'])
             ->assertJsonPath('data.attributes.reportDate', $payload['report_date'])
             ->assertJsonPath('data.attributes.tripStart', $payload['trip_start'])
             ->assertJsonPath('data.attributes.tripEnd', $payload['trip_end'])
@@ -71,6 +73,7 @@ describe('authenticated user', function () {
 
         assertDatabaseHas('trip_reports', [
             'purchase_order_id' => $purchaseOrder->id,
+            'trip_report_no' => $payload['trip_report_no'],
             'driver' => $payload['driver'],
             'destinations' => $payload['destinations'],
             'amount' => $payload['amount'],
@@ -143,6 +146,7 @@ describe('authenticated user', function () {
         $tripReport = TripReport::factory()->for($purchaseOrder)->create();
 
         $payload = [
+            'trip_report_no' => 'TR-UPDATED-001',
             'report_date' => '2026-08-01',
             'trip_start' => '2026-07-30',
             'trip_end' => '2026-08-01',
@@ -154,6 +158,7 @@ describe('authenticated user', function () {
 
         putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/trip-reports/{$tripReport->id}", $payload)
             ->assertOk()
+            ->assertJsonPath('data.attributes.tripReportNo', $payload['trip_report_no'])
             ->assertJsonPath('data.attributes.reportDate', $payload['report_date'])
             ->assertJsonPath('data.attributes.tripStart', $payload['trip_start'])
             ->assertJsonPath('data.attributes.tripEnd', $payload['trip_end'])
@@ -163,6 +168,7 @@ describe('authenticated user', function () {
 
         assertDatabaseHas('trip_reports', [
             'id' => $tripReport->id,
+            'trip_report_no' => $payload['trip_report_no'],
             'driver' => $payload['driver'],
             'destinations' => $payload['destinations'],
             'amount' => $payload['amount'],
@@ -179,6 +185,7 @@ describe('authenticated user', function () {
         $purchaseOrder = PurchaseOrder::factory()->create();
 
         postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/trip-reports", [
+            'trip_report_no' => '',
             'report_date' => 'not-a-date',
             'trip_start' => 'not-a-date',
             'trip_end' => 'not-a-date',
@@ -188,13 +195,51 @@ describe('authenticated user', function () {
             'trip_report_image' => UploadedFile::fake()->create('malware.exe', 100, 'application/octet-stream'),
         ])
             ->assertUnprocessable()
-            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/report_date');
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/trip_report_no');
+    });
+
+    test('requires trip report no', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/trip-reports", [
+            'report_date' => '2026-07-28',
+            'trip_start' => '2026-07-27',
+            'trip_end' => '2026-07-28',
+            'driver' => 'Juan Dela Cruz',
+            'destinations' => 'Manila to Quezon City',
+            'amount' => 1_500,
+        ])
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/trip_report_no');
+    });
+
+    test('rejects duplicate trip report no within the same purchase order', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+        TripReport::factory()->for($purchaseOrder)->create(['trip_report_no' => 'TR-DUP-001']);
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/trip-reports", tripReportPayload([
+            'trip_report_no' => 'TR-DUP-001',
+        ]))
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/trip_report_no');
+    });
+
+    test('allows the same trip report no on a different purchase order', function () {
+        TripReport::factory()->create(['trip_report_no' => 'TR-SHARED-001']);
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/trip-reports", tripReportPayload([
+            'trip_report_no' => 'TR-SHARED-001',
+        ]))
+            ->assertCreated()
+            ->assertJsonPath('data.attributes.tripReportNo', 'TR-SHARED-001');
     });
 
     test('requires trip start and trip end dates', function () {
         $purchaseOrder = PurchaseOrder::factory()->create();
 
         postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/trip-reports", [
+            'trip_report_no' => 'TR-001',
             'report_date' => '2026-07-28',
             'driver' => 'Juan Dela Cruz',
             'destinations' => 'Manila to Quezon City',
