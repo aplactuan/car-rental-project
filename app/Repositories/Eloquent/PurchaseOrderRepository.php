@@ -17,7 +17,7 @@ class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRep
     }
 
     /**
-     * @param  array{customer_id?: string}  $filters
+     * @param  array{customer_id?: string, program_id?: string}  $filters
      */
     public function paginate(int $perPage = 15, array $filters = [])
     {
@@ -27,13 +27,17 @@ class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRep
                 isset($filters['customer_id']),
                 fn (Builder $builder) => $builder->where('customer_id', $filters['customer_id'])
             )
+            ->when(
+                isset($filters['program_id']),
+                fn (Builder $builder) => $builder->where('program_id', $filters['program_id'])
+            )
             ->latest('date')
             ->paginate($perPage);
     }
 
     public function find($id)
     {
-        return $this->model->with(['customer', 'media'])->findOrFail($id);
+        return $this->model->with(['customer', 'program', 'media'])->findOrFail($id);
     }
 
     /**
@@ -46,7 +50,7 @@ class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRep
 
             $this->addAttachments($purchaseOrder, $attachments);
 
-            return $purchaseOrder->fresh(['customer', 'media']);
+            return $purchaseOrder->fresh(['customer', 'program', 'media']);
         });
     }
 
@@ -64,7 +68,7 @@ class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRep
             $this->removeAttachments($purchaseOrder, $removeAttachmentIds);
             $this->addAttachments($purchaseOrder, $attachments);
 
-            return $purchaseOrder->fresh(['customer', 'media']);
+            return $purchaseOrder->fresh(['customer', 'program', 'media']);
         });
     }
 

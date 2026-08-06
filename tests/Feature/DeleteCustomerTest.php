@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\Program;
 use App\Models\PurchaseOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -51,6 +52,23 @@ describe('authenticated user', function () {
 
         assertDatabaseHas('purchase_orders', [
             'id' => $purchaseOrder->id,
+            'customer_id' => null,
+        ]);
+    });
+
+    test('deleting a customer keeps related programs', function () {
+        $customer = Customer::factory()->create();
+        $program = Program::factory()->forCustomer($customer)->create();
+
+        deleteJson("/api/v1/customers/{$customer->id}")
+            ->assertNoContent();
+
+        assertDatabaseMissing('customers', [
+            'id' => $customer->id,
+        ]);
+
+        assertDatabaseHas('programs', [
+            'id' => $program->id,
             'customer_id' => null,
         ]);
     });

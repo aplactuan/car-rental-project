@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Enums\PurchaseOrderStatus;
 use App\Models\Customer;
+use App\Models\Program;
 use App\Models\PurchaseOrder;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,6 +22,7 @@ class PurchaseOrderFactory extends Factory
     {
         return [
             'customer_id' => Customer::factory(),
+            'program_id' => null,
             'po_number' => strtoupper($this->faker->unique()->bothify('PO-####-????')),
             'date' => $this->faker->date(),
             'amount' => $this->faker->numberBetween(1000, 500000),
@@ -34,6 +36,13 @@ class PurchaseOrderFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'customer_id' => $customer->id,
+        ]);
+    }
+
+    public function forProgram(Program $program): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'program_id' => $program->id,
         ]);
     }
 

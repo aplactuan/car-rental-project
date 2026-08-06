@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\Program;
 use App\Models\PurchaseOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -151,6 +152,51 @@ describe('authenticated user', function () {
             'id' => $purchaseOrder->id,
             'customer_id' => $newCustomer->id,
         ]);
+    });
+
+    test('it can assign a program to a purchase order', function () {
+        $program = Program::factory()->create(['name' => 'Tourism Drive']);
+        $purchaseOrder = PurchaseOrder::factory()->create(['program_id' => null]);
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}", [
+            'program_id' => $program->id,
+        ])
+            ->assertStatus(200)
+            ->assertJsonPath('data.attributes.programId', $program->id)
+            ->assertJsonPath('data.relationships.program.data.id', $program->id)
+            ->assertJsonPath('data.relationships.program.data.attributes.name', $program->name);
+
+        assertDatabaseHas('purchase_orders', [
+            'id' => $purchaseOrder->id,
+            'program_id' => $program->id,
+        ]);
+    });
+
+    test('it can clear the program from a purchase order', function () {
+        $program = Program::factory()->create();
+        $purchaseOrder = PurchaseOrder::factory()->forProgram($program)->create();
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}", [
+            'program_id' => null,
+        ])
+            ->assertStatus(200)
+            ->assertJsonPath('data.attributes.programId', null)
+            ->assertJsonPath('data.relationships.program.data', null);
+
+        assertDatabaseHas('purchase_orders', [
+            'id' => $purchaseOrder->id,
+            'program_id' => null,
+        ]);
+    });
+
+    test('it fails to update a purchase order with an invalid program', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}", [
+            'program_id' => '00000000-0000-0000-0000-000000000000',
+        ])
+            ->assertStatus(422)
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/program_id');
     });
 
     test('it fails to update a purchase order with a duplicate po number', function () {

@@ -26,11 +26,15 @@ class PurchaseOrderResource extends JsonResource
                 'description' => $this->description,
                 'status' => $this->status->value,
                 'customerId' => $this->customer_id,
+                'programId' => $this->program_id,
                 'attachments' => $this->attachmentsData(),
             ],
             'relationships' => [
                 'customer' => [
                     'data' => $this->customerRelationshipData(),
+                ],
+                'program' => [
+                    'data' => $this->programRelationshipData(),
                 ],
             ],
         ];
@@ -70,6 +74,29 @@ class PurchaseOrderResource extends JsonResource
         if ($this->relationLoaded('customer') && $this->customer) {
             $data['attributes'] = [
                 'name' => $this->customer->name,
+            ];
+        }
+
+        return $data;
+    }
+
+    /**
+     * @return array{type: string, id: string, attributes?: array{name: string}}|null
+     */
+    private function programRelationshipData(): ?array
+    {
+        if (! $this->program_id) {
+            return null;
+        }
+
+        $data = [
+            'type' => 'program',
+            'id' => $this->program_id,
+        ];
+
+        if ($this->relationLoaded('program') && $this->program) {
+            $data['attributes'] = [
+                'name' => $this->program->name,
             ];
         }
 
