@@ -22,8 +22,10 @@ class UpdateInvoiceController extends Controller
         unset(
             $data['payment_receipt'],
             $data['disbursement_voucher'],
+            $data['invoice_picture'],
             $data['remove_payment_receipt'],
-            $data['remove_disbursement_voucher']
+            $data['remove_disbursement_voucher'],
+            $data['remove_invoice_picture']
         );
 
         $invoice = $this->invoiceRepository->update(
@@ -32,8 +34,10 @@ class UpdateInvoiceController extends Controller
             $data,
             $request->file('payment_receipt'),
             $request->file('disbursement_voucher'),
+            $request->file('invoice_picture'),
             $request->boolean('remove_payment_receipt'),
-            $request->boolean('remove_disbursement_voucher')
+            $request->boolean('remove_disbursement_voucher'),
+            $request->boolean('remove_invoice_picture')
         );
 
         return new PurchaseOrderInvoiceResource($invoice);

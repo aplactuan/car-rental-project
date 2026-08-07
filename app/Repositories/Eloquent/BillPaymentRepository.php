@@ -6,13 +6,17 @@ use App\Enums\BillStatus;
 use App\Models\Bill;
 use App\Models\BillPayment;
 use App\Repositories\Contracts\BillPaymentRepositoryInterface;
+use App\Support\Media\MediaUploader;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class BillPaymentRepository implements BillPaymentRepositoryInterface
 {
-    public function __construct(protected BillPayment $model) {}
+    public function __construct(
+        protected BillPayment $model,
+        protected MediaUploader $mediaUploader
+    ) {}
 
     public function listForBill(Bill $bill): Collection
     {
@@ -36,7 +40,11 @@ class BillPaymentRepository implements BillPaymentRepositoryInterface
             ]);
 
             if ($proofImage !== null) {
-                $payment->addMedia($proofImage)->toMediaCollection(BillPayment::PROOF_MEDIA_COLLECTION);
+                $this->mediaUploader->add(
+                    $payment,
+                    $proofImage,
+                    BillPayment::PROOF_MEDIA_COLLECTION
+                );
             }
 
             $this->recomputeBillStatus($bill->fresh());

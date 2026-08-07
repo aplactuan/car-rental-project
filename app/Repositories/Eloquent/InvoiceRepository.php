@@ -6,13 +6,17 @@ use App\Models\Invoice;
 use App\Models\PurchaseOrder;
 use App\Models\TripReport;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
+use App\Support\Media\MediaUploader;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceRepository implements InvoiceRepositoryInterface
 {
-    public function __construct(protected Invoice $model) {}
+    public function __construct(
+        protected Invoice $model,
+        protected MediaUploader $mediaUploader
+    ) {}
 
     public function listForPurchaseOrder(PurchaseOrder $purchaseOrder): Collection
     {
@@ -36,19 +40,34 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         PurchaseOrder $purchaseOrder,
         array $data,
         ?UploadedFile $paymentReceipt = null,
-        ?UploadedFile $disbursementVoucher = null
+        ?UploadedFile $disbursementVoucher = null,
+        ?UploadedFile $invoicePicture = null
     ): Invoice {
-        return DB::transaction(function () use ($purchaseOrder, $data, $paymentReceipt, $disbursementVoucher): Invoice {
+        return DB::transaction(function () use ($purchaseOrder, $data, $paymentReceipt, $disbursementVoucher, $invoicePicture): Invoice {
             $invoice = $purchaseOrder->invoices()->create($data);
 
             if ($paymentReceipt !== null) {
-                $invoice->addMedia($paymentReceipt)
-                    ->toMediaCollection(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION);
+                $this->mediaUploader->add(
+                    $invoice,
+                    $paymentReceipt,
+                    Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION
+                );
             }
 
             if ($disbursementVoucher !== null) {
-                $invoice->addMedia($disbursementVoucher)
-                    ->toMediaCollection(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION);
+                $this->mediaUploader->add(
+                    $invoice,
+                    $disbursementVoucher,
+                    Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION
+                );
+            }
+
+            if ($invoicePicture !== null) {
+                $this->mediaUploader->add(
+                    $invoice,
+                    $invoicePicture,
+                    Invoice::INVOICE_PICTURE_MEDIA_COLLECTION
+                );
             }
 
             return $invoice->fresh('media');
@@ -61,12 +80,14 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         array $data,
         ?UploadedFile $paymentReceipt = null,
         ?UploadedFile $disbursementVoucher = null,
+        ?UploadedFile $invoicePicture = null,
         bool $removePaymentReceipt = false,
-        bool $removeDisbursementVoucher = false
+        bool $removeDisbursementVoucher = false,
+        bool $removeInvoicePicture = false
     ): Invoice {
         $invoice = $this->findForPurchaseOrder($purchaseOrder, $invoice);
 
-        return DB::transaction(function () use ($invoice, $data, $paymentReceipt, $disbursementVoucher, $removePaymentReceipt, $removeDisbursementVoucher): Invoice {
+        return DB::transaction(function () use ($invoice, $data, $paymentReceipt, $disbursementVoucher, $invoicePicture, $removePaymentReceipt, $removeDisbursementVoucher, $removeInvoicePicture): Invoice {
             $invoice->update($data);
 
             if ($removePaymentReceipt) {
@@ -77,14 +98,32 @@ class InvoiceRepository implements InvoiceRepositoryInterface
                 $invoice->clearMediaCollection(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION);
             }
 
+            if ($removeInvoicePicture) {
+                $invoice->clearMediaCollection(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION);
+            }
+
             if ($paymentReceipt !== null) {
-                $invoice->addMedia($paymentReceipt)
-                    ->toMediaCollection(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION);
+                $this->mediaUploader->add(
+                    $invoice,
+                    $paymentReceipt,
+                    Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION
+                );
             }
 
             if ($disbursementVoucher !== null) {
-                $invoice->addMedia($disbursementVoucher)
-                    ->toMediaCollection(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION);
+                $this->mediaUploader->add(
+                    $invoice,
+                    $disbursementVoucher,
+                    Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION
+                );
+            }
+
+            if ($invoicePicture !== null) {
+                $this->mediaUploader->add(
+                    $invoice,
+                    $invoicePicture,
+                    Invoice::INVOICE_PICTURE_MEDIA_COLLECTION
+                );
             }
 
             return $invoice->fresh('media');

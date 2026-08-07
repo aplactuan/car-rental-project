@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\TripReport;
 
+use App\Support\Media\MediaUploader;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -34,7 +35,7 @@ class CreateTripReportRequest extends FormRequest
             'driver' => ['required', 'string', 'max:255'],
             'destinations' => ['required', 'string'],
             'amount' => ['required', 'integer', 'min:0'],
-            'trip_report_image' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx', 'max:10240'],
+            'trip_report_image' => ['nullable', 'file', 'mimes:'.MediaUploader::IMAGE_DOCUMENT_OR_PDF_MIMES, 'max:10240'],
         ];
     }
 

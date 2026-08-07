@@ -24,7 +24,8 @@ interface InvoiceRepositoryInterface
         PurchaseOrder $purchaseOrder,
         array $data,
         ?UploadedFile $paymentReceipt = null,
-        ?UploadedFile $disbursementVoucher = null
+        ?UploadedFile $disbursementVoucher = null,
+        ?UploadedFile $invoicePicture = null
     ): Invoice;
 
     /**
@@ -36,8 +37,10 @@ interface InvoiceRepositoryInterface
         array $data,
         ?UploadedFile $paymentReceipt = null,
         ?UploadedFile $disbursementVoucher = null,
+        ?UploadedFile $invoicePicture = null,
         bool $removePaymentReceipt = false,
-        bool $removeDisbursementVoucher = false
+        bool $removeDisbursementVoucher = false,
+        bool $removeInvoicePicture = false
     ): Invoice;
 
     public function delete(PurchaseOrder $purchaseOrder, Invoice $invoice): void;

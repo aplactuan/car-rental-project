@@ -4,6 +4,7 @@ namespace App\Http\Requests\BillPayment;
 
 use App\Enums\PaymentMethod;
 use App\Models\Transaction;
+use App\Support\Media\MediaUploader;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -38,7 +39,7 @@ class AddBillPaymentRequest extends FormRequest
             'method' => ['required', Rule::enum(PaymentMethod::class)],
             'reference_number' => ['required', 'string', 'max:255'],
             'notes' => ['nullable', 'string'],
-            'proof_image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:10240'],
+            'proof_image' => ['nullable', 'file', 'mimes:'.MediaUploader::IMAGE_MIMES, 'max:10240'],
         ];
     }
 
@@ -49,7 +50,7 @@ class AddBillPaymentRequest extends FormRequest
     {
         return [
             'proof_image.nullable' => 'A proof of payment image is optional.',
-            'proof_image.image' => 'The proof of payment must be an image.',
+            'proof_image.mimes' => 'The proof of payment must be an image (jpg, jpeg, png, webp, heic, or heif).',
             'proof_image.max' => 'The proof of payment image must not exceed 10MB.',
         ];
     }

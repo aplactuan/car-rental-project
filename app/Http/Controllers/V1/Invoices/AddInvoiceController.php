@@ -16,13 +16,14 @@ class AddInvoiceController extends Controller
     public function __invoke(CreateInvoiceRequest $request, PurchaseOrder $purchaseOrder): JsonResponse
     {
         $data = $request->validated();
-        unset($data['payment_receipt'], $data['disbursement_voucher']);
+        unset($data['payment_receipt'], $data['disbursement_voucher'], $data['invoice_picture']);
 
         $invoice = $this->invoiceRepository->create(
             $purchaseOrder,
             $data,
             $request->file('payment_receipt'),
-            $request->file('disbursement_voucher')
+            $request->file('disbursement_voucher'),
+            $request->file('invoice_picture')
         );
 
         return (new PurchaseOrderInvoiceResource($invoice))

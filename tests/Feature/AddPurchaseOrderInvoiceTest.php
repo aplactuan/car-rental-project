@@ -42,6 +42,7 @@ describe('authenticated user', function () {
         $payload = purchaseOrderInvoicePayload([
             'payment_receipt' => UploadedFile::fake()->image('receipt.jpg'),
             'disbursement_voucher' => UploadedFile::fake()->image('voucher.png'),
+            'invoice_picture' => UploadedFile::fake()->image('invoice-picture.jpg'),
         ]);
 
         $response = postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices", $payload);
@@ -54,7 +55,8 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.relationships.purchaseOrder.data.id', $purchaseOrder->id);
 
         expect($response->json('data.attributes.paymentReceiptUrl'))->not->toBeNull()
-            ->and($response->json('data.attributes.disbursementVoucherUrl'))->not->toBeNull();
+            ->and($response->json('data.attributes.disbursementVoucherUrl'))->not->toBeNull()
+            ->and($response->json('data.attributes.invoicePictureUrl'))->not->toBeNull();
 
         assertDatabaseHas('invoices', [
             'purchase_order_id' => $purchaseOrder->id,
@@ -65,7 +67,8 @@ describe('authenticated user', function () {
 
         $invoice = Invoice::query()->latest('created_at')->firstOrFail();
         expect($invoice->getFirstMedia(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION))->not->toBeNull()
-            ->and($invoice->getFirstMedia(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION))->not->toBeNull();
+            ->and($invoice->getFirstMedia(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION))->not->toBeNull()
+            ->and($invoice->getFirstMedia(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION))->not->toBeNull();
     });
 
     test('can add an invoice without an lddap adap no', function () {
@@ -93,8 +96,33 @@ describe('authenticated user', function () {
             ->assertCreated()
             ->assertJsonPath('data.attributes.paymentReceiptUrl', null)
             ->assertJsonPath('data.attributes.disbursementVoucherUrl', null)
+            ->assertJsonPath('data.attributes.invoicePictureUrl', null)
             ->assertJsonPath('data.attributes.note', null)
             ->assertJsonPath('data.attributes.status', 'unpaid');
+    });
+
+    test('can add an invoice with a pdf invoice picture', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices", purchaseOrderInvoicePayload([
+            'invoice_picture' => UploadedFile::fake()->createWithContent('invoice.pdf', '%PDF-1.4 fake'),
+        ]))
+            ->assertCreated()
+            ->assertJsonPath('data.attributes.invoicePictureUrl', fn ($url) => $url !== null);
+
+        $invoice = Invoice::query()->latest('created_at')->firstOrFail();
+        expect($invoice->getFirstMedia(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION)->mime_type)
+            ->toBe('application/pdf');
+    });
+
+    test('rejects invoice picture when file type is invalid', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices", purchaseOrderInvoicePayload([
+            'invoice_picture' => UploadedFile::fake()->create('invoice.txt', 100, 'text/plain'),
+        ]))
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/invoice_picture');
     });
 
     test('can add an invoice with paid status', function () {
