@@ -6,13 +6,17 @@ use App\Models\Invoice;
 use App\Models\PurchaseOrder;
 use App\Models\TripReport;
 use App\Repositories\Contracts\InvoiceRepositoryInterface;
+use App\Support\Media\MediaUploader;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class InvoiceRepository implements InvoiceRepositoryInterface
 {
-    public function __construct(protected Invoice $model) {}
+    public function __construct(
+        protected Invoice $model,
+        protected MediaUploader $mediaUploader
+    ) {}
 
     public function listForPurchaseOrder(PurchaseOrder $purchaseOrder): Collection
     {
@@ -42,13 +46,19 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             $invoice = $purchaseOrder->invoices()->create($data);
 
             if ($paymentReceipt !== null) {
-                $invoice->addMedia($paymentReceipt)
-                    ->toMediaCollection(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION);
+                $this->mediaUploader->add(
+                    $invoice,
+                    $paymentReceipt,
+                    Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION
+                );
             }
 
             if ($disbursementVoucher !== null) {
-                $invoice->addMedia($disbursementVoucher)
-                    ->toMediaCollection(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION);
+                $this->mediaUploader->add(
+                    $invoice,
+                    $disbursementVoucher,
+                    Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION
+                );
             }
 
             return $invoice->fresh('media');
@@ -78,13 +88,19 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             }
 
             if ($paymentReceipt !== null) {
-                $invoice->addMedia($paymentReceipt)
-                    ->toMediaCollection(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION);
+                $this->mediaUploader->add(
+                    $invoice,
+                    $paymentReceipt,
+                    Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION
+                );
             }
 
             if ($disbursementVoucher !== null) {
-                $invoice->addMedia($disbursementVoucher)
-                    ->toMediaCollection(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION);
+                $this->mediaUploader->add(
+                    $invoice,
+                    $disbursementVoucher,
+                    Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION
+                );
             }
 
             return $invoice->fresh('media');

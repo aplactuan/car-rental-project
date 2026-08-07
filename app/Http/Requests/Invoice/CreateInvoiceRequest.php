@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Invoice;
 
 use App\Enums\InvoiceStatus;
+use App\Support\Media\MediaUploader;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -24,8 +25,8 @@ class CreateInvoiceRequest extends FormRequest
             'lddap_adap_no' => ['nullable', 'string', 'max:255'],
             'note' => ['nullable', 'string'],
             'status' => ['sometimes', Rule::enum(InvoiceStatus::class)],
-            'payment_receipt' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:10240'],
-            'disbursement_voucher' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp,pdf', 'max:10240'],
+            'payment_receipt' => ['nullable', 'file', 'mimes:'.MediaUploader::IMAGE_OR_PDF_MIMES, 'max:10240'],
+            'disbursement_voucher' => ['nullable', 'file', 'mimes:'.MediaUploader::IMAGE_OR_PDF_MIMES, 'max:10240'],
         ];
     }
 

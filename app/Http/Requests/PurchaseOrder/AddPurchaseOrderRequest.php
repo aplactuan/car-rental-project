@@ -3,6 +3,7 @@
 namespace App\Http\Requests\PurchaseOrder;
 
 use App\Enums\PurchaseOrderStatus;
+use App\Support\Media\MediaUploader;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -28,7 +29,7 @@ class AddPurchaseOrderRequest extends FormRequest
             'description' => ['sometimes', 'nullable', 'string'],
             'status' => ['sometimes', Rule::enum(PurchaseOrderStatus::class)],
             'attachments' => ['sometimes', 'array'],
-            'attachments.*' => ['file', 'mimes:jpg,jpeg,png,webp,pdf,doc,docx,xls,xlsx', 'max:10240'],
+            'attachments.*' => ['file', 'mimes:'.MediaUploader::IMAGE_DOCUMENT_OR_PDF_MIMES, 'max:10240'],
         ];
     }
 

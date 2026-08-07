@@ -4,6 +4,7 @@ namespace App\Http\Requests\Invoice;
 
 use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
+use App\Support\Media\MediaUploader;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -39,14 +40,14 @@ class UpdateInvoiceRequest extends FormRequest
             'payment_receipt' => [
                 'nullable',
                 'file',
-                'mimes:jpg,jpeg,png,webp,pdf',
+                'mimes:'.MediaUploader::IMAGE_OR_PDF_MIMES,
                 'max:10240',
                 'prohibited_if:remove_payment_receipt,true',
             ],
             'disbursement_voucher' => [
                 'nullable',
                 'file',
-                'mimes:jpg,jpeg,png,webp,pdf',
+                'mimes:'.MediaUploader::IMAGE_OR_PDF_MIMES,
                 'max:10240',
                 'prohibited_if:remove_disbursement_voucher,true',
             ],

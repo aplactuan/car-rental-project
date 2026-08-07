@@ -5,14 +5,17 @@ namespace App\Repositories\Eloquent;
 use App\Models\PurchaseOrder;
 use App\Repositories\BaseRepository;
 use App\Repositories\Contracts\PurchaseOrderRepositoryInterface;
+use App\Support\Media\MediaUploader;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 
 class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRepositoryInterface
 {
-    public function __construct(PurchaseOrder $model)
-    {
+    public function __construct(
+        PurchaseOrder $model,
+        protected MediaUploader $mediaUploader
+    ) {
         parent::__construct($model);
     }
 
@@ -82,8 +85,11 @@ class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRep
     private function addAttachments(PurchaseOrder $purchaseOrder, array $attachments): void
     {
         foreach ($attachments as $attachment) {
-            $purchaseOrder->addMedia($attachment)
-                ->toMediaCollection(PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION);
+            $this->mediaUploader->add(
+                $purchaseOrder,
+                $attachment,
+                PurchaseOrder::ATTACHMENTS_MEDIA_COLLECTION
+            );
         }
     }
 

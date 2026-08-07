@@ -4,6 +4,7 @@ use App\Models\Customer;
 use App\Models\Program;
 use App\Models\PurchaseOrder;
 use App\Repositories\Eloquent\PurchaseOrderRepository;
+use App\Support\Media\MediaUploader;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -12,7 +13,7 @@ uses(RefreshDatabase::class);
 
 beforeEach(function () {
     Storage::fake('public');
-    $this->repository = new PurchaseOrderRepository(new PurchaseOrder);
+    $this->repository = new PurchaseOrderRepository(new PurchaseOrder, app(MediaUploader::class));
 });
 
 test('create persists purchase order', function () {
