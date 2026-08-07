@@ -23,6 +23,7 @@ class PurchaseOrderInvoiceResource extends JsonResource
                 'status' => $this->status->value,
                 'paymentReceiptUrl' => $this->getFirstMediaUrl(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION) ?: null,
                 'disbursementVoucherUrl' => $this->getFirstMediaUrl(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION) ?: null,
+                'invoicePictureUrl' => $this->getFirstMediaUrl(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION) ?: null,
                 'createdAt' => $this->created_at?->toIso8601String(),
                 'updatedAt' => $this->updated_at?->toIso8601String(),
             ],

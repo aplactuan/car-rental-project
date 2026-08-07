@@ -27,6 +27,7 @@ class CreateInvoiceRequest extends FormRequest
             'status' => ['sometimes', Rule::enum(InvoiceStatus::class)],
             'payment_receipt' => ['nullable', 'file', 'mimes:'.MediaUploader::IMAGE_OR_PDF_MIMES, 'max:10240'],
             'disbursement_voucher' => ['nullable', 'file', 'mimes:'.MediaUploader::IMAGE_OR_PDF_MIMES, 'max:10240'],
+            'invoice_picture' => ['nullable', 'file', 'mimes:'.MediaUploader::IMAGE_OR_PDF_MIMES, 'max:10240'],
         ];
     }
 
@@ -41,6 +42,8 @@ class CreateInvoiceRequest extends FormRequest
             'payment_receipt.max' => 'The payment receipt must not exceed 10MB.',
             'disbursement_voucher.mimes' => 'The disbursement voucher must be an image or PDF.',
             'disbursement_voucher.max' => 'The disbursement voucher must not exceed 10MB.',
+            'invoice_picture.mimes' => 'The invoice picture must be an image or PDF.',
+            'invoice_picture.max' => 'The invoice picture must not exceed 10MB.',
         ];
     }
 }

@@ -18,6 +18,8 @@ class Invoice extends Model implements HasMedia
 
     public const DISBURSEMENT_VOUCHER_MEDIA_COLLECTION = 'disbursement_voucher';
 
+    public const INVOICE_PICTURE_MEDIA_COLLECTION = 'invoice_picture';
+
     protected $fillable = [
         'purchase_order_id',
         'invoice_number',
@@ -49,7 +51,7 @@ class Invoice extends Model implements HasMedia
 
     public function registerMediaCollections(): void
     {
-        $mimeTypes = [
+        $documentMimeTypes = [
             'image/jpeg',
             'image/png',
             'image/webp',
@@ -58,10 +60,14 @@ class Invoice extends Model implements HasMedia
 
         $this->addMediaCollection(self::PAYMENT_RECEIPT_MEDIA_COLLECTION)
             ->singleFile()
-            ->acceptsMimeTypes($mimeTypes);
+            ->acceptsMimeTypes($documentMimeTypes);
 
         $this->addMediaCollection(self::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION)
             ->singleFile()
-            ->acceptsMimeTypes($mimeTypes);
+            ->acceptsMimeTypes($documentMimeTypes);
+
+        $this->addMediaCollection(self::INVOICE_PICTURE_MEDIA_COLLECTION)
+            ->singleFile()
+            ->acceptsMimeTypes($documentMimeTypes);
     }
 }

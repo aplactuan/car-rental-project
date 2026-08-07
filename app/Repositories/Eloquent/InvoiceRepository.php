@@ -40,9 +40,10 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         PurchaseOrder $purchaseOrder,
         array $data,
         ?UploadedFile $paymentReceipt = null,
-        ?UploadedFile $disbursementVoucher = null
+        ?UploadedFile $disbursementVoucher = null,
+        ?UploadedFile $invoicePicture = null
     ): Invoice {
-        return DB::transaction(function () use ($purchaseOrder, $data, $paymentReceipt, $disbursementVoucher): Invoice {
+        return DB::transaction(function () use ($purchaseOrder, $data, $paymentReceipt, $disbursementVoucher, $invoicePicture): Invoice {
             $invoice = $purchaseOrder->invoices()->create($data);
 
             if ($paymentReceipt !== null) {
@@ -61,6 +62,14 @@ class InvoiceRepository implements InvoiceRepositoryInterface
                 );
             }
 
+            if ($invoicePicture !== null) {
+                $this->mediaUploader->add(
+                    $invoice,
+                    $invoicePicture,
+                    Invoice::INVOICE_PICTURE_MEDIA_COLLECTION
+                );
+            }
+
             return $invoice->fresh('media');
         });
     }
@@ -71,12 +80,14 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         array $data,
         ?UploadedFile $paymentReceipt = null,
         ?UploadedFile $disbursementVoucher = null,
+        ?UploadedFile $invoicePicture = null,
         bool $removePaymentReceipt = false,
-        bool $removeDisbursementVoucher = false
+        bool $removeDisbursementVoucher = false,
+        bool $removeInvoicePicture = false
     ): Invoice {
         $invoice = $this->findForPurchaseOrder($purchaseOrder, $invoice);
 
-        return DB::transaction(function () use ($invoice, $data, $paymentReceipt, $disbursementVoucher, $removePaymentReceipt, $removeDisbursementVoucher): Invoice {
+        return DB::transaction(function () use ($invoice, $data, $paymentReceipt, $disbursementVoucher, $invoicePicture, $removePaymentReceipt, $removeDisbursementVoucher, $removeInvoicePicture): Invoice {
             $invoice->update($data);
 
             if ($removePaymentReceipt) {
@@ -85,6 +96,10 @@ class InvoiceRepository implements InvoiceRepositoryInterface
 
             if ($removeDisbursementVoucher) {
                 $invoice->clearMediaCollection(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION);
+            }
+
+            if ($removeInvoicePicture) {
+                $invoice->clearMediaCollection(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION);
             }
 
             if ($paymentReceipt !== null) {
@@ -100,6 +115,14 @@ class InvoiceRepository implements InvoiceRepositoryInterface
                     $invoice,
                     $disbursementVoucher,
                     Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION
+                );
+            }
+
+            if ($invoicePicture !== null) {
+                $this->mediaUploader->add(
+                    $invoice,
+                    $invoicePicture,
+                    Invoice::INVOICE_PICTURE_MEDIA_COLLECTION
                 );
             }
 

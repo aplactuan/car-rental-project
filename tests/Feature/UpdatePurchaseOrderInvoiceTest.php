@@ -47,6 +47,8 @@ describe('authenticated user', function () {
             ->toMediaCollection(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION);
         $invoice->addMedia(UploadedFile::fake()->image('old-voucher.jpg'))
             ->toMediaCollection(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION);
+        $invoice->addMedia(UploadedFile::fake()->image('old-picture.jpg'))
+            ->toMediaCollection(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION);
 
         $response = putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
             'invoice_number' => 'INV-UPDATED-002',
@@ -55,6 +57,7 @@ describe('authenticated user', function () {
             'status' => 'paid',
             'payment_receipt' => UploadedFile::fake()->image('new-receipt.png'),
             'disbursement_voucher' => UploadedFile::fake()->image('new-voucher.webp'),
+            'invoice_picture' => UploadedFile::fake()->image('new-picture.jpg'),
         ]);
 
         $response->assertOk()
@@ -65,7 +68,8 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.status', 'paid');
 
         expect($response->json('data.attributes.paymentReceiptUrl'))->not->toBeNull()
-            ->and($response->json('data.attributes.disbursementVoucherUrl'))->not->toBeNull();
+            ->and($response->json('data.attributes.disbursementVoucherUrl'))->not->toBeNull()
+            ->and($response->json('data.attributes.invoicePictureUrl'))->not->toBeNull();
 
         assertDatabaseHas('invoices', [
             'id' => $invoice->id,
@@ -80,7 +84,9 @@ describe('authenticated user', function () {
         expect($invoice->getMedia(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION))->toHaveCount(1)
             ->and($invoice->getFirstMedia(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION)?->file_name)->toBe('new-receipt.png')
             ->and($invoice->getMedia(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION))->toHaveCount(1)
-            ->and($invoice->getFirstMedia(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION)?->file_name)->toBe('new-voucher.webp');
+            ->and($invoice->getFirstMedia(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION)?->file_name)->toBe('new-voucher.webp')
+            ->and($invoice->getMedia(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION))->toHaveCount(1)
+            ->and($invoice->getFirstMedia(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION)?->file_name)->toBe('new-picture.jpg');
     });
 
     test('can clear lddap adap no on update', function () {
@@ -116,26 +122,31 @@ describe('authenticated user', function () {
             ->toBe('receipt.jpg');
     });
 
-    test('can remove payment receipt and disbursement voucher', function () {
+    test('can remove payment receipt, disbursement voucher, and invoice picture', function () {
         $purchaseOrder = PurchaseOrder::factory()->create();
         $invoice = invoiceForUpdate($purchaseOrder);
         $invoice->addMedia(UploadedFile::fake()->image('receipt.jpg'))
             ->toMediaCollection(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION);
         $invoice->addMedia(UploadedFile::fake()->image('voucher.jpg'))
             ->toMediaCollection(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION);
+        $invoice->addMedia(UploadedFile::fake()->image('picture.jpg'))
+            ->toMediaCollection(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION);
 
         putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
             'remove_payment_receipt' => true,
             'remove_disbursement_voucher' => true,
+            'remove_invoice_picture' => true,
         ])
             ->assertOk()
             ->assertJsonPath('data.attributes.paymentReceiptUrl', null)
-            ->assertJsonPath('data.attributes.disbursementVoucherUrl', null);
+            ->assertJsonPath('data.attributes.disbursementVoucherUrl', null)
+            ->assertJsonPath('data.attributes.invoicePictureUrl', null);
 
         $invoice->refresh();
 
         expect($invoice->getFirstMedia(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION))->toBeNull()
-            ->and($invoice->getFirstMedia(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION))->toBeNull();
+            ->and($invoice->getFirstMedia(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION))->toBeNull()
+            ->and($invoice->getFirstMedia(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION))->toBeNull();
     });
 
     test('cannot upload a file while also requesting its removal', function () {
