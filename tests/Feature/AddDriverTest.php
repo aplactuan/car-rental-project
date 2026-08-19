@@ -77,4 +77,28 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.licenseNumber', $payload['license_number'])
             ->assertJsonPath('data.attributes.userId', $createdUser->id);
     });
+
+    test('it can add a driver without a last name', function () {
+        $payload = driverPayload(['last_name' => null]);
+
+        $response = postJson('/api/v1/drivers', $payload);
+
+        $createdUser = User::where('email', $payload['email'])->first();
+
+        assertDatabaseHas('users', [
+            'email' => $payload['email'],
+            'name' => $payload['first_name'],
+        ]);
+
+        assertDatabaseHas('drivers', [
+            'first_name' => $payload['first_name'],
+            'last_name' => null,
+            'license_number' => $payload['license_number'],
+            'user_id' => $createdUser->id,
+        ]);
+
+        $response->assertCreated()
+            ->assertJsonPath('data.attributes.firstName', $payload['first_name'])
+            ->assertJsonPath('data.attributes.lastName', null);
+    });
 });

@@ -26,7 +26,7 @@ class UpdateDriverRequest extends FormRequest
     {
         $rules = [
             'first_name' => 'sometimes|string',
-            'last_name' => 'sometimes|string',
+            'last_name' => 'sometimes|nullable|string',
             'license_number' => 'sometimes|string|unique:drivers,license_number,'.$this->route('driver')->id,
             'license_expiry_date' => 'sometimes|date',
             'address' => 'sometimes|string',
@@ -38,5 +38,12 @@ class UpdateDriverRequest extends FormRequest
         }
 
         return $rules;
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('last_name') && trim((string) $this->input('last_name')) === '') {
+            $this->merge(['last_name' => null]);
+        }
     }
 }

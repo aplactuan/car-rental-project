@@ -79,7 +79,32 @@ describe('ImportDriversJob', function () {
         expect($driverImport->imported_count)->toBe(0)
             ->and($driverImport->failed_count)->toBe(1)
             ->and($driverImport->failures[0]['row'])->toBe(1)
-            ->and($driverImport->failures[0]['errors'])->toHaveKeys(['first_name', 'last_name']);
+            ->and($driverImport->failures[0]['errors'])->toHaveKeys(['first_name']);
+    });
+
+    test('it imports a row with a missing last name', function () {
+        $path = makeDriverCsvFile([
+            ['John', '', 'LIC-NO-LAST', '2030-01-01', '123 Main St', '555-1234', 'john.nolast@example.com', 'password123'],
+        ]);
+
+        $driverImport = DriverImport::factory()->create(['file_path' => $path]);
+
+        (new ImportDriversJob($driverImport))->handle(app(DriverRepositoryInterface::class));
+
+        $driverImport->refresh();
+
+        expect($driverImport->imported_count)->toBe(1)
+            ->and($driverImport->failed_count)->toBe(0);
+
+        $this->assertDatabaseHas('drivers', [
+            'license_number' => 'LIC-NO-LAST',
+            'first_name' => 'John',
+            'last_name' => null,
+        ]);
+        $this->assertDatabaseHas('users', [
+            'email' => 'john.nolast@example.com',
+            'name' => 'John',
+        ]);
     });
 
     test('it records failure for a duplicate license_number already in the database', function () {
