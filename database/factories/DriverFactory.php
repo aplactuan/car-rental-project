@@ -44,7 +44,7 @@ class DriverFactory extends Factory
             }
 
             $user = User::factory()->create([
-                'name' => $driver->first_name.' '.$driver->last_name,
+                'name' => Driver::displayName($driver->first_name, $driver->last_name),
             ]);
 
             $driver->update(['user_id' => $user->id]);

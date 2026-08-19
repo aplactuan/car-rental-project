@@ -19,6 +19,15 @@ test('withUser creates a linked user with matching name', function () {
     expect($driver->user->name)->toBe('Jane Doe');
 });
 
+test('withUser uses only first name when last name is missing', function () {
+    $driver = Driver::factory()->withUser()->create([
+        'first_name' => 'Jane',
+        'last_name' => null,
+    ]);
+
+    expect($driver->fresh()->user->name)->toBe('Jane');
+});
+
 test('withUser does not create a user when driver already has one', function () {
     $existingUser = User::factory()->create();
 

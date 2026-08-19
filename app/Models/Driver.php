@@ -33,6 +33,11 @@ class Driver extends Model
         'updated_at' => 'datetime',
     ];
 
+    public static function displayName(string $firstName, ?string $lastName): string
+    {
+        return trim($firstName.' '.($lastName ?? ''));
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

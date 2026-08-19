@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Enums\DriverImportStatus;
 use App\Enums\UserRole;
+use App\Models\Driver;
 use App\Models\DriverImport;
 use App\Models\User;
 use App\Repositories\Contracts\DriverRepositoryInterface;
@@ -68,9 +69,13 @@ class ImportDriversJob implements ShouldQueue
 
             $data = array_combine($headers, $row);
 
+            if (($data['last_name'] ?? '') === '') {
+                $data['last_name'] = null;
+            }
+
             $validator = Validator::make($data, [
                 'first_name' => ['required', 'string'],
-                'last_name' => ['required', 'string'],
+                'last_name' => ['nullable', 'string'],
                 'license_number' => ['required', 'string', 'unique:drivers,license_number'],
                 'license_expiry_date' => ['required', 'date'],
                 'address' => ['required', 'string'],
@@ -102,7 +107,7 @@ class ImportDriversJob implements ShouldQueue
             $validated = $validator->validated();
 
             $user = User::create([
-                'name' => $validated['first_name'].' '.$validated['last_name'],
+                'name' => Driver::displayName($validated['first_name'], $validated['last_name'] ?? null),
                 'email' => $validated['email'],
                 'password' => Hash::make($validated['password']),
                 'role' => UserRole::User,

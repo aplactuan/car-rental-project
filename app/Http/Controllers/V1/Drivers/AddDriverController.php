@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Driver\AddDriverRequest;
 use App\Http\Resources\V1\DriverResource;
+use App\Models\Driver;
 use App\Models\User;
 use App\Repositories\Contracts\DriverRepositoryInterface;
 use App\Traits\ApiResponses;
@@ -22,7 +23,7 @@ class AddDriverController extends Controller
         $validated = $request->validated();
 
         $user = User::create([
-            'name' => $validated['first_name'].' '.$validated['last_name'],
+            'name' => Driver::displayName($validated['first_name'], $validated['last_name'] ?? null),
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => UserRole::User,

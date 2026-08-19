@@ -15,7 +15,7 @@ class AddDriverRequest extends FormRequest
     {
         return [
             'first_name' => 'required|string',
-            'last_name' => 'required|string',
+            'last_name' => 'nullable|string',
             'license_number' => 'required|string|unique:drivers,license_number',
             'license_expiry_date' => 'required|date',
             'address' => 'required|string',
@@ -23,5 +23,12 @@ class AddDriverRequest extends FormRequest
             'email' => 'required|string|email|unique:users,email',
             'password' => 'required|string|min:8',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        if ($this->has('last_name') && trim((string) $this->input('last_name')) === '') {
+            $this->merge(['last_name' => null]);
+        }
     }
 }

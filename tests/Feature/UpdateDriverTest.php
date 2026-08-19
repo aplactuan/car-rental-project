@@ -95,6 +95,21 @@ describe('authenticated user', function () {
         expect($driver->fresh()->first_name)->toBe('Updated');
     });
 
+    test('it allows an admin to clear a driver last name', function () {
+        $admin = User::factory()->admin()->create();
+        $driver = Driver::factory()->create(['last_name' => 'Doe']);
+
+        Sanctum::actingAs($admin);
+
+        putJson("/api/v1/drivers/{$driver->id}", [
+            'last_name' => null,
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.attributes.lastName', null);
+
+        expect($driver->fresh()->last_name)->toBeNull();
+    });
+
     test('it forbids a linked driver user from updating another driver profile', function () {
         $driverUser = User::factory()->create();
         Driver::factory()->forUser($driverUser)->create();
