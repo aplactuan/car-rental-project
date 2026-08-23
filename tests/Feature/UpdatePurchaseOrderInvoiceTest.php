@@ -65,7 +65,9 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.invoiceNumber', 'INV-UPDATED-002')
             ->assertJsonPath('data.attributes.lddapAdapNo', 'LDDAP-UPDATED')
             ->assertJsonPath('data.attributes.note', 'Updated note')
-            ->assertJsonPath('data.attributes.status', 'paid');
+            ->assertJsonPath('data.attributes.status', 'paid')
+            ->assertJsonPath('data.attributes.tripReportCount', 0)
+            ->assertJsonPath('data.attributes.amount', 0);
 
         expect($response->json('data.attributes.paymentReceiptUrl'))->not->toBeNull()
             ->and($response->json('data.attributes.disbursementVoucherUrl'))->not->toBeNull()

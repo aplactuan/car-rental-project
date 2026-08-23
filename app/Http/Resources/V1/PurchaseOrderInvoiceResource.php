@@ -21,6 +21,8 @@ class PurchaseOrderInvoiceResource extends JsonResource
                 'lddapAdapNo' => $this->lddap_adap_no,
                 'note' => $this->note,
                 'status' => $this->status->value,
+                'tripReportCount' => (int) ($this->trip_reports_count ?? 0),
+                'amount' => (int) ($this->trip_reports_sum_amount ?? 0),
                 'paymentReceiptUrl' => $this->getFirstMediaUrl(Invoice::PAYMENT_RECEIPT_MEDIA_COLLECTION) ?: null,
                 'disbursementVoucherUrl' => $this->getFirstMediaUrl(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION) ?: null,
                 'invoicePictureUrl' => $this->getFirstMediaUrl(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION) ?: null,
