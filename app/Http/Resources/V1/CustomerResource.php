@@ -27,6 +27,22 @@ class CustomerResource extends JsonResource
                 'contactPerson' => $this->contact_person,
                 'contactMobileNumber' => $this->contact_mobile_number,
                 'contactEmail' => $this->contact_email,
+                'purchaseOrderCount' => $this->when(
+                    isset($this->purchase_orders_count),
+                    fn () => (int) $this->purchase_orders_count
+                ),
+                'purchaseOrderTotal' => $this->when(
+                    isset($this->purchase_orders_count),
+                    fn () => (int) ($this->purchase_orders_sum_amount ?? 0)
+                ),
+                'unprogrammedPurchaseOrderCount' => $this->when(
+                    isset($this->unprogrammed_purchase_orders_count),
+                    fn () => (int) $this->unprogrammed_purchase_orders_count
+                ),
+                'unprogrammedPurchaseOrderTotal' => $this->when(
+                    isset($this->unprogrammed_purchase_orders_count),
+                    fn () => (int) ($this->unprogrammed_purchase_orders_sum_amount ?? 0)
+                ),
             ],
             'relationships' => [
                 'parent' => [

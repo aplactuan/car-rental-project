@@ -1,6 +1,8 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\Program;
+use App\Models\PurchaseOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -35,6 +37,10 @@ describe('authenticated user', function () {
                     'name',
                     'type',
                     'parentId',
+                    'purchaseOrderCount',
+                    'purchaseOrderTotal',
+                    'unprogrammedPurchaseOrderCount',
+                    'unprogrammedPurchaseOrderTotal',
                 ],
                 'relationships' => [
                     'parent',
@@ -44,6 +50,10 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.id', $customer->id)
             ->assertJsonPath('data.attributes.name', $customer->name)
             ->assertJsonPath('data.attributes.type', $customer->type)
+            ->assertJsonPath('data.attributes.purchaseOrderCount', 0)
+            ->assertJsonPath('data.attributes.purchaseOrderTotal', 0)
+            ->assertJsonPath('data.attributes.unprogrammedPurchaseOrderCount', 0)
+            ->assertJsonPath('data.attributes.unprogrammedPurchaseOrderTotal', 0)
             ->assertJsonPath('data.relationships.parent.data', null);
     });
 
@@ -59,5 +69,21 @@ describe('authenticated user', function () {
             ->assertSuccessful()
             ->assertJsonPath('data.relationships.parent.data.id', $parent->id)
             ->assertJsonPath('data.relationships.parent.data.attributes.name', $parent->name);
+    });
+
+    test('it returns purchase order rollups for the customer', function () {
+        $customer = Customer::factory()->create();
+        $program = Program::factory()->forCustomer($customer)->create();
+
+        PurchaseOrder::factory()->forCustomer($customer)->forProgram($program)->create(['amount' => 4000]);
+        PurchaseOrder::factory()->forCustomer($customer)->forProgram($program)->create(['amount' => 6000]);
+        PurchaseOrder::factory()->forCustomer($customer)->create(['amount' => 1500, 'program_id' => null]);
+
+        getJson("/api/v1/customers/{$customer->id}")
+            ->assertSuccessful()
+            ->assertJsonPath('data.attributes.purchaseOrderCount', 3)
+            ->assertJsonPath('data.attributes.purchaseOrderTotal', 11500)
+            ->assertJsonPath('data.attributes.unprogrammedPurchaseOrderCount', 1)
+            ->assertJsonPath('data.attributes.unprogrammedPurchaseOrderTotal', 1500);
     });
 });
