@@ -22,6 +22,12 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     {
         return $this->model->newQuery()
             ->with('media')
+            ->withCount([
+                'tripReports as trip_reports_count' => fn ($query) => $query->where('purchase_order_id', $purchaseOrder->id),
+            ])
+            ->withSum([
+                'tripReports as trip_reports_sum_amount' => fn ($query) => $query->where('purchase_order_id', $purchaseOrder->id),
+            ], 'amount')
             ->where('purchase_order_id', $purchaseOrder->id)
             ->latest()
             ->get();
@@ -33,7 +39,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
             abort(404);
         }
 
-        return $invoice->load('media');
+        return $this->loadTripReportAggregates($invoice->load('media'));
     }
 
     public function create(
@@ -70,7 +76,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
                 );
             }
 
-            return $invoice->fresh('media');
+            return $this->loadTripReportAggregates($invoice->fresh('media'));
         });
     }
 
@@ -126,7 +132,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
                 );
             }
 
-            return $invoice->fresh('media');
+            return $this->loadTripReportAggregates($invoice->fresh('media'));
         });
     }
 
@@ -178,5 +184,16 @@ class InvoiceRepository implements InvoiceRepositoryInterface
                 ->whereIn('id', $tripReportIds)
                 ->get();
         });
+    }
+
+    private function loadTripReportAggregates(Invoice $invoice): Invoice
+    {
+        return $invoice
+            ->loadCount([
+                'tripReports as trip_reports_count' => fn ($query) => $query->where('purchase_order_id', $invoice->purchase_order_id),
+            ])
+            ->loadSum([
+                'tripReports as trip_reports_sum_amount' => fn ($query) => $query->where('purchase_order_id', $invoice->purchase_order_id),
+            ], 'amount');
     }
 }

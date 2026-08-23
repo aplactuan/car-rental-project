@@ -52,6 +52,8 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.invoiceNumber', $payload['invoice_number'])
             ->assertJsonPath('data.attributes.lddapAdapNo', $payload['lddap_adap_no'])
             ->assertJsonPath('data.attributes.note', $payload['note'])
+            ->assertJsonPath('data.attributes.tripReportCount', 0)
+            ->assertJsonPath('data.attributes.amount', 0)
             ->assertJsonPath('data.relationships.purchaseOrder.data.id', $purchaseOrder->id);
 
         expect($response->json('data.attributes.paymentReceiptUrl'))->not->toBeNull()
