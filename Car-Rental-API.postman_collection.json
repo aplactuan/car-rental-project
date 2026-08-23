@@ -1028,7 +1028,7 @@
 								"{{customer_id}}"
 							]
 						},
-						"description": "**Bearer required.** Returns one customer. Customer attributes include `name`, `type`, `parentId`, `contactPerson`, `contactMobileNumber`, and `contactEmail`. Single-resource responses may include parent attributes such as the parent name under `relationships.parent.data.attributes`."
+						"description": "**Bearer required.** Returns one customer. Customer attributes include `name`, `type`, `parentId`, `contactPerson`, `contactMobileNumber`, `contactEmail`, `purchaseOrderCount`, `purchaseOrderTotal`, `unprogrammedPurchaseOrderCount`, and `unprogrammedPurchaseOrderTotal`. Rollup fields count/sum all purchase orders for this customer; unprogrammed fields count/sum only POs with no `program_id`. Single-resource responses may include parent attributes such as the parent name under `relationships.parent.data.attributes`."
 					}
 				},
 				{
@@ -1106,7 +1106,7 @@
 								"programs"
 							]
 						},
-						"description": "**Bearer required.** Returns all programs for `{{customer_id}}` as a program resource collection, newest first. Each item includes `name`, `description`, `customerId`, and a `customer` relationship (may include the customer name)."
+						"description": "**Bearer required.** Returns all programs for `{{customer_id}}` as a program resource collection, newest first. Each item includes `name`, `description`, `customerId`, `purchaseOrderCount`, `purchaseOrderTotal`, and a `customer` relationship (may include the customer name). `purchaseOrderCount` is the count of purchase orders for this customer linked to that program; `purchaseOrderTotal` is the sum of those PO amounts (0 when none). Unprogrammed POs (`program_id` null) are excluded from program rows and reported in top-level `meta` as `unprogrammedPurchaseOrderCount` and `unprogrammedPurchaseOrderTotal`."
 					}
 				},
 				{

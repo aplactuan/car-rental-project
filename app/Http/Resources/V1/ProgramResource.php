@@ -21,6 +21,14 @@ class ProgramResource extends JsonResource
                 'name' => $this->name,
                 'description' => $this->description,
                 'customerId' => $this->customer_id,
+                'purchaseOrderCount' => $this->when(
+                    isset($this->purchase_orders_count),
+                    fn () => (int) $this->purchase_orders_count
+                ),
+                'purchaseOrderTotal' => $this->when(
+                    isset($this->purchase_orders_count),
+                    fn () => (int) ($this->purchase_orders_sum_amount ?? 0)
+                ),
             ],
             'relationships' => [
                 'customer' => [
