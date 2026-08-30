@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Customer extends Model
 {
@@ -57,6 +58,16 @@ class Customer extends Model
     public function programs(): HasMany
     {
         return $this->hasMany(Program::class);
+    }
+
+    public function tripReports(): HasManyThrough
+    {
+        return $this->hasManyThrough(TripReport::class, PurchaseOrder::class);
+    }
+
+    public function invoices(): HasManyThrough
+    {
+        return $this->hasManyThrough(Invoice::class, PurchaseOrder::class);
     }
 
     public function isSubAccount(): bool
