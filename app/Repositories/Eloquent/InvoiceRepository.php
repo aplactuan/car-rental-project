@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\InvoiceStatus;
 use App\Models\Invoice;
 use App\Models\PurchaseOrder;
 use App\Models\TripReport;
@@ -50,6 +51,12 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         ?UploadedFile $invoicePicture = null
     ): Invoice {
         return DB::transaction(function () use ($purchaseOrder, $data, $paymentReceipt, $disbursementVoucher, $invoicePicture): Invoice {
+            $data['billed_at'] ??= now();
+
+            if (($data['status'] ?? InvoiceStatus::Unpaid->value) === InvoiceStatus::Paid->value) {
+                $data['paid_at'] = now();
+            }
+
             $invoice = $purchaseOrder->invoices()->create($data);
 
             if ($paymentReceipt !== null) {
@@ -94,6 +101,16 @@ class InvoiceRepository implements InvoiceRepositoryInterface
         $invoice = $this->findForPurchaseOrder($purchaseOrder, $invoice);
 
         return DB::transaction(function () use ($invoice, $data, $paymentReceipt, $disbursementVoucher, $invoicePicture, $removePaymentReceipt, $removeDisbursementVoucher, $removeInvoicePicture): Invoice {
+            if (array_key_exists('status', $data)) {
+                if ($data['status'] === InvoiceStatus::Paid->value && $invoice->status !== InvoiceStatus::Paid) {
+                    $data['paid_at'] = now();
+                }
+
+                if ($data['status'] === InvoiceStatus::Unpaid->value) {
+                    $data['paid_at'] = null;
+                }
+            }
+
             $invoice->update($data);
 
             if ($removePaymentReceipt) {

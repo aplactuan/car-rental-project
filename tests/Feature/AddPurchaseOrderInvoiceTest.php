@@ -100,7 +100,22 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.disbursementVoucherUrl', null)
             ->assertJsonPath('data.attributes.invoicePictureUrl', null)
             ->assertJsonPath('data.attributes.note', null)
-            ->assertJsonPath('data.attributes.status', 'unpaid');
+            ->assertJsonPath('data.attributes.status', 'unpaid')
+            ->assertJsonPath('data.attributes.billedAt', fn ($value) => is_string($value))
+            ->assertJsonPath('data.attributes.paidAt', null);
+    });
+
+    test('can set an explicit billed date', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices", purchaseOrderInvoicePayload([
+            'billed_at' => '2026-08-15 09:30:00',
+        ]))
+            ->assertCreated()
+            ->assertJsonPath('data.attributes.billedAt', '2026-08-15T09:30:00+00:00');
+
+        expect(Invoice::query()->where('invoice_number', 'INV-1001')->firstOrFail()->billed_at?->toDateTimeString())
+            ->toBe('2026-08-15 09:30:00');
     });
 
     test('can add an invoice with a pdf invoice picture', function () {
@@ -134,7 +149,8 @@ describe('authenticated user', function () {
             'status' => 'paid',
         ]))
             ->assertCreated()
-            ->assertJsonPath('data.attributes.status', 'paid');
+            ->assertJsonPath('data.attributes.status', 'paid')
+            ->assertJsonPath('data.attributes.paidAt', fn ($value) => is_string($value));
 
         assertDatabaseHas('invoices', [
             'purchase_order_id' => $purchaseOrder->id,
@@ -154,6 +170,7 @@ describe('authenticated user', function () {
         postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices", [
             'invoice_number' => 'INV-DUPLICATE',
             'lddap_adap_no' => '',
+            'billed_at' => 'not-a-date',
             'payment_receipt' => UploadedFile::fake()->create('receipt.txt', 100, 'text/plain'),
         ])
             ->assertUnprocessable()

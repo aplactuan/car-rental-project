@@ -35,6 +35,7 @@ class UpdateInvoiceRequest extends FormRequest
             'lddap_adap_no' => ['sometimes', 'nullable', 'string', 'max:255'],
             'note' => ['sometimes', 'nullable', 'string'],
             'status' => ['sometimes', Rule::enum(InvoiceStatus::class)],
+            'billed_at' => ['sometimes', 'required', 'date'],
             'remove_payment_receipt' => ['sometimes', 'boolean'],
             'remove_disbursement_voucher' => ['sometimes', 'boolean'],
             'remove_invoice_picture' => ['sometimes', 'boolean'],
@@ -69,6 +70,7 @@ class UpdateInvoiceRequest extends FormRequest
     {
         return [
             'status.enum' => 'The status must be either unpaid or paid.',
+            'billed_at.date' => 'The billed at field must be a valid date.',
             'payment_receipt.mimes' => 'The payment receipt must be an image or PDF.',
             'payment_receipt.max' => 'The payment receipt must not exceed 10MB.',
             'payment_receipt.prohibited_if' => 'Do not upload a payment receipt when removing it.',

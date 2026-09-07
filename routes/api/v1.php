@@ -32,6 +32,10 @@ use App\Http\Controllers\V1\Customers\SingleCustomerController;
 use App\Http\Controllers\V1\Customers\SingleCustomerTransactionController;
 use App\Http\Controllers\V1\Customers\UpdateCustomerController;
 use App\Http\Controllers\V1\Customers\UpdateCustomerTransactionController;
+use App\Http\Controllers\V1\Dashboard\CustomerOverviewController;
+use App\Http\Controllers\V1\Dashboard\MonthReportController;
+use App\Http\Controllers\V1\Dashboard\ProgramRankingsController;
+use App\Http\Controllers\V1\Dashboard\RecentTripReportsController;
 use App\Http\Controllers\V1\Drivers\AddDriverController;
 use App\Http\Controllers\V1\Drivers\ImportDriversController;
 use App\Http\Controllers\V1\Drivers\ListDriverNamesController;
@@ -73,6 +77,13 @@ use App\Http\Controllers\V1\Users\AddUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+    Route::prefix('dashboard')->group(function () {
+        Route::get('/customer-overview', CustomerOverviewController::class);
+        Route::get('/program-rankings', ProgramRankingsController::class);
+        Route::get('/trip-reports/recent', RecentTripReportsController::class);
+        Route::get('/month-report', MonthReportController::class);
+    });
+
     Route::post('/cars', AddCarController::class);
     Route::post('/cars/import', ImportCarsController::class);
     Route::get('/cars/imports/{carImport}', ShowCarImportController::class);

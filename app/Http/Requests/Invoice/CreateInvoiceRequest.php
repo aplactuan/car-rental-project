@@ -25,6 +25,7 @@ class CreateInvoiceRequest extends FormRequest
             'lddap_adap_no' => ['nullable', 'string', 'max:255'],
             'note' => ['nullable', 'string'],
             'status' => ['sometimes', Rule::enum(InvoiceStatus::class)],
+            'billed_at' => ['sometimes', 'required', 'date'],
             'payment_receipt' => ['nullable', 'file', 'mimes:'.MediaUploader::IMAGE_OR_PDF_MIMES, 'max:10240'],
             'disbursement_voucher' => ['nullable', 'file', 'mimes:'.MediaUploader::IMAGE_OR_PDF_MIMES, 'max:10240'],
             'invoice_picture' => ['nullable', 'file', 'mimes:'.MediaUploader::IMAGE_OR_PDF_MIMES, 'max:10240'],
@@ -38,6 +39,7 @@ class CreateInvoiceRequest extends FormRequest
     {
         return [
             'status.enum' => 'The status must be either unpaid or paid.',
+            'billed_at.date' => 'The billed at field must be a valid date.',
             'payment_receipt.mimes' => 'The payment receipt must be an image or PDF.',
             'payment_receipt.max' => 'The payment receipt must not exceed 10MB.',
             'disbursement_voucher.mimes' => 'The disbursement voucher must be an image or PDF.',
