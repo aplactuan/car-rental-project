@@ -18,6 +18,9 @@ class CustomerOverviewResource extends JsonResource
             'id' => 'overview',
             'attributes' => [
                 'totalPrograms' => (int) $this->resource['total_programs'],
+                'totalPurchaseOrderAmount' => (int) $this->resource['total_purchase_order_amount'],
+                'totalBilled' => (int) $this->resource['total_billed'],
+                'totalPaid' => (int) $this->resource['total_paid'],
                 'balanceToCollect' => (int) $this->resource['balance_to_collect'],
                 'topCustomers' => $this->resource['top_customers']
                     ->map(fn (Customer $customer): array => [

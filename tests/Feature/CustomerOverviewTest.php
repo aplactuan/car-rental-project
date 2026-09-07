@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use App\Models\TripReport;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
@@ -34,6 +35,9 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.type', 'customerOverview')
             ->assertJsonPath('data.id', 'overview')
             ->assertJsonPath('data.attributes.totalPrograms', 0)
+            ->assertJsonPath('data.attributes.totalPurchaseOrderAmount', 0)
+            ->assertJsonPath('data.attributes.totalBilled', 0)
+            ->assertJsonPath('data.attributes.totalPaid', 0)
             ->assertJsonPath('data.attributes.balanceToCollect', 0)
             ->assertJsonCount(0, 'data.attributes.topCustomers');
     });
@@ -94,7 +98,9 @@ describe('authenticated user', function () {
 
     test('sums only trip reports attached to unpaid purchase order invoices', function () {
         $customer = Customer::factory()->create();
-        $purchaseOrder = PurchaseOrder::factory()->forCustomer($customer)->create();
+        $purchaseOrder = PurchaseOrder::factory()->forCustomer($customer)->create([
+            'amount' => 700000,
+        ]);
 
         $unpaidInvoice = Invoice::query()->create([
             'purchase_order_id' => $purchaseOrder->id,
@@ -136,6 +142,17 @@ describe('authenticated user', function () {
 
         getJson('/api/v1/dashboard/customer-overview')
             ->assertSuccessful()
+            ->assertJsonPath('data.attributes.totalPurchaseOrderAmount', 700000)
+            ->assertJsonPath('data.attributes.totalBilled', 153400)
+            ->assertJsonPath('data.attributes.totalPaid', 25000)
             ->assertJsonPath('data.attributes.balanceToCollect', 128400);
+    });
+
+    test('loads the overview with four bounded aggregate queries', function () {
+        DB::enableQueryLog();
+
+        getJson('/api/v1/dashboard/customer-overview')->assertSuccessful();
+
+        expect(DB::getQueryLog())->toHaveCount(4);
     });
 });

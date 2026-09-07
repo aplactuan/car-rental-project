@@ -5,6 +5,7 @@ use App\Models\PurchaseOrder;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 
@@ -170,6 +171,40 @@ describe('authenticated user', function () {
         ])->assertNotFound();
     });
 
+    test('manages paid at when invoice status changes', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+        $invoice = invoiceForUpdate($purchaseOrder);
+
+        $this->travelTo(Carbon::parse('2026-09-08 10:00:00'));
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
+            'status' => 'paid',
+            'billed_at' => '2026-09-01 08:00:00',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.attributes.billedAt', '2026-09-01T08:00:00+00:00')
+            ->assertJsonPath('data.attributes.paidAt', '2026-09-08T10:00:00+00:00');
+
+        $paidAt = $invoice->fresh()->paid_at;
+
+        $this->travelTo(Carbon::parse('2026-09-09 10:00:00'));
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
+            'status' => 'paid',
+            'note' => 'Still paid',
+        ])->assertOk();
+
+        expect($invoice->fresh()->paid_at?->equalTo($paidAt))->toBeTrue();
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
+            'status' => 'unpaid',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.attributes.paidAt', null);
+
+        expect($invoice->fresh()->paid_at)->toBeNull();
+    });
+
     test('validates updated invoice attributes and files', function () {
         $purchaseOrder = PurchaseOrder::factory()->create();
         $invoice = invoiceForUpdate($purchaseOrder);
@@ -179,6 +214,7 @@ describe('authenticated user', function () {
             'invoice_number' => 'INV-TAKEN',
             'lddap_adap_no' => '',
             'status' => 'pending',
+            'billed_at' => 'not-a-date',
             'payment_receipt' => UploadedFile::fake()->create('receipt.txt', 100, 'text/plain'),
         ])->assertUnprocessable();
     });

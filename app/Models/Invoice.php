@@ -26,6 +26,8 @@ class Invoice extends Model implements HasMedia
         'lddap_adap_no',
         'note',
         'status',
+        'billed_at',
+        'paid_at',
     ];
 
     protected function casts(): array
@@ -34,6 +36,8 @@ class Invoice extends Model implements HasMedia
             'id' => 'string',
             'purchase_order_id' => 'string',
             'status' => InvoiceStatus::class,
+            'billed_at' => 'datetime',
+            'paid_at' => 'datetime',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
