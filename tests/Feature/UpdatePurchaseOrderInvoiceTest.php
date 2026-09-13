@@ -55,7 +55,6 @@ describe('authenticated user', function () {
             'invoice_number' => 'INV-UPDATED-002',
             'lddap_adap_no' => 'LDDAP-UPDATED',
             'note' => 'Updated note',
-            'status' => 'paid',
             'payment_receipt' => UploadedFile::fake()->image('new-receipt.png'),
             'disbursement_voucher' => UploadedFile::fake()->image('new-voucher.webp'),
             'invoice_picture' => UploadedFile::fake()->image('new-picture.jpg'),
@@ -66,7 +65,7 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.invoiceNumber', 'INV-UPDATED-002')
             ->assertJsonPath('data.attributes.lddapAdapNo', 'LDDAP-UPDATED')
             ->assertJsonPath('data.attributes.note', 'Updated note')
-            ->assertJsonPath('data.attributes.status', 'paid')
+            ->assertJsonPath('data.attributes.status', 'unpaid')
             ->assertJsonPath('data.attributes.tripReportCount', 0)
             ->assertJsonPath('data.attributes.amount', 0);
 
@@ -79,7 +78,7 @@ describe('authenticated user', function () {
             'invoice_number' => 'INV-UPDATED-002',
             'lddap_adap_no' => 'LDDAP-UPDATED',
             'note' => 'Updated note',
-            'status' => 'paid',
+            'status' => 'unpaid',
         ]);
 
         $invoice->refresh();
@@ -90,6 +89,24 @@ describe('authenticated user', function () {
             ->and($invoice->getFirstMedia(Invoice::DISBURSEMENT_VOUCHER_MEDIA_COLLECTION)?->file_name)->toBe('new-voucher.webp')
             ->and($invoice->getMedia(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION))->toHaveCount(1)
             ->and($invoice->getFirstMedia(Invoice::INVOICE_PICTURE_MEDIA_COLLECTION)?->file_name)->toBe('new-picture.jpg');
+    });
+
+    test('cannot set invoice payment status', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+        $invoice = invoiceForUpdate($purchaseOrder);
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
+            'status' => 'paid',
+        ])->assertForbidden();
+
+        $paidInvoice = invoiceForUpdate($purchaseOrder, [
+            'invoice_number' => 'INV-PAID-001',
+            'status' => 'paid',
+        ]);
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$paidInvoice->id}", [
+            'status' => 'unpaid',
+        ])->assertForbidden();
     });
 
     test('can clear lddap adap no on update', function () {
@@ -171,7 +188,28 @@ describe('authenticated user', function () {
         ])->assertNotFound();
     });
 
-    test('manages paid at when invoice status changes', function () {
+    test('validates updated invoice attributes and files', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create();
+        $invoice = invoiceForUpdate($purchaseOrder);
+        invoiceForUpdate($purchaseOrder, ['invoice_number' => 'INV-TAKEN']);
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
+            'invoice_number' => 'INV-TAKEN',
+            'lddap_adap_no' => '',
+            'billed_at' => 'not-a-date',
+            'payment_receipt' => UploadedFile::fake()->create('receipt.txt', 100, 'text/plain'),
+        ])->assertUnprocessable();
+    });
+});
+
+describe('privileged user payment status', function () {
+    beforeEach(function () {
+        Storage::fake('public');
+    });
+
+    test('admin can manage paid at when invoice status changes', function () {
+        Sanctum::actingAs(User::factory()->admin()->create());
+
         $purchaseOrder = PurchaseOrder::factory()->create();
         $invoice = invoiceForUpdate($purchaseOrder);
 
@@ -205,17 +243,34 @@ describe('authenticated user', function () {
         expect($invoice->fresh()->paid_at)->toBeNull();
     });
 
-    test('validates updated invoice attributes and files', function () {
+    test('owner can set invoice status to paid and unpaid', function () {
+        Sanctum::actingAs(User::factory()->owner()->create());
+
         $purchaseOrder = PurchaseOrder::factory()->create();
         $invoice = invoiceForUpdate($purchaseOrder);
-        invoiceForUpdate($purchaseOrder, ['invoice_number' => 'INV-TAKEN']);
 
         putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
-            'invoice_number' => 'INV-TAKEN',
-            'lddap_adap_no' => '',
+            'status' => 'paid',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.attributes.status', 'paid');
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
+            'status' => 'unpaid',
+        ])
+            ->assertOk()
+            ->assertJsonPath('data.attributes.status', 'unpaid')
+            ->assertJsonPath('data.attributes.paidAt', null);
+    });
+
+    test('admin validates invalid payment status', function () {
+        Sanctum::actingAs(User::factory()->admin()->create());
+
+        $purchaseOrder = PurchaseOrder::factory()->create();
+        $invoice = invoiceForUpdate($purchaseOrder);
+
+        putJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices/{$invoice->id}", [
             'status' => 'pending',
-            'billed_at' => 'not-a-date',
-            'payment_receipt' => UploadedFile::fake()->create('receipt.txt', 100, 'text/plain'),
         ])->assertUnprocessable();
     });
 });

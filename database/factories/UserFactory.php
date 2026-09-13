@@ -35,6 +35,13 @@ class UserFactory extends Factory
         ];
     }
 
+    public function owner(): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'role' => UserRole::Owner,
+        ]);
+    }
+
     public function admin(): static
     {
         return $this->state(fn (array $attributes): array => [

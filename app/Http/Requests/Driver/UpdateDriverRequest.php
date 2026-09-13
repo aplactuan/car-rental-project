@@ -12,7 +12,7 @@ class UpdateDriverRequest extends FormRequest
         $user = $this->user();
         $driver = $this->route('driver');
 
-        if ($user->isAdmin()) {
+        if ($user->hasAdminPrivileges()) {
             return true;
         }
 
@@ -33,7 +33,7 @@ class UpdateDriverRequest extends FormRequest
             'phone_number' => 'sometimes|string',
         ];
 
-        if ($this->user()?->isAdmin()) {
+        if ($this->user()?->hasAdminPrivileges()) {
             $rules['user_id'] = 'nullable|integer|exists:users,id|unique:drivers,user_id,'.$this->route('driver')->id;
         }
 

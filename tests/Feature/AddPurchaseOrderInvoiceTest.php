@@ -142,21 +142,12 @@ describe('authenticated user', function () {
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/invoice_picture');
     });
 
-    test('can add an invoice with paid status', function () {
+    test('cannot add an invoice with paid status', function () {
         $purchaseOrder = PurchaseOrder::factory()->create();
 
         postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices", purchaseOrderInvoicePayload([
             'status' => 'paid',
-        ]))
-            ->assertCreated()
-            ->assertJsonPath('data.attributes.status', 'paid')
-            ->assertJsonPath('data.attributes.paidAt', fn ($value) => is_string($value));
-
-        assertDatabaseHas('invoices', [
-            'purchase_order_id' => $purchaseOrder->id,
-            'invoice_number' => 'INV-1001',
-            'status' => 'paid',
-        ]);
+        ]))->assertForbidden();
     });
 
     test('validates invoice attributes', function () {
@@ -175,5 +166,48 @@ describe('authenticated user', function () {
         ])
             ->assertUnprocessable()
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/invoice_number');
+    });
+});
+
+describe('privileged user payment status', function () {
+    beforeEach(function () {
+        Storage::fake('public');
+    });
+
+    test('admin can add an invoice with paid status', function () {
+        Sanctum::actingAs(User::factory()->admin()->create());
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices", purchaseOrderInvoicePayload([
+            'status' => 'paid',
+        ]))
+            ->assertCreated()
+            ->assertJsonPath('data.attributes.status', 'paid')
+            ->assertJsonPath('data.attributes.paidAt', fn ($value) => is_string($value));
+
+        assertDatabaseHas('invoices', [
+            'purchase_order_id' => $purchaseOrder->id,
+            'invoice_number' => 'INV-1001',
+            'status' => 'paid',
+        ]);
+    });
+
+    test('owner can add an invoice with paid status', function () {
+        Sanctum::actingAs(User::factory()->owner()->create());
+        $purchaseOrder = PurchaseOrder::factory()->create();
+
+        postJson("/api/v1/purchase-orders/{$purchaseOrder->id}/invoices", purchaseOrderInvoicePayload([
+            'invoice_number' => 'INV-OWNER-1001',
+            'status' => 'paid',
+        ]))
+            ->assertCreated()
+            ->assertJsonPath('data.attributes.status', 'paid')
+            ->assertJsonPath('data.attributes.paidAt', fn ($value) => is_string($value));
+
+        assertDatabaseHas('invoices', [
+            'purchase_order_id' => $purchaseOrder->id,
+            'invoice_number' => 'INV-OWNER-1001',
+            'status' => 'paid',
+        ]);
     });
 });
