@@ -20,7 +20,7 @@ class ListAllBookingsController extends Controller
         $user = $request->user()->loadMissing('driver');
         $filters = $request->filters();
 
-        $bookings = $user->driver !== null && ! $user->isAdmin()
+        $bookings = $user->driver !== null && ! $user->hasAdminPrivileges()
             ? $this->bookingRepository->getAllByDriver($user->driver->id, $filters, $perPage)
             : $this->bookingRepository->getAllByUser($user->id, $filters, $perPage);
 

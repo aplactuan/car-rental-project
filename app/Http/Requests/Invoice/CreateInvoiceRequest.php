@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Invoice;
 
 use App\Enums\InvoiceStatus;
+use App\Models\Invoice;
 use App\Support\Media\MediaUploader;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -12,7 +13,11 @@ class CreateInvoiceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        if (! $this->has('status')) {
+            return true;
+        }
+
+        return $this->user()?->can('setPaymentStatus', Invoice::class) ?? false;
     }
 
     /**

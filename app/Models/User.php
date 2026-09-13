@@ -53,9 +53,19 @@ class User extends Authenticatable
         ];
     }
 
+    public function isOwner(): bool
+    {
+        return $this->role === UserRole::Owner;
+    }
+
     public function isAdmin(): bool
     {
         return $this->role === UserRole::Admin;
+    }
+
+    public function hasAdminPrivileges(): bool
+    {
+        return $this->isOwner() || $this->isAdmin();
     }
 
     public function transactions(): HasMany

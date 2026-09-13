@@ -13,7 +13,11 @@ class UpdateInvoiceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        if (! $this->has('status')) {
+            return true;
+        }
+
+        return $this->user()?->can('setPaymentStatus', Invoice::class) ?? false;
     }
 
     /**
