@@ -7,12 +7,14 @@ use App\Models\Traits\HasUuid;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Invoice extends Model implements HasMedia
+class Invoice extends Model implements AuditableContract, HasMedia
 {
-    use HasUuid, InteractsWithMedia;
+    use Auditable, HasUuid, InteractsWithMedia;
 
     public const PAYMENT_RECEIPT_MEDIA_COLLECTION = 'payment_receipt';
 
@@ -51,6 +53,17 @@ class Invoice extends Model implements HasMedia
     public function tripReports(): HasMany
     {
         return $this->hasMany(TripReport::class);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public function transformAudit(array $data): array
+    {
+        $data['customer_id'] = $this->purchaseOrder()->value('customer_id');
+
+        return $data;
     }
 
     public function registerMediaCollections(): void

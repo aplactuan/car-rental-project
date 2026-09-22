@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\V1\Audits\ListAuditsController;
 use App\Http\Controllers\V1\Availability\ListAvailabilityController;
 use App\Http\Controllers\V1\Billing\BillingSummaryController;
 use App\Http\Controllers\V1\BillPayments\AddBillPaymentController;
@@ -77,6 +78,8 @@ use App\Http\Controllers\V1\Users\AddUserController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
+    Route::get('/audits', ListAuditsController::class);
+
     Route::prefix('dashboard')->group(function () {
         Route::get('/customer-overview', CustomerOverviewController::class);
         Route::get('/program-rankings', ProgramRankingsController::class);

@@ -7,13 +7,15 @@ use Database\Factories\TripReportFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class TripReport extends Model implements HasMedia
+class TripReport extends Model implements AuditableContract, HasMedia
 {
     /** @use HasFactory<TripReportFactory> */
-    use HasFactory, HasUuid, InteractsWithMedia;
+    use Auditable, HasFactory, HasUuid, InteractsWithMedia;
 
     public const TRIP_REPORT_IMAGE_MEDIA_COLLECTION = 'trip_report_image';
 
@@ -49,6 +51,17 @@ class TripReport extends Model implements HasMedia
     public function invoice(): BelongsTo
     {
         return $this->belongsTo(Invoice::class);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public function transformAudit(array $data): array
+    {
+        $data['customer_id'] = $this->purchaseOrder()->value('customer_id');
+
+        return $data;
     }
 
     public function registerMediaCollections(): void

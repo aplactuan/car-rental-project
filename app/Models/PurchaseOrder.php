@@ -9,13 +9,15 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use OwenIt\Auditing\Auditable;
+use OwenIt\Auditing\Contracts\Auditable as AuditableContract;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
 
-class PurchaseOrder extends Model implements HasMedia
+class PurchaseOrder extends Model implements AuditableContract, HasMedia
 {
     /** @use HasFactory<PurchaseOrderFactory> */
-    use HasFactory, HasUuid, InteractsWithMedia;
+    use Auditable, HasFactory, HasUuid, InteractsWithMedia;
 
     public const ATTACHMENTS_MEDIA_COLLECTION = 'attachments';
 
@@ -59,6 +61,17 @@ class PurchaseOrder extends Model implements HasMedia
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    public function transformAudit(array $data): array
+    {
+        $data['customer_id'] = $this->customer_id;
+
+        return $data;
     }
 
     public function registerMediaCollections(): void
