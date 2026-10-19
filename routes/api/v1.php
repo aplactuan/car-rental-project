@@ -36,6 +36,8 @@ use App\Http\Controllers\V1\Customers\UpdateCustomerTransactionController;
 use App\Http\Controllers\V1\Dashboard\CustomerOverviewController;
 use App\Http\Controllers\V1\Dashboard\MonthReportController;
 use App\Http\Controllers\V1\Dashboard\ProgramRankingsController;
+use App\Http\Controllers\V1\Dashboard\RecentBillsController;
+use App\Http\Controllers\V1\Dashboard\RecentInvoicesController;
 use App\Http\Controllers\V1\Dashboard\RecentTripReportsController;
 use App\Http\Controllers\V1\Drivers\AddDriverController;
 use App\Http\Controllers\V1\Drivers\ImportDriversController;
@@ -84,6 +86,8 @@ Route::prefix('v1')->middleware('auth:sanctum')->group(function () {
         Route::get('/customer-overview', CustomerOverviewController::class);
         Route::get('/program-rankings', ProgramRankingsController::class);
         Route::get('/trip-reports/recent', RecentTripReportsController::class);
+        Route::get('/invoices/recent', RecentInvoicesController::class);
+        Route::get('/billing/recent', RecentBillsController::class);
         Route::get('/month-report', MonthReportController::class);
     });
 
