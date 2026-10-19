@@ -3,7 +3,9 @@
 namespace App\Repositories\Eloquent;
 
 use App\Enums\InvoiceStatus;
+use App\Models\Bill;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Program;
 use App\Models\PurchaseOrder;
 use App\Models\TripReport;
@@ -104,6 +106,36 @@ class DashboardRepository implements DashboardRepositoryInterface
             ])
             ->orderByDesc('report_date')
             ->orderBy('driver')
+            ->orderBy('id')
+            ->limit(10)
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, Invoice>
+     */
+    public function recentInvoices(): Collection
+    {
+        return Invoice::query()
+            ->withSum('tripReports', 'amount')
+            ->orderByRaw('billed_at is null')
+            ->orderByDesc('billed_at')
+            ->orderBy('invoice_number')
+            ->orderBy('id')
+            ->limit(10)
+            ->get();
+    }
+
+    /**
+     * @return Collection<int, Bill>
+     */
+    public function recentBills(): Collection
+    {
+        return Bill::query()
+            ->withSum('payments', 'amount')
+            ->orderByRaw('issued_at is null')
+            ->orderByDesc('issued_at')
+            ->orderBy('bill_number')
             ->orderBy('id')
             ->limit(10)
             ->get();

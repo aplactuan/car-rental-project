@@ -2,7 +2,9 @@
 
 namespace App\Repositories\Contracts;
 
+use App\Models\Bill;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Program;
 use App\Models\TripReport;
 use Illuminate\Database\Eloquent\Collection;
@@ -34,6 +36,16 @@ interface DashboardRepositoryInterface
      * @return Collection<int, TripReport>
      */
     public function recentTripReports(): Collection;
+
+    /**
+     * @return Collection<int, Invoice>
+     */
+    public function recentInvoices(): Collection;
+
+    /**
+     * @return Collection<int, Bill>
+     */
+    public function recentBills(): Collection;
 
     /**
      * @return list<array{

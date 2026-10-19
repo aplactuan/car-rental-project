@@ -20,7 +20,7 @@ class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRep
     }
 
     /**
-     * @param  array{customer_id?: string, program_id?: string, unprogrammed?: true}  $filters
+     * @param  array{customer_id?: string, program_id?: string, unprogrammed?: true, date_from?: string, date_to?: string}  $filters
      */
     public function paginate(int $perPage = 15, array $filters = [])
     {
@@ -37,6 +37,14 @@ class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRep
             ->when(
                 isset($filters['program_id']),
                 fn (Builder $builder) => $builder->where('program_id', $filters['program_id'])
+            )
+            ->when(
+                isset($filters['date_from']),
+                fn (Builder $builder) => $builder->whereDate('date', '>=', $filters['date_from'])
+            )
+            ->when(
+                isset($filters['date_to']),
+                fn (Builder $builder) => $builder->whereDate('date', '<=', $filters['date_to'])
             )
             ->latest('date')
             ->paginate($perPage);

@@ -23,6 +23,8 @@ class ListPurchaseOrdersRequest extends FormRequest
             'customer_id' => ['sometimes', 'nullable', 'uuid', 'exists:customers,id'],
             'program_id' => ['sometimes', 'nullable', 'uuid', 'exists:programs,id'],
             'unprogrammed' => ['sometimes', 'boolean'],
+            'date_from' => ['sometimes', 'date'],
+            'date_to' => ['sometimes', 'date', 'after_or_equal:date_from'],
         ];
     }
 
@@ -36,6 +38,9 @@ class ListPurchaseOrdersRequest extends FormRequest
             'customer_id.exists' => 'The selected customer does not exist.',
             'program_id.uuid' => 'The selected program must be a valid UUID.',
             'program_id.exists' => 'The selected program does not exist.',
+            'date_from.date' => 'The date from field must be a valid date.',
+            'date_to.date' => 'The date to field must be a valid date.',
+            'date_to.after_or_equal' => 'The date to field must be a date on or after date from.',
         ];
     }
 
@@ -56,7 +61,7 @@ class ListPurchaseOrdersRequest extends FormRequest
     }
 
     /**
-     * @return array{customer_id?: string, program_id?: string, unprogrammed?: true}
+     * @return array{customer_id?: string, program_id?: string, unprogrammed?: true, date_from?: string, date_to?: string}
      */
     public function filters(): array
     {
@@ -70,6 +75,14 @@ class ListPurchaseOrdersRequest extends FormRequest
             $filters['unprogrammed'] = true;
         } elseif ($this->filled('program_id')) {
             $filters['program_id'] = $this->string('program_id')->toString();
+        }
+
+        if ($this->filled('date_from')) {
+            $filters['date_from'] = $this->date('date_from')->toDateString();
+        }
+
+        if ($this->filled('date_to')) {
+            $filters['date_to'] = $this->date('date_to')->toDateString();
         }
 
         return $filters;

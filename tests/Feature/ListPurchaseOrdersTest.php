@@ -192,4 +192,63 @@ describe('authenticated user', function () {
             ->assertUnprocessable()
             ->assertJsonPath('errors.0.source.pointer', '/data/attributes/program_id');
     });
+
+    test('it can filter purchase orders by date interval', function () {
+        $insideStart = PurchaseOrder::factory()->create([
+            'po_number' => 'PO-RANGE-START',
+            'date' => '2026-06-02',
+        ]);
+        $insideEnd = PurchaseOrder::factory()->create([
+            'po_number' => 'PO-RANGE-END',
+            'date' => '2026-07-31',
+        ]);
+        PurchaseOrder::factory()->create([
+            'po_number' => 'PO-BEFORE-RANGE',
+            'date' => '2026-06-01',
+        ]);
+        PurchaseOrder::factory()->create([
+            'po_number' => 'PO-AFTER-RANGE',
+            'date' => '2026-08-01',
+        ]);
+
+        $response = getJson('/api/v1/purchase-orders?date_from=2026-06-02&date_to=2026-07-31&per_page=100');
+
+        $response
+            ->assertSuccessful()
+            ->assertJsonCount(2, 'data');
+
+        $ids = collect($response->json('data'))->pluck('id');
+
+        expect($ids)->toContain($insideStart->id)
+            ->and($ids)->toContain($insideEnd->id);
+    });
+
+    test('it can filter purchase orders with only a start or end date', function () {
+        $early = PurchaseOrder::factory()->create(['po_number' => 'PO-EARLY', 'date' => '2026-06-01']);
+        $from = PurchaseOrder::factory()->create(['po_number' => 'PO-FROM', 'date' => '2026-06-02']);
+        $later = PurchaseOrder::factory()->create(['po_number' => 'PO-LATER', 'date' => '2026-07-31']);
+
+        $fromResponse = getJson('/api/v1/purchase-orders?date_from=2026-06-02&per_page=100');
+
+        $fromResponse->assertSuccessful()->assertJsonCount(2, 'data');
+
+        expect(collect($fromResponse->json('data'))->pluck('id'))
+            ->toContain($from->id, $later->id)
+            ->not->toContain($early->id);
+
+        getJson('/api/v1/purchase-orders?date_to=2026-06-01&per_page=100')
+            ->assertSuccessful()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $early->id);
+    });
+
+    test('it validates the purchase order date interval', function () {
+        getJson('/api/v1/purchase-orders?date_from=not-a-date')
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/date_from');
+
+        getJson('/api/v1/purchase-orders?date_from=2026-07-31&date_to=2026-06-02')
+            ->assertUnprocessable()
+            ->assertJsonPath('errors.0.source.pointer', '/data/attributes/date_to');
+    });
 });

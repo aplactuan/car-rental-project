@@ -49,7 +49,7 @@ class Bill extends Model
 
     public function amountPaid(): int
     {
-        if (isset($this->payments_sum_amount)) {
+        if (array_key_exists('payments_sum_amount', $this->attributes)) {
             return (int) $this->payments_sum_amount;
         }
 

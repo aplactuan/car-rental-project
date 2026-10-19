@@ -155,3 +155,17 @@ test('paginate can filter by program', function () {
     expect($result->total())->toBe(2)
         ->and($result->every(fn (PurchaseOrder $purchaseOrder) => $purchaseOrder->program_id === $program->id))->toBeTrue();
 });
+
+test('paginate can filter by date interval', function () {
+    PurchaseOrder::factory()->create(['date' => '2026-06-01']);
+    PurchaseOrder::factory()->create(['date' => '2026-06-02']);
+    PurchaseOrder::factory()->create(['date' => '2026-07-31']);
+    PurchaseOrder::factory()->create(['date' => '2026-08-01']);
+
+    $result = $this->repository->paginate(15, [
+        'date_from' => '2026-06-02',
+        'date_to' => '2026-07-31',
+    ]);
+
+    expect($result->total())->toBe(2);
+});
