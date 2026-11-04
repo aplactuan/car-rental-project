@@ -1,7 +1,9 @@
 <?php
 
 use App\Enums\InvoiceStatus;
+use App\Models\Customer;
 use App\Models\Invoice;
+use App\Models\Program;
 use App\Models\PurchaseOrder;
 use App\Models\TripReport;
 use App\Models\User;
@@ -31,7 +33,12 @@ describe('authenticated user', function () {
     });
 
     test('returns only the ten most recently billed invoices', function () {
-        $purchaseOrder = PurchaseOrder::factory()->create();
+        $customer = Customer::factory()->create(['name' => 'Acme Logistics']);
+        $program = Program::factory()->for($customer)->create(['name' => 'Fleet Ops']);
+        $purchaseOrder = PurchaseOrder::factory()->create([
+            'customer_id' => $customer->id,
+            'program_id' => $program->id,
+        ]);
         $invoices = collect(range(1, 11))->map(
             fn (int $day): Invoice => Invoice::query()->create([
                 'purchase_order_id' => $purchaseOrder->id,
@@ -56,10 +63,35 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.0.attributes.amount', 2500)
             ->assertJsonPath('data.0.attributes.billedAt', '2026-08-11T08:00:00+00:00')
             ->assertJsonPath('data.0.attributes.paidAt', null)
+            ->assertJsonPath('data.0.attributes.customerId', $customer->id)
+            ->assertJsonPath('data.0.attributes.customerName', 'Acme Logistics')
+            ->assertJsonPath('data.0.attributes.programId', $program->id)
+            ->assertJsonPath('data.0.attributes.programName', 'Fleet Ops')
             ->assertJsonPath('data.0.relationships.purchaseOrder.data.id', $purchaseOrder->id)
             ->assertJsonMissing(['id' => $invoices[0]->id])
             ->assertJsonMissingPath('data.0.attributes.note')
             ->assertJsonMissingPath('data.0.attributes.paymentReceiptUrl');
+    });
+
+    test('returns null program fields for unprogrammed purchase orders', function () {
+        $customer = Customer::factory()->create(['name' => 'Solo Customer']);
+        $purchaseOrder = PurchaseOrder::factory()->create([
+            'customer_id' => $customer->id,
+            'program_id' => null,
+        ]);
+        Invoice::query()->create([
+            'purchase_order_id' => $purchaseOrder->id,
+            'invoice_number' => 'INV-UNPROGRAMMED',
+            'status' => InvoiceStatus::Unpaid,
+            'billed_at' => '2026-08-01 08:00:00',
+        ]);
+
+        getJson('/api/v1/dashboard/invoices/recent')
+            ->assertSuccessful()
+            ->assertJsonPath('data.0.attributes.customerId', $customer->id)
+            ->assertJsonPath('data.0.attributes.customerName', 'Solo Customer')
+            ->assertJsonPath('data.0.attributes.programId', null)
+            ->assertJsonPath('data.0.attributes.programName', null);
     });
 
     test('orders invoices billed at the same time by invoice number', function () {
@@ -106,8 +138,13 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.1.id', $unbilled->id);
     });
 
-    test('loads recent invoices with one bounded query', function () {
-        $purchaseOrder = PurchaseOrder::factory()->create();
+    test('loads recent invoices with a bounded query set', function () {
+        $customer = Customer::factory()->create();
+        $program = Program::factory()->for($customer)->create();
+        $purchaseOrder = PurchaseOrder::factory()->create([
+            'customer_id' => $customer->id,
+            'program_id' => $program->id,
+        ]);
         Invoice::query()->create([
             'purchase_order_id' => $purchaseOrder->id,
             'invoice_number' => 'INV-QUERY',
@@ -119,6 +156,7 @@ describe('authenticated user', function () {
 
         getJson('/api/v1/dashboard/invoices/recent')->assertSuccessful();
 
-        expect(DB::getQueryLog())->toHaveCount(1);
+        // invoices + purchase orders + customers + programs
+        expect(DB::getQueryLog())->toHaveCount(4);
     });
 });

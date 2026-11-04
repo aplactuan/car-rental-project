@@ -887,7 +887,7 @@
 								"recent"
 							]
 						},
-						"description": "**Bearer required.** Returns up to 10 global trip reports ordered by `reportDate` descending, then driver name. Slim attributes are `tripReportNo`, `driver`, `reportDate`, `tripStart`, and `tripEnd`, with purchase-order relationship linkage."
+						"description": "**Bearer required.** Returns up to 10 global trip reports ordered by `reportDate` descending, then driver name. Slim attributes are `tripReportNo`, `driver`, `reportDate`, `tripStart`, `tripEnd`, and `customerId`, with purchase-order relationship linkage."
 					}
 				},
 				{
@@ -913,7 +913,7 @@
 								"recent"
 							]
 						},
-						"description": "**Bearer required.** Returns up to 10 purchase-order invoices ordered by `billedAt` descending, then invoice number. Invoices without `billedAt` come last. Slim attributes are `invoiceNumber`, `status`, `amount` (sum of attached trip-report amounts), `billedAt`, and `paidAt`, with purchase-order relationship linkage."
+						"description": "**Bearer required.** Returns up to 10 purchase-order invoices ordered by `billedAt` descending, then invoice number. Invoices without `billedAt` come last. Slim attributes are `invoiceNumber`, `status`, `amount` (sum of attached trip-report amounts), `billedAt`, `paidAt`, `customerId`, `customerName`, `programId`, and `programName` (null when the PO has no program), with purchase-order relationship linkage."
 					}
 				},
 				{

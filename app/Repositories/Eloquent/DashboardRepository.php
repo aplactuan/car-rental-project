@@ -104,6 +104,7 @@ class DashboardRepository implements DashboardRepositoryInterface
                 'trip_start',
                 'trip_end',
             ])
+            ->with(['purchaseOrder:id,customer_id'])
             ->orderByDesc('report_date')
             ->orderBy('driver')
             ->orderBy('id')
@@ -117,6 +118,11 @@ class DashboardRepository implements DashboardRepositoryInterface
     public function recentInvoices(): Collection
     {
         return Invoice::query()
+            ->with([
+                'purchaseOrder:id,customer_id,program_id',
+                'purchaseOrder.customer:id,name',
+                'purchaseOrder.program:id,name',
+            ])
             ->withSum('tripReports', 'amount')
             ->orderByRaw('billed_at is null')
             ->orderByDesc('billed_at')

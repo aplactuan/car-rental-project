@@ -21,6 +21,10 @@ class RecentInvoiceResource extends JsonResource
                 'amount' => (int) ($this->trip_reports_sum_amount ?? 0),
                 'billedAt' => $this->billed_at?->toIso8601String(),
                 'paidAt' => $this->paid_at?->toIso8601String(),
+                'customerId' => $this->purchaseOrder?->customer_id,
+                'customerName' => $this->purchaseOrder?->customer?->name,
+                'programId' => $this->purchaseOrder?->program_id,
+                'programName' => $this->purchaseOrder?->program?->name,
             ],
             'relationships' => [
                 'purchaseOrder' => [
