@@ -45,6 +45,7 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.0.id', $reports[10]->id)
             ->assertJsonPath('data.0.attributes.driver', 'Driver 11')
             ->assertJsonPath('data.0.attributes.reportDate', '2026-08-11')
+            ->assertJsonPath('data.0.attributes.customerId', $purchaseOrder->customer_id)
             ->assertJsonPath('data.0.relationships.purchaseOrder.data.id', $purchaseOrder->id)
             ->assertJsonMissing(['id' => $reports[0]->id])
             ->assertJsonMissingPath('data.0.attributes.amount')
@@ -68,13 +69,14 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.1.id', $bravo->id);
     });
 
-    test('loads recent reports with one bounded query', function () {
+    test('loads recent reports with a bounded query set', function () {
         TripReport::factory()->count(3)->create();
 
         DB::enableQueryLog();
 
         getJson('/api/v1/dashboard/trip-reports/recent')->assertSuccessful();
 
-        expect(DB::getQueryLog())->toHaveCount(1);
+        // trip reports + purchase orders (for customerId)
+        expect(DB::getQueryLog())->toHaveCount(2);
     });
 });

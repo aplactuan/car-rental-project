@@ -19,6 +19,7 @@ class RecentTripReportResource extends JsonResource
                 'reportDate' => $this->report_date?->toDateString(),
                 'tripStart' => $this->trip_start?->toDateString(),
                 'tripEnd' => $this->trip_end?->toDateString(),
+                'customerId' => $this->purchaseOrder?->customer_id,
             ],
             'relationships' => [
                 'purchaseOrder' => [
