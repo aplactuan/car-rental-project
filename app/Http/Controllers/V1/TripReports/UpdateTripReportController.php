@@ -33,6 +33,10 @@ class UpdateTripReportController extends Controller
             );
         }
 
+        if (array_key_exists('amount', $data)) {
+            $purchaseOrder->recomputeStatus();
+        }
+
         return new TripReportResource($tripReport->fresh('media'));
     }
 

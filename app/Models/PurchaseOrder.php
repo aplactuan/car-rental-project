@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\InvoiceStatus;
 use App\Enums\PurchaseOrderStatus;
 use App\Models\Traits\HasUuid;
 use Database\Factories\PurchaseOrderFactory;
@@ -61,6 +62,28 @@ class PurchaseOrder extends Model implements AuditableContract, HasMedia
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    public function paidAmount(): int
+    {
+        return (int) $this->tripReports()
+            ->whereHas('invoice', function ($query): void {
+                $query->where('status', InvoiceStatus::Paid);
+            })
+            ->sum('amount');
+    }
+
+    public function recomputeStatus(): void
+    {
+        $status = $this->paidAmount() >= $this->amount
+            ? PurchaseOrderStatus::Ok
+            : PurchaseOrderStatus::Pending;
+
+        if ($this->status === $status) {
+            return;
+        }
+
+        $this->update(['status' => $status]);
     }
 
     /**

@@ -15,7 +15,13 @@ class DeleteTripReportController extends Controller
             abort(404);
         }
 
+        $shouldRecomputeStatus = $tripReport->invoice_id !== null;
+
         $tripReport->delete();
+
+        if ($shouldRecomputeStatus) {
+            $purchaseOrder->recomputeStatus();
+        }
 
         return response()->json(null, 204);
     }

@@ -80,6 +80,10 @@ class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRep
         return DB::transaction(function () use ($purchaseOrder, $data, $attachments, $removeAttachmentIds) {
             $purchaseOrder->update($data);
 
+            if (array_key_exists('amount', $data) && ! array_key_exists('status', $data)) {
+                $purchaseOrder->recomputeStatus();
+            }
+
             $this->removeAttachments($purchaseOrder, $removeAttachmentIds);
             $this->addAttachments($purchaseOrder, $attachments);
 

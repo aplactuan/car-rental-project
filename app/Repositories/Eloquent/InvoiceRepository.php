@@ -83,6 +83,8 @@ class InvoiceRepository implements InvoiceRepositoryInterface
                 );
             }
 
+            $purchaseOrder->recomputeStatus();
+
             return $this->loadTripReportAggregates($invoice->fresh('media'));
         });
     }
@@ -100,7 +102,7 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     ): Invoice {
         $invoice = $this->findForPurchaseOrder($purchaseOrder, $invoice);
 
-        return DB::transaction(function () use ($invoice, $data, $paymentReceipt, $disbursementVoucher, $invoicePicture, $removePaymentReceipt, $removeDisbursementVoucher, $removeInvoicePicture): Invoice {
+        return DB::transaction(function () use ($purchaseOrder, $invoice, $data, $paymentReceipt, $disbursementVoucher, $invoicePicture, $removePaymentReceipt, $removeDisbursementVoucher, $removeInvoicePicture): Invoice {
             if (array_key_exists('status', $data)) {
                 if ($data['status'] === InvoiceStatus::Paid->value && $invoice->status !== InvoiceStatus::Paid) {
                     $data['paid_at'] = now();
@@ -149,6 +151,8 @@ class InvoiceRepository implements InvoiceRepositoryInterface
                 );
             }
 
+            $purchaseOrder->recomputeStatus();
+
             return $this->loadTripReportAggregates($invoice->fresh('media'));
         });
     }
@@ -157,7 +161,11 @@ class InvoiceRepository implements InvoiceRepositoryInterface
     {
         $invoice = $this->findForPurchaseOrder($purchaseOrder, $invoice);
 
-        $invoice->delete();
+        DB::transaction(function () use ($purchaseOrder, $invoice): void {
+            $invoice->delete();
+
+            $purchaseOrder->recomputeStatus();
+        });
     }
 
     public function attachTripReports(
@@ -172,6 +180,8 @@ class InvoiceRepository implements InvoiceRepositoryInterface
                 ->where('purchase_order_id', $purchaseOrder->id)
                 ->whereIn('id', $tripReportIds)
                 ->update(['invoice_id' => $invoice->id]);
+
+            $purchaseOrder->recomputeStatus();
 
             return TripReport::query()
                 ->with('media')
@@ -194,6 +204,8 @@ class InvoiceRepository implements InvoiceRepositoryInterface
                 ->where('invoice_id', $invoice->id)
                 ->whereIn('id', $tripReportIds)
                 ->update(['invoice_id' => null]);
+
+            $purchaseOrder->recomputeStatus();
 
             return TripReport::query()
                 ->with('media')
