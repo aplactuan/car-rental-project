@@ -2,6 +2,7 @@
 
 namespace App\Repositories\Eloquent;
 
+use App\Enums\InvoiceStatus;
 use App\Models\PurchaseOrder;
 use App\Repositories\BaseRepository;
 use App\Repositories\Contracts\PurchaseOrderRepositoryInterface;
@@ -52,7 +53,19 @@ class PurchaseOrderRepository extends BaseRepository implements PurchaseOrderRep
 
     public function find($id)
     {
-        return $this->model->with(['customer', 'program', 'media'])->findOrFail($id);
+        return $this->model->newQuery()
+            ->with(['customer', 'program', 'media'])
+            ->withSum([
+                'tripReports as invoiced_sum_amount' => fn (Builder $query) => $query->whereNotNull('invoice_id'),
+            ], 'amount')
+            ->withSum([
+                'tripReports as invoice_paid_sum_amount' => function (Builder $query): void {
+                    $query->whereHas('invoice', function (Builder $invoice): void {
+                        $invoice->where('status', InvoiceStatus::Paid);
+                    });
+                },
+            ], 'amount')
+            ->findOrFail($id);
     }
 
     /**

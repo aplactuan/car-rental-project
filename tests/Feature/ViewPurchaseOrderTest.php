@@ -1,8 +1,11 @@
 <?php
 
+use App\Enums\InvoiceStatus;
 use App\Models\Customer;
+use App\Models\Invoice;
 use App\Models\Program;
 use App\Models\PurchaseOrder;
+use App\Models\TripReport;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -54,6 +57,9 @@ describe('authenticated user', function () {
                         'description',
                         'customerId',
                         'programId',
+                        'invoicedTotal',
+                        'invoicePaidTotal',
+                        'balance',
                     ],
                     'relationships' => [
                         'customer',
@@ -69,6 +75,9 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.requestPerson', 'John Cruz')
             ->assertJsonPath('data.attributes.description', 'City tour')
             ->assertJsonPath('data.attributes.programId', $program->id)
+            ->assertJsonPath('data.attributes.invoicedTotal', 0)
+            ->assertJsonPath('data.attributes.invoicePaidTotal', 0)
+            ->assertJsonPath('data.attributes.balance', 150000)
             ->assertJsonPath('data.relationships.customer.data.id', $customer->id)
             ->assertJsonPath('data.relationships.customer.data.attributes.name', $customer->name)
             ->assertJsonPath('data.relationships.program.data.id', $program->id)
@@ -82,5 +91,39 @@ describe('authenticated user', function () {
             ->assertStatus(200)
             ->assertJsonPath('data.attributes.programId', null)
             ->assertJsonPath('data.relationships.program.data', null);
+    });
+
+    test('it returns invoiced, paid, and balance rollups for the purchase order', function () {
+        $purchaseOrder = PurchaseOrder::factory()->create(['amount' => 20000]);
+
+        $unpaidInvoice = Invoice::query()->create([
+            'purchase_order_id' => $purchaseOrder->id,
+            'invoice_number' => 'INV-PO-UNPAID-1',
+            'status' => InvoiceStatus::Unpaid,
+        ]);
+        $paidInvoice = Invoice::query()->create([
+            'purchase_order_id' => $purchaseOrder->id,
+            'invoice_number' => 'INV-PO-PAID-1',
+            'status' => InvoiceStatus::Paid,
+        ]);
+
+        TripReport::factory()->for($purchaseOrder)->create([
+            'invoice_id' => $unpaidInvoice->id,
+            'amount' => 5000,
+        ]);
+        TripReport::factory()->for($purchaseOrder)->create([
+            'invoice_id' => $paidInvoice->id,
+            'amount' => 7000,
+        ]);
+        TripReport::factory()->for($purchaseOrder)->create([
+            'invoice_id' => null,
+            'amount' => 3000,
+        ]);
+
+        getJson("/api/v1/purchase-orders/{$purchaseOrder->id}")
+            ->assertSuccessful()
+            ->assertJsonPath('data.attributes.invoicedTotal', 12000)
+            ->assertJsonPath('data.attributes.invoicePaidTotal', 7000)
+            ->assertJsonPath('data.attributes.balance', 13000);
     });
 });

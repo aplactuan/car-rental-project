@@ -27,6 +27,18 @@ class PurchaseOrderResource extends JsonResource
                 'status' => $this->status->value,
                 'customerId' => $this->customer_id,
                 'programId' => $this->program_id,
+                'invoicedTotal' => $this->when(
+                    array_key_exists('invoiced_sum_amount', $this->resource->getAttributes()),
+                    fn () => (int) ($this->invoiced_sum_amount ?? 0)
+                ),
+                'invoicePaidTotal' => $this->when(
+                    array_key_exists('invoice_paid_sum_amount', $this->resource->getAttributes()),
+                    fn () => (int) ($this->invoice_paid_sum_amount ?? 0)
+                ),
+                'balance' => $this->when(
+                    array_key_exists('invoice_paid_sum_amount', $this->resource->getAttributes()),
+                    fn () => (int) $this->amount - (int) ($this->invoice_paid_sum_amount ?? 0)
+                ),
                 'attachments' => $this->attachmentsData(),
             ],
             'relationships' => [

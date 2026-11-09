@@ -55,6 +55,18 @@ class CustomerResource extends JsonResource
                     isset($this->unattached_trip_reports_count),
                     fn () => (int) $this->unattached_trip_reports_count
                 ),
+                'invoicedTotal' => $this->when(
+                    isset($this->trip_reports_count),
+                    fn () => (int) ($this->invoiced_sum_amount ?? 0)
+                ),
+                'invoicePaidTotal' => $this->when(
+                    isset($this->trip_reports_count),
+                    fn () => (int) ($this->invoice_paid_sum_amount ?? 0)
+                ),
+                'balance' => $this->when(
+                    isset($this->trip_reports_count) && isset($this->purchase_orders_count),
+                    fn () => (int) ($this->purchase_orders_sum_amount ?? 0) - (int) ($this->invoice_paid_sum_amount ?? 0)
+                ),
                 'unpaidInvoiceTotal' => $this->when(
                     isset($this->trip_reports_count),
                     fn () => (int) ($this->unpaid_invoices_sum_amount ?? 0)
