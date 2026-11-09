@@ -113,6 +113,37 @@ class DashboardRepository implements DashboardRepositoryInterface
     }
 
     /**
+     * @return Collection<int, TripReport>
+     */
+    public function searchTripReports(string $query): Collection
+    {
+        $normalizedQuery = mb_strtolower(trim($query));
+
+        return TripReport::query()
+            ->select([
+                'id',
+                'purchase_order_id',
+                'trip_report_no',
+                'driver',
+                'report_date',
+                'trip_start',
+                'trip_end',
+            ])
+            ->with(['purchaseOrder:id,customer_id'])
+            ->where(function ($tripReportQuery) use ($normalizedQuery): void {
+                $tripReportQuery
+                    ->whereRaw('LOWER(trip_report_no) LIKE ?', ["%{$normalizedQuery}%"])
+                    ->orWhereRaw('LOWER(driver) LIKE ?', ["%{$normalizedQuery}%"])
+                    ->orWhereRaw('LOWER(destinations) LIKE ?', ["%{$normalizedQuery}%"]);
+            })
+            ->orderByDesc('report_date')
+            ->orderBy('driver')
+            ->orderBy('id')
+            ->limit(20)
+            ->get();
+    }
+
+    /**
      * @return Collection<int, Invoice>
      */
     public function recentInvoices(): Collection
