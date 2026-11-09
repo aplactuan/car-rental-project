@@ -20,6 +20,12 @@ class SingleCustomerController extends Controller
             ->withCount(['programs as programs_count' => fn ($query) => $query->has('purchaseOrders')])
             ->withCount('tripReports')
             ->withCount(['tripReports as unattached_trip_reports_count' => fn ($query) => $query->whereNull('invoice_id')])
+            ->withSum(['tripReports as invoiced_sum_amount' => fn ($query) => $query->whereNotNull('invoice_id')], 'amount')
+            ->withSum(['tripReports as invoice_paid_sum_amount' => function ($query): void {
+                $query->whereHas('invoice', function ($invoice): void {
+                    $invoice->where('status', InvoiceStatus::Paid);
+                });
+            }], 'amount')
             ->withSum(['tripReports as unpaid_invoices_sum_amount' => function ($query): void {
                 $query->whereHas('invoice', function ($invoice): void {
                     $invoice->where('status', InvoiceStatus::Unpaid);

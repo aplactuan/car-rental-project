@@ -47,6 +47,9 @@ describe('authenticated user', function () {
                     'programCount',
                     'tripReportCount',
                     'unattachedTripReportCount',
+                    'invoicedTotal',
+                    'invoicePaidTotal',
+                    'balance',
                     'unpaidInvoiceTotal',
                 ],
                 'relationships' => [
@@ -64,6 +67,9 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.programCount', 0)
             ->assertJsonPath('data.attributes.tripReportCount', 0)
             ->assertJsonPath('data.attributes.unattachedTripReportCount', 0)
+            ->assertJsonPath('data.attributes.invoicedTotal', 0)
+            ->assertJsonPath('data.attributes.invoicePaidTotal', 0)
+            ->assertJsonPath('data.attributes.balance', 0)
             ->assertJsonPath('data.attributes.unpaidInvoiceTotal', 0)
             ->assertJsonPath('data.relationships.parent.data', null);
     });
@@ -141,6 +147,9 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.programCount', 1)
             ->assertJsonPath('data.attributes.tripReportCount', 4)
             ->assertJsonPath('data.attributes.unattachedTripReportCount', 2)
+            ->assertJsonPath('data.attributes.invoicedTotal', 10500)
+            ->assertJsonPath('data.attributes.invoicePaidTotal', 2500)
+            ->assertJsonPath('data.attributes.balance', 8606)
             ->assertJsonPath('data.attributes.unpaidInvoiceTotal', 8000);
     });
 
@@ -175,6 +184,9 @@ describe('authenticated user', function () {
             ->assertJsonPath('data.attributes.programCount', 0)
             ->assertJsonPath('data.attributes.tripReportCount', 0)
             ->assertJsonPath('data.attributes.unattachedTripReportCount', 0)
+            ->assertJsonPath('data.attributes.invoicedTotal', 0)
+            ->assertJsonPath('data.attributes.invoicePaidTotal', 0)
+            ->assertJsonPath('data.attributes.balance', 0)
             ->assertJsonPath('data.attributes.unpaidInvoiceTotal', 0);
     });
 });
