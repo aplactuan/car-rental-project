@@ -38,6 +38,11 @@ interface DashboardRepositoryInterface
     public function recentTripReports(): Collection;
 
     /**
+     * @return Collection<int, TripReport>
+     */
+    public function searchTripReports(string $query): Collection;
+
+    /**
      * @return Collection<int, Invoice>
      */
     public function recentInvoices(): Collection;
